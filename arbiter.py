@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.align import Align
 from rich.prompt import Confirm
+from core.intelligence import run_intelligence
 
 # --- THE UPGRADE: SQLite Memory Core ---
 from core.state import TargetSession
@@ -30,6 +31,7 @@ from modules.offensive import run_offensive
 from modules.mining import run_mining
 from modules.oast import run_oast
 from modules.chaos import run_chaos
+from modules.nuclei_scan import run_nuclei
 from modules.report import run_report
 
 # Setup Logging
@@ -96,14 +98,14 @@ def scan(target: str = typer.Argument(...), mode: str = typer.Option("stealth", 
             ("email", run_email), 
             ("github", run_github), 
             ("cortex", run_cortex), 
-            ("offensive", run_offensive),
-            ("mining", run_mining), 
+            ("nuclei", run_nuclei),
+            ("intelligence", run_intelligence),            
             ("oast", run_oast), 
             ("chaos", run_chaos)
         ]
 
         for name, func in phases:
-            if name not in completed_phases:
+            if name not in completed_phases or name == "intelligence":
                 func(session, CONFIG)
                 completed_phases.append(name)
 

@@ -1,85 +1,84 @@
 import subprocess
 import requests
 import logging
+import re
+from concurrent.futures import ThreadPoolExecutor
 from rich.console import Console
 
 console = Console()
 log = logging.getLogger("rich")
 
-def run_recon(session, config):
-    """
-    Orchestrates the Reconnaissance Phase.
-    1. Subfinder (Binary)
-    2. Wayback Machine (Native Python)
-    """
-    console.print("[bold blue]━━ PHASE 1: PASSIVE RECON ━━[/bold blue]")
-
-    # 1. Subfinder Execution
-    log.info("Running Subfinder...")
-    subs = run_subfinder(session.domain, config)
-    
-    # 2. Wayback Execution
-    log.info("Mining Wayback Machine...")
-    wayback_subs = run_wayback(session.domain)
-
-    # 3. deduplicate and Save
-    all_subs = list(set(subs + wayback_subs))
-    session.subdomains = all_subs
-    log.info(f"Total Unique Subdomains Found: {len(session.subdomains)}")
-
-def run_subfinder(domain, config):
-    """Runs Subfinder binary and returns a list of subdomains."""
-    subfinder_path = config['tools']['subfinder']['path']
-    cmd = [
-        subfinder_path,
-        "-d", domain,
-        "-silent",
-        "-all"
-    ]
-    
+def fetch_wayback(domain):
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        subs = result.stdout.splitlines()
-        log.info(f"Subfinder found {len(subs)} subdomains")
-        return subs
-    except FileNotFoundError:
-        log.error("Subfinder binary not found! Check config/settings.yaml")
-        return []
-    except subprocess.CalledProcessError as e:
-        log.error(f"Subfinder failed: {e}")
-        return []
-
-def run_wayback(domain):
-    """
-    Native Python implementation of 'gau' for subdomains.
-    Queries web.archive.org CDX API.
-    """
-    url = f"http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=json&fl=original&collapse=urlkey"
-    
-    try:
-        # standard timeout 15s
-        r = requests.get(url, timeout=15)
+        r = requests.get(f"http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=json&collapse=urlkey&limit=5000", timeout=15)
         if r.status_code == 200:
-            data = r.json()
-            # data[0] is header, skip it. data[x][0] is the url.
-            urls = [row[0] for row in data[1:]]
-            
-            # Extract subdomains from URLs
-            found_subs = set()
-            for u in urls:
-                # Basic parsing to extract subdomain
-                parts = u.split('/')
-                if len(parts) >= 3:
-                    host = parts[2]
-                    # Remove port if exists
-                    host = host.split(':')[0]
-                    if host.endswith(domain):
-                        found_subs.add(host)
-            
-            log.info(f"Wayback Machine found {len(found_subs)} subdomains")
-            return list(found_subs)
-            
-    except Exception as e:
-        log.warning(f"Wayback Machine failed: {e}")
+            urls = [x[2] for x in r.json()[1:]]
+            subs = set()
+            regex = re.compile(r'https?://([a-zA-Z0-9.-]+)')
+            for url in urls:
+                match = regex.search(url)
+                if match and match.group(1).endswith(domain):
+                    subs.add(match.group(1))
+            return subs
+    except Exception:
+        pass
+    return set()
+
+def fetch_alienvault(domain):
+    try:
+        r = requests.get(f"https://otx.alienvault.com/api/v1/indicators/domain/{domain}/passive_dns", timeout=15)
+        if r.status_code == 200:
+            return {x['hostname'] for x in r.json().get('passive_dns', []) if domain in x['hostname']}
+    except Exception:
+        pass
+    return set()
+
+def fetch_urlscan(domain):
+    try:
+        r = requests.get(f"https://urlscan.io/api/v1/search/?q=domain:{domain}&size=1000", timeout=15)
+        if r.status_code == 200:
+            return {x['page']['domain'] for x in r.json().get('results', []) if 'page' in x and domain in x['page'].get('domain', '')}
+    except Exception:
+        pass
+    return set()
+
+def run_recon(session, config):
+    console.print("[bold blue]━━ PHASE 1: PASSIVE RECON & THE ARCHIVIST ━━[/bold blue]")
+    domain = session.domain
     
-    return []
+    # 1. Subfinder
+    console.print("INFO     Running Subfinder...")
+    cmd = ["subfinder", "-d", domain, "-silent"]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        subs = set(result.stdout.splitlines())
+        session.subdomains.extend(list(subs))
+        console.print(f"INFO     Subfinder found {len(subs)} subdomains")
+    except Exception as e:
+        log.error(f"Subfinder failed: {e}")
+
+    # 2. The Archivist (Multi-threaded Historical Recon)
+    console.print("INFO     Deploying The Archivist (Wayback, AlienVault, URLScan)...")
+    historical_subs = set()
+    
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(fetch_wayback, domain): "Wayback Machine",
+            executor.submit(fetch_alienvault, domain): "AlienVault OTX",
+            executor.submit(fetch_urlscan, domain): "URLScan.io"
+        }
+        
+        for future in futures:
+            source = futures[future]
+            try:
+                res = future.result()
+                historical_subs.update(res)
+                console.print(f"[green]  + {source} returned {len(res)} historical assets.[/green]")
+            except Exception:
+                console.print(f"[red]  ! {source} query failed or timed out.[/red]")
+
+    if historical_subs:
+        session.subdomains.extend(list(historical_subs))
+        
+    total_unique = len(set(session.subdomains))
+    console.print(f"INFO     Total Unique Subdomains Found: {total_unique}")

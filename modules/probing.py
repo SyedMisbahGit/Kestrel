@@ -1,7 +1,6 @@
 import json
 import subprocess
 import logging
-import tempfile
 import os
 from rich.console import Console
 
@@ -16,32 +15,37 @@ def run_probing(session, config):
         log.warning("No targets available for active probing.")
         return
 
-    console.print(f"INFO     Probing {len(targets)} targets (WAF-Bypass Enabled)...")
+    console.print(f"INFO     Probing {len(targets)} targets (Stealth Governor & Debug Logging Active)...")
     
-    # Use a secure temp directory mapped to RAM
-    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tf:
-        tf.write("\n".join(targets))
-        target_file = tf.name
+    target_file = "data/temp_httpx_in.txt"
+    out_file = "data/temp_httpx_out.json"
 
-    out_file = f"{target_file}_out.json"
+    with open(target_file, "w") as f:
+        f.write("\n".join(targets) + "\n")
 
-    # Added -random-agent to bypass WAFs blocking default Go agents
+    # THE UPGRADE: Removed invalid '-tech' flag. Removed '-silent' to unblind error logging. 
+    # Spelled out '-follow-redirects' for cross-version compatibility.
     cmd = [
         "httpx",
         "-l", target_file,
-        "-sc", "-tech", "-title", "-server", "-td",
-        "-t", "50",
+        "-sc", "-title", "-server", "-td",
+        "-t", "10",
+        "-rl", "20",
+        "-follow-redirects",
         "-random-agent",
         "-json",
-        "-o", out_file,
-        "-silent"
+        "-o", out_file
     ]
 
     live_hosts = []
     
     try:
-        subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        # We capture stdout and stderr natively, so we don't need -silent hiding our bugs
+        result = subprocess.run(cmd, capture_output=True, text=True, )
         
+        if result.returncode != 0 and not os.path.exists(out_file):
+            log.error(f"HTTPX Crash Report: {result.stderr.strip()}")
+            
         if os.path.exists(out_file):
             with open(out_file, 'r') as f:
                 for line in f:
@@ -50,7 +54,9 @@ def run_probing(session, config):
                         data = json.loads(line)
                         url = data.get("url")
                         status = data.get("status_code", 0)
-                        tech = data.get("tech", [])
+                        
+                        # Handle varied JSON keys depending on httpx version
+                        tech = data.get("technologies", data.get("tech", [])) 
                         server = data.get("webserver", "Unknown")
                         title = data.get("title", "No Title")
                         

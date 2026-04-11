@@ -1,90 +1,83 @@
-import checkdmarc
-import dns.resolver
+import subprocess
 import logging
-import socket
 from rich.console import Console
-from rich.panel import Panel
 
 console = Console()
 log = logging.getLogger("rich")
 
+def get_txt_records(domain):
+    try:
+        result = subprocess.run(["host", "-t", "TXT", domain], capture_output=True, text=True, timeout=10)
+        return [line for line in result.stdout.splitlines() if "descriptive text" in line]
+    except Exception: return []
+
+def get_mx_records(domain):
+    try:
+        result = subprocess.run(["host", "-t", "MX", domain], capture_output=True, text=True, timeout=10)
+        for line in result.stdout.splitlines():
+            if "mail is handled by" in line:
+                return line.split()[-1].strip('.')
+    except Exception: pass
+    return None
+
 def run_email(session, config):
-    """
-    Phase 2.7: SpoofCheck (Email Security).
-    """
-    console.print("[bold blue]━━ PHASE 2.7: SPOOFCHECK (CEO FRAUD) ━━[/bold blue]")
-
+    console.print("\n[bold blue]━━ PHASE 2.7: SPOOFCHECK (SPF & DMARC MATRIX) ━━[/bold blue]")
     domain = session.domain
-    results = {
-        "spf": "Missing",
-        "dmarc": "Missing",
-        "spoofable": False,
-        "mx_records": []
-    }
+    
+    mx = get_mx_records(domain)
+    if mx:
+        console.print(f"  + Primary MX: {mx}")
+    else:
+        console.print("  ! No MX records found. Domain likely does not receive email.")
+        return
 
-    # 1. Get MX Records
-    mx_ip = "127.0.0.1"
-    try:
-        mx_answers = dns.resolver.resolve(domain, 'MX')
-        mx_records = sorted([(r.preference, str(r.exchange).rstrip('.')) for r in mx_answers])
-        results["mx_records"] = [r[1] for r in mx_records]
-        primary_mx = mx_records[0][1]
+    # 1. Parse SPF Enforcement
+    spf_records = get_txt_records(domain)
+    spf_enforcement = "Missing"
+    for rec in spf_records:
+        if "v=spf1" in rec:
+            if "-all" in rec: spf_enforcement = "HardFail (-all)"
+            elif "~all" in rec: spf_enforcement = "SoftFail (~all)"
+            elif "?all" in rec: spf_enforcement = "Neutral (?all)"
+            elif "+all" in rec: spf_enforcement = "Pass (+all)"
+            else: spf_enforcement = "Weak/Malformed"
+
+    # 2. Parse DMARC Policy
+    dmarc_records = get_txt_records(f"_dmarc.{domain}")
+    dmarc_p = "Missing"
+    for rec in dmarc_records:
+        if "v=DMARC1" in rec:
+            if "p=reject" in rec: dmarc_p = "reject"
+            elif "p=quarantine" in rec: dmarc_p = "quarantine"
+            elif "p=none" in rec: dmarc_p = "none"
+
+    # 3. The Logical Decision Matrix
+    is_vuln = False
+    
+    # If DMARC protects the domain, it cannot be spoofed regardless of SPF
+    if dmarc_p in ["reject", "quarantine"]:
+        is_vuln = False
+    # If DMARC is weak/missing, we check if SPF allows unauthorized senders
+    elif dmarc_p in ["none", "Missing"]:
+        if spf_enforcement in ["Missing", "SoftFail (~all)", "Neutral (?all)", "Pass (+all)", "Weak/Malformed"]:
+            is_vuln = True
+
+    if is_vuln:
+        console.print("╭────────────────────────────────────────── ❌ SPOOFCHECK FAILED ──────────────────────────────────────────╮")
+        console.print("│ VULNERABLE: CEO Fraud / Email Spoofing Confirmed!                                                        │")
+        console.print(f"│ SPF Record:   {spf_enforcement:<86} │")
+        console.print(f"│ DMARC Policy: p={dmarc_p:<84} │")
+        console.print(f"│ Impact: You can send emails as 'admin@{domain}' directly to employee inboxes.                       │")
+        console.print("╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯")
+        console.print("\nPoC Command (Authorized Testing Only):")
+        console.print(f"swaks --to target@example.com --from admin@{domain} --server {mx} --header 'Subject: Urgent Transfer'\n")
         
-        # Resolve MX to IP for SWAKS
-        mx_ip = socket.gethostbyname(primary_mx)
-        console.print(f"[cyan]  + Primary MX: {primary_mx} ({mx_ip})[/cyan]")
-        
-    except Exception:
-        log.warning("No MX records found. Email might not be active.")
-        primary_mx = f"mx.{domain}"
-
-    # 2. Analyze DMARC
-    try:
-        dmarc_info = checkdmarc.check_domains([domain], timeout=10)
-        data = dmarc_info.get(domain, {})
-        
-        spf_rec = data.get("spf", {}).get("record", "Missing")
-        dmarc_rec = data.get("dmarc", {}).get("record", "Missing")
-        p_policy = data.get("dmarc", {}).get("tags", {}).get("p", {}).get("value", "none")
-        
-        results["spf"] = spf_rec
-        results["dmarc"] = dmarc_rec
-
-        if "v=DMARC1" not in str(dmarc_rec) or p_policy == "none":
-            results["spoofable"] = True
-            console.print(Panel(
-                f"[bold red]VULNERABLE: CEO Fraud Possible![/bold red]\n"
-                f"Policy: p={p_policy}\n"
-                f"Impact: You can send emails as 'admin@{domain}' to anyone.",
-                title="❌ SPOOFCHECK FAILED", border_style="red"
-            ))
-            
-            poc_cmd = f"swaks --to user@example.com --from admin@{domain} --server {primary_mx} --header 'Subject: Urgent Transfer'"
-            console.print(f"\n[yellow]PoC Command (Authorized Testing Only):[/yellow]")
-            console.print(f"[white on black]{poc_cmd}[/white on black]\n")
-            
-            session.vulnerabilities.append({
-                "name": "Email Spoofing (CEO Fraud)",
-                "severity": "CRITICAL",
-                "url": domain,
-                "info": f"DMARC policy is '{p_policy}'. Spoofing is possible."
-            })
-
-        elif p_policy == "quarantine":
-            console.print(Panel(
-                f"[bold orange1]MEDIUM: Spoofing Possible (Spam Folder)[/bold orange1]\n"
-                f"Policy: p=quarantine",
-                title="⚠️ SPOOFCHECK WARNING", border_style="orange1"
-            ))
-
-        elif p_policy == "reject":
-            console.print(Panel(
-                f"[bold green]SECURE: Spoofing Blocked[/bold green]\n"
-                f"Policy: p=reject",
-                title="✅ SPOOFCHECK PASSED", border_style="green"
-            ))
-
-    except Exception as e:
-        log.error(f"DMARC Check failed: {e}")
-
-    session.email_security = results
+        session.vulnerabilities.append({
+            "type": "VULN",
+            "name": "Email Spoofing Vulnerability",
+            "matched-at": domain,
+            "info": {"severity": "MEDIUM"}
+        })
+    else:
+        console.print(f"[green]  + SECURE: Domain is cryptographically protected against spoofing.[/green]")
+        console.print(f"[dim]    └ SPF: {spf_enforcement} | DMARC: p={dmarc_p}[/dim]")

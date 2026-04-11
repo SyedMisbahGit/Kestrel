@@ -1,87 +1,72 @@
-import os
-import subprocess
+import asyncio
+import socket
 import logging
-import dns.resolver
-from concurrent.futures import ThreadPoolExecutor
 from rich.console import Console
-from rich.panel import Panel
 
 console = Console()
 log = logging.getLogger("rich")
 
-CDN_SIGNATURES = ["cloudflare", "cloudfront", "fastly", "akamai", "incapsula", "sucuri", "imperva"]
+# --- THE CDN SHIELD ---
+CDN_DOMAINS = ["cloudflare", "akamai", "fastly", "cloudfront", "incapdns", "sucuri", "edgecast"]
 
-def is_cdn(domain):
-    """Lightweight CNAME resolution to detect CDN presence."""
-    try:
-        resolver = dns.resolver.Resolver()
-        resolver.timeout = 2
-        resolver.lifetime = 2
-        answers = resolver.resolve(domain, 'CNAME')
-        for rdata in answers:
-            target = str(rdata.target).lower()
-            if any(cdn in target for cdn in CDN_SIGNATURES):
-                return domain, True
-    except Exception:
-        pass
-    return domain, False
+# Top 25 most common exposed infrastructure ports
+TOP_PORTS = [21, 22, 23, 25, 53, 80, 110, 111, 135, 139, 143, 443, 445, 993, 995, 1723, 3306, 3389, 5900, 8080, 8443, 8888, 9000, 9200, 27017]
+
+async def check_port(host, port, sem):
+    async with sem:
+        try:
+            fut = asyncio.open_connection(host, port)
+            reader, writer = await asyncio.wait_for(fut, timeout=1.0)
+            writer.close()
+            await writer.wait_closed()
+            return port
+        except Exception:
+            return None
+
+async def scan_host(host, sem_global):
+    async with sem_global:
+        is_cdn = False
+        try:
+            # Resolve CNAME to detect CDN routing
+            _, aliases, _ = socket.gethostbyname_ex(host)
+            for alias in aliases:
+                if any(cdn in alias.lower() for cdn in CDN_DOMAINS):
+                    is_cdn = True
+                    break
+        except Exception:
+            pass
+
+        # If CDN is detected, deep port scanning is useless. Stick to web ports.
+        target_ports = [80, 443] if is_cdn else TOP_PORTS
+        
+        sem_local = asyncio.Semaphore(20)
+        tasks = [check_port(host, p, sem_local) for p in target_ports]
+        results = await asyncio.gather(*tasks)
+        
+        open_ports = [p for p in results if p]
+        return is_cdn, len(open_ports)
+
+async def deploy_port_scanner(targets):
+    sem_global = asyncio.Semaphore(50)
+    tasks = [scan_host(target, sem_global) for target in targets]
+    results = await asyncio.gather(*tasks)
+    
+    cdn_count = sum(1 for r in results if r[0])
+    total_ports = sum(r[1] for r in results)
+    return cdn_count, total_ports
 
 def run_ports(session, config):
-    console.print("[bold blue]━━ PHASE 1.5: PORT SCANNING (CDN SHIELD ACTIVE) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (CDN SHIELD ACTIVE) ━━[/bold blue]")
+    targets = session.get_subdomains()
     
-    if not session.get_subdomains():
-        log.warning("No subdomains found to scan.")
+    if not targets:
+        console.print("WARNING  No targets available for port scanning.")
         return
-
-    direct_targets = []
-    cdn_targets = []
-    
-    console.print(f"[cyan]  + Analyzing {len(session.get_subdomains())} hosts for CDN routing (50 Threads)...[/cyan]")
-    
-    # THE UPGRADE: Multi-threaded CDN classification
-    with ThreadPoolExecutor(max_workers=50) as executor:
-        results = executor.map(is_cdn, session.get_subdomains())
-        for domain, is_fronted in results:
-            if is_fronted:
-                cdn_targets.append(domain)
-            else:
-                direct_targets.append(domain)
-            
-    if cdn_targets:
-        console.print(f"[yellow]  ! Bypassing deep scan for {len(cdn_targets)} CDN-fronted hosts.[/yellow]")
-
-    if not direct_targets:
-        log.info("All targets are CDN-fronted. Skipping deep port scan.")
-        return
-
-    target_file = "data/temp_port_targets.txt"
-    with open(target_file, "w") as f:
-        for t in direct_targets:
-            f.write(t + "\n")
-
-    log.info(f"Executing Naabu against {len(direct_targets)} direct-origin hosts...")
-    out_file = "data/temp_naabu.txt"
-    
-    cmd = [
-        "naabu",
-        "-l", target_file,
-        "-top-ports", "100", 
-        "-c", "50",          
-        "-silent",
-        "-o", out_file
-    ]
-
-    try:
-        subprocess.run(cmd, capture_output=True, text=True)
-        if os.path.exists(out_file):
-            with open(out_file, "r") as f:
-                lines = f.readlines()
-                console.print(f"[green]  + Port Scan Complete. Found {len(lines)} open ports.[/green]")
-            os.remove(out_file)
-        else:
-            console.print("[dim]  + No new open ports discovered.[/dim]")
-    except Exception as e:
-        log.error(f"Port scan failed: {e}")
         
-    if os.path.exists(target_file):
-        os.remove(target_file)
+    console.print(f"  + Analyzing {len(targets)} hosts for CDN routing...")
+    
+    cdn_count, total_ports = asyncio.run(deploy_port_scanner(targets))
+    
+    if cdn_count > 0:
+        console.print(f"  [yellow]! Bypassing deep scan for {cdn_count} CDN-fronted hosts.[/yellow]")
+    console.print(f"  + Port Scan Complete. Found {total_ports} open ports across infrastructure.")

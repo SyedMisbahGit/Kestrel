@@ -2,59 +2,88 @@ import asyncio
 import aiohttp
 import logging
 import re
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
+from collections import defaultdict
 from rich.console import Console
 
-log = logging.getLogger("rich")
 console = Console()
+log = logging.getLogger("rich")
 
-JS_REGEX = re.compile(r'src=["\']([^"\']+\.js[^"\']*)["\']', re.IGNORECASE)
-HREF_REGEX = re.compile(r'href=["\']([^"\']+)["\']', re.IGNORECASE)
+# --- THE SKELETON ENGINE ---
+# Regex patterns to detect dynamic variables in URLs
+UUID_REGEX = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', re.I)
+HASH_REGEX = re.compile(r'\b[0-9a-f]{32,64}\b', re.I)
+INT_REGEX = re.compile(r'\b\d+\b')
+LINK_REGEX = re.compile(r'(?:href|src)=["\']([^"\'#]+)["\']', re.I)
 
-async def crawl_target(session_client, url, state_session):
-    try:
-        async with session_client.get(url, timeout=10, ssl=False) as response:
-            if response.status == 200:
-                html = await response.text()
+# Assets we do not want to crawl to save bandwidth
+IGNORE_EXTS = ('.pdf', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.woff', '.woff2', '.mp4', '.css', '.ico', '.zip', '.tar', '.gz')
+
+def get_skeleton(url):
+    """Strips dynamic data to reveal the underlying URL structure."""
+    parsed = urlparse(url)
+    path = parsed.path
+    path = UUID_REGEX.sub('{uuid}', path)
+    path = HASH_REGEX.sub('{hash}', path)
+    path = INT_REGEX.sub('{int}', path)
+    return f"{parsed.netloc}{path}"
+
+async def crawl_target(client, sem, url, session_state, global_skeletons):
+    async with sem:
+        try:
+            async with client.get(url, timeout=5, ssl=False) as r:
+                if r.status != 200: return
+                text = await r.text()
                 
-                js_files = JS_REGEX.findall(html)
-                for js in js_files:
-                    state_session.add_crawled_url(urljoin(url, js))
-
-                links = HREF_REGEX.findall(html)
+                links = LINK_REGEX.findall(text)
                 for link in links:
-                    if link.startswith('/') or url in link:
-                        state_session.add_crawled_url(urljoin(url, link))
-    except Exception:
-        pass 
+                    full_url = urljoin(url, link)
+                    parsed_full = urlparse(full_url)
+                    
+                    # 1. Scope Boundary: Only map our target infrastructure
+                    if not parsed_full.netloc.endswith(session_state.domain): continue
+                    if not full_url.startswith(('http://', 'https://')): continue
+                    if parsed_full.path.lower().endswith(IGNORE_EXTS): continue
+                    
+                    # 2. THE SPIDER TRAP DEFENSE
+                    skeleton = get_skeleton(full_url)
+                    if global_skeletons[skeleton] >= 3:
+                        continue # Structural Trap Detected. Drop the URL silently.
+                        
+                    global_skeletons[skeleton] += 1
+                    session_state.add_crawled_url(full_url)
+                    
+        except Exception:
+            pass
 
-async def deploy_spider(state_session, targets):
-    # OOM Protection: Chunking
-    CHUNK_SIZE = 500 
-    connector = aiohttp.TCPConnector(limit=50) # Connection pool limit
+async def deploy_spider(session_state, targets):
+    CHUNK_SIZE = 500
+    sem = asyncio.Semaphore(50)
+    global_skeletons = defaultdict(int) # Tracks the structural frequency
     
+    connector = aiohttp.TCPConnector(limit=0, ssl=False)
     async with aiohttp.ClientSession(connector=connector) as client:
-        # Process targets in strict memory-safe batches
         for i in range(0, len(targets), CHUNK_SIZE):
-            chunk = targets[i:i + CHUNK_SIZE]
-            tasks = [crawl_target(client, target['url'] if isinstance(target, dict) else target, state_session) for target in chunk]
+            chunk = targets[i:i+CHUNK_SIZE]
             
-            # Await the chunk to finish before loading the next batch into RAM
+            # Extract URL string whether it's a dict or a raw string
+            clean_targets = [t['url'] if isinstance(t, dict) else t for t in chunk]
+            
+            tasks = [crawl_target(client, sem, t, session_state, global_skeletons) for t in clean_targets]
             await asyncio.gather(*tasks)
-            
-            # Optional: Add a tiny sleep to let the OS clear TCP sockets
-            await asyncio.sleep(0.1)
 
 def run_spider(session, config):
-    console.print("[bold blue]━━ PHASE 2.2: THE SPIDER (ASYNC BACKPRESSURE ACTIVE) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 2.2: THE SPIDER (STRUCTURE-HASHING & ANTI-TRAP) ━━[/bold blue]")
+    targets = session.get_live_hosts()
     
-    live_hosts = session.get_live_hosts()
-    if not live_hosts:
+    if not targets:
         console.print("WARNING  No live hosts to crawl. Skipping.")
         return
-
-    console.print(f"INFO     Deploying Async Spider to {len(live_hosts)} targets (Chunk Size: 500)...")
-    asyncio.run(deploy_spider(session, live_hosts))
+        
+    console.print(f"INFO     Deploying Async Spider to {len(targets)} targets (URL Skeleton Depth-Limiter Active)...")
     
-    total_crawled = len(session.get_crawled_urls())
-    console.print(f"  + Spider Complete. Mapped and injected {total_crawled} endpoints/bundles for analysis.")
+    initial_count = len(session.get_crawled_urls())
+    asyncio.run(deploy_spider(session, targets))
+    new_count = len(session.get_crawled_urls())
+    
+    console.print(f"  + Spider Complete. Safely mapped {new_count - initial_count} endpoints without looping.")

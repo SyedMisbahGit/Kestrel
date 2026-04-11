@@ -1,123 +1,140 @@
-import logging
 import asyncio
 import aiohttp
+import logging
+import re
+import json
+import esprima
 from rich.console import Console
-try:
-    from pyjsparser import parse
-except ImportError:
-    parse = None
 
-log = logging.getLogger("rich")
 console = Console()
+log = logging.getLogger("rich")
 
-class ASTTaintAnalyzer:
+# --- PROJECT GHOST: TIER 1 SECRET SIGNATURES ---
+SECRETS_REGEX = {
+    "AWS Access Key": re.compile(r'(AKIA[0-9A-Z]{16})'),
+    "Stripe Standard Key": re.compile(r'(sk_live_[0-9a-zA-Z]{24})'),
+    "Google API Key": re.compile(r'(AIza[0-9A-Za-z-_]{35})'),
+    "Slack Token": re.compile(r'(xox[baprs]-[0-9a-zA-Z]{10,48})'),
+    "RSA Private Key": re.compile(r'(-----BEGIN RSA PRIVATE KEY-----)')
+}
+
+# --- THE AST TAINT TRACKER ---
+class TaintTracker:
     def __init__(self):
         self.variables = {}
         self.endpoints = set()
 
-    def traverse(self, node):
-        if not isinstance(node, dict): return
-        
-        # 1. State Tracking: Variable Declarations
-        if node.get('type') == 'VariableDeclarator':
-            id_node = node.get('id')
-            init_node = node.get('init')
-            if id_node and init_node and id_node.get('type') == 'Identifier':
-                var_name = id_node.get('name')
-                if init_node.get('type') == 'Literal':
-                    self.variables[var_name] = init_node.get('value')
-        
-        # 2. Sink Detection: Finding the API Calls (fetch, axios, http)
-        if node.get('type') == 'CallExpression':
-            callee = node.get('callee')
-            if self._is_api_sink(callee):
-                args = node.get('arguments', [])
-                if args:
-                    # Weaponized Taint Resolution
-                    endpoint = self._resolve_argument(args[0])
-                    if endpoint and isinstance(endpoint, str) and (endpoint.startswith('/') or endpoint.startswith('http')):
-                        self.endpoints.add(endpoint)
+    def walk(self, node):
+        if not node or not hasattr(node, "type"): return
 
-        # 3. Recursive Graph Traversal
-        for key, value in node.items():
-            if isinstance(value, dict):
-                self.traverse(value)
-            elif isinstance(value, list):
-                for item in value:
-                    self.traverse(item)
+        # 1. Track Variable Assignments (e.g., const base = "/api/v1")
+        if node.type == "VariableDeclarator":
+            if node.id.type == "Identifier" and node.init:
+                if node.init.type == "Literal" and isinstance(node.init.value, str):
+                    self.variables[node.id.name] = node.init.value
 
-    def _is_api_sink(self, callee):
-        """Heuristic identification of network execution sinks."""
-        if not callee: return False
-        if callee.get('type') == 'Identifier' and callee.get('name') in ['fetch', 'request']:
-            return True
-        if callee.get('type') == 'MemberExpression':
-            obj = callee.get('object', {})
-            prop = callee.get('property', {})
-            if obj.get('name') in ['axios', '$http', 'http'] and prop.get('name') in ['get', 'post', 'put', 'delete', 'request']:
-                return True
-        return False
+        # 2. Track Concatenations (e.g., fetch(base + "/users"))
+        if node.type == "BinaryExpression" and node.operator == "+":
+            left = self._resolve_node(node.left)
+            right = self._resolve_node(node.right)
+            if left and right and isinstance(left, str) and isinstance(right, str):
+                combined = left + right
+                if "/" in combined and len(combined) > 4: 
+                    self.endpoints.add(combined)
 
-    def _resolve_argument(self, arg):
-        """Recursively trace variables and concatenations backward through the AST."""
-        if not arg: return ""
-        # Base case: Literal String
-        if arg.get('type') == 'Literal':
-            return str(arg.get('value'))
-        # Taint Resolution: Variable Lookup
-        if arg.get('type') == 'Identifier':
-            return str(self.variables.get(arg.get('name'), ''))
-        # Concatenation: Binary Expression (e.g., base_url + "/users")
-        if arg.get('type') == 'BinaryExpression' and arg.get('operator') == '+':
-            left = self._resolve_argument(arg.get('left'))
-            right = self._resolve_argument(arg.get('right'))
-            return str(left) + str(right)
+        # 3. Track Raw Literals
+        if node.type == "Literal" and isinstance(node.value, str):
+            if node.value.startswith(('/', 'http', 'api/')) and len(node.value) > 4:
+                self.endpoints.add(node.value)
+
+        # Recursion
+        for key, val in vars(node).items():
+            if isinstance(val, list):
+                for item in val: self.walk(item)
+            elif hasattr(val, "type"):
+                self.walk(val)
+
+    def _resolve_node(self, node):
+        if not node or not hasattr(node, "type"): return ""
+        if node.type == "Literal": return node.value
+        if node.type == "Identifier": return self.variables.get(node.name, "")
         return ""
 
-async def analyze_js_file(session_client, url, session):
+async def hunt_source_map(client, js_url, session_state):
+    """PROJECT GHOST: Hunts for and reconstructs unminified source trees."""
+    map_url = f"{js_url}.map"
+    vulnerabilities = []
+    
     try:
-        async with session_client.get(url, timeout=10) as response:
+        async with client.get(map_url, timeout=8, ssl=False) as response:
             if response.status == 200:
-                js_code = await response.text()
-                if parse:
-                    try:
-                        # Compile JS into logical tree
-                        ast_tree = parse(js_code)
-                        analyzer = ASTTaintAnalyzer()
-                        analyzer.traverse(ast_tree)
+                text = await response.text()
+                try:
+                    map_data = json.loads(text)
+                    sources = map_data.get("sources", [])
+                    contents = map_data.get("sourcesContent", [])
+                    
+                    if sources and contents:
+                        console.print(f"[bold magenta]  [*] PROJECT GHOST: Extracted Unminified Source Tree from {js_url}[/bold magenta]")
+                        console.print(f"      └ Recovered {len(sources)} original developer files (.ts, .jsx, .vue)")
                         
-                        # Inject extracted Shadow APIs back into the Omni-Adapter
-                        for ep in analyzer.endpoints:
-                            full_url = f"https://{url.split('/')[2]}{ep}" if ep.startswith('/') else ep
-                            session.add_crawled_url(full_url)
-                    except Exception:
-                        pass # Ignore highly obfuscated syntax errors
-    except Exception:
-        pass
+                        for filename, content in zip(sources, contents):
+                            if not content: continue
+                            for sec_name, regex in SECRETS_REGEX.items():
+                                if regex.search(content):
+                                    console.print(f"[bold red]  ! [CRITICAL] {sec_name} found in unminified {filename}[/bold red]")
+                                    vulnerabilities.append({
+                                        "type": "VULN", "name": f"Source Map Leak: {sec_name}", 
+                                        "matched-at": map_url, "info": {"severity": "CRITICAL"}
+                                    })
+                except json.JSONDecodeError: pass
+    except Exception: pass
+    return vulnerabilities
 
-async def run_cortex_async(session, js_urls):
-    async with aiohttp.ClientSession() as client:
-        tasks = [analyze_js_file(client, url, session) for url in js_urls]
-        await asyncio.gather(*tasks)
+async def extract_js_ast(client, js_url, session_state):
+    """AST Neural Extraction: Bypasses Minification via Taint Tracking."""
+    try:
+        async with client.get(js_url, timeout=8, ssl=False) as response:
+            if response.status == 200:
+                text = await response.text()
+                base_url = "/".join(js_url.split('/')[:3])
+                
+                try:
+                    # Parse code into an Abstract Syntax Tree
+                    tree = esprima.parseScript(text, {"tolerant": True})
+                    tracker = TaintTracker()
+                    tracker.walk(tree)
+                    
+                    for endpoint in tracker.endpoints:
+                        if not endpoint.startswith('http'):
+                            endpoint = base_url + ("/" if not endpoint.startswith('/') else "") + endpoint
+                        session_state.add_crawled_url(endpoint)
+                except Exception:
+                    # Fallback if Esprima fails on overly complex ES6+ syntax
+                    pass
+    except Exception: pass
+
+async def deploy_cortex(session_state, js_targets):
+    connector = aiohttp.TCPConnector(limit=20, ssl=False)
+    async with aiohttp.ClientSession(connector=connector) as client:
+        ghost_tasks = [hunt_source_map(client, url, session_state) for url in js_targets]
+        results = await asyncio.gather(*ghost_tasks)
+        for vuln_list in results:
+            if vuln_list: session_state.vulnerabilities.extend(vuln_list)
+                
+        console.print("INFO     Executing AST Taint Tracking across JS clusters...")
+        ast_tasks = [extract_js_ast(client, url, session_state) for url in js_targets]
+        await asyncio.gather(*ast_tasks)
 
 def run_cortex(session, config):
-    console.print("\n[bold blue]━━ PHASE 3: CORTEX (AST NEURAL EXTRACTION) ━━[/bold blue]")
-    if not parse:
-        log.warning("pyjsparser not installed. Run: pip install pyjsparser")
-        return
-
-    # Extract clean strings safely from the Omni-Adapter database
-    js_urls = []
-    for u in session.get_crawled_urls():
-        if isinstance(u, dict) and u.get('url', '').endswith('.js'):
-            js_urls.append(u['url'])
-        elif isinstance(u, str) and u.endswith('.js'):
-            js_urls.append(u)
+    console.print("\n[bold blue]━━ PHASE 3: CORTEX (PROJECT GHOST & AST EXTRACTION) ━━[/bold blue]")
+    urls = [u['url'] if isinstance(u, dict) else u for u in session.get_crawled_urls()]
+    js_targets = list(set([u for u in urls if u.endswith('.js')]))
     
-    if not js_urls:
-        log.warning("No JavaScript bundles found. Skipping Cortex.")
+    if not js_targets:
+        console.print("WARNING  No JavaScript bundles found. Skipping Cortex.")
         return
-
-    console.print(f"INFO     Compiling {len(js_urls)} JS bundles into Abstract Syntax Trees...")
-    asyncio.run(run_cortex_async(session, js_urls))
+        
+    console.print(f"INFO     Deploying Neural Extraction against {len(js_targets)} JS bundles...")
+    asyncio.run(deploy_cortex(session, js_targets))
     console.print("  + AST Taint Analysis Complete. Extracted Shadow APIs injected into state graph.")

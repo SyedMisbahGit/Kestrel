@@ -1,49 +1,48 @@
-# ARBITER // System Integrity Evaluator (v2.0)
+# SENTINEL-X (Codename: Arbiter v2.0)
 
-> **"Advanced External Attack Surface Management and Automated Red Teaming Framework."**
+> **"A Zero-Dependency, Native Python Intelligence Apparatus for Modern Attack Surface Management."**
 
-ARBITER is a highly modular, stateful, and memory-efficient reconnaissance and vulnerability discovery engine. Designed to operate flawlessly on low-resource environments (like minimal Kali VMs) while targeting massive enterprise scopes, ARBITER replaces disjointed bash scripts with a unified, SQLite-backed Python intelligence pipeline. 
+Sentinel-X is not a scanner; it is a stateful decision engine. Designed to bypass the limitations of third-party wrappers, regular expressions, and blind fuzzing, Sentinel-X is a 100% self-contained Python architecture. 
 
-It does not just dump raw data; it cross-references findings, filters out false positives via auto-calibration, and actively hunts for high-impact bug bounty vectors.
-
----
-
-## 🧠 Core Architecture
-
-* **The SQLite Memory Core:** ARBITER abandons legacy JSON/RAM storage. It streams tens of thousands of subdomains, IPs, and endpoints directly to a local SQLite database utilizing Write-Ahead Logging (WAL) and memory-piping. It can process 100,000+ assets with virtually zero RAM footprint.
-* **Stateful Execution:** Built-in mission tracking. If a scan drops or a WAF blocks your IP, ARBITER resumes exactly where it left off.
-* **The Ghost Protocol:** At the conclusion of an evaluation, ARBITER can interactively purge all local `.db` files and output logs, leaving zero trace of the mission on the host machine.
-* **Subprocess RAM Piping:** Integrates with powerful Go binaries (`httpx`, `naabu`, `subfinder`, `ffuf`) but routes all data through standard input/output streams rather than temporary disk files, eliminating disk thrashing.
+It does not rely on Go binaries or shell sub-processes. Instead, it utilizes an embedded SQLite Write-Ahead Logging (WAL) core, Abstract Syntax Tree (AST) compilation, and native asynchronous network pools to hunt for vulnerabilities on modern Web 3.0 infrastructure.
 
 ---
 
-## ⚔️ The Execution Pipeline (Subsystems)
+## 🧠 The Masterclass Architecture
 
-ARBITER operates in sequential, intelligent phases. Later phases dynamically adapt based on intelligence gathered in earlier phases.
-
-### Phase 1: Surface Mapping
-* **Phase 1.1 - Horizontal Recon:** Resolves the origin IP, queries global BGP routing tables to identify the target's Autonomous System Number (ASN), and extracts all associated IPv4 CIDR blocks. (Includes a Cloud Shield to prevent scanning shared infrastructure).
-* **Phase 1.2 - Infrastructure Forensics:** Deep DNS structural analysis. Hunts for AXFR Zone Transfers (feeding results back into the scanner), NS Hijacking (dangling nameservers), legacy DNSSEC NSEC walking, and mines TXT records for exposed verification tokens.
-* **Phase 1.5 - The CDN Shield & Port Scanning:** Evaluates all domains for Cloudflare/AWS routing. Bypasses deep scanning on CDN-fronted hosts to save time, piping direct-origin IPs into `Naabu` for aggressive port sweeps.
-* **Phase 1.8 - Permutations:** Generates and resolves hidden development and staging environment naming conventions to uncover Shadow IT.
-
-### Phase 2: Active Profiling
-* **Phase 2.0 - The Tech Profiler:** Streams live targets through `HTTPX` (with WAF-evasion agents) to extract server identities, status codes, and underlying technologies (e.g., WordPress, React, IIS).
-* **Phase 2.2 - The Asynchronous Spider:** A high-speed `aiohttp` crawler that maps internal URL structures and extracts hidden endpoints without falling into infinite crawler traps.
-* **Phase 2.5 - Cloud Recon:** Hunts for unprotected S3, Azure, and GCP storage buckets tied to the target's brand footprint.
-* **Phase 2.7 - SpoofCheck:** Analyzes DMARC/SPF configurations for CEO Fraud vulnerabilities, generating weaponized `swaks` Proof-of-Concept commands for internal spoofing tests.
-* **Phase 2.8 - GitHub Intelligence:** Interfaces with the GitHub REST API using advanced dorking to hunt for leaked AWS keys, database passwords, and API tokens across public repositories.
-
-### Phase 3 & 4: Neural Extraction & Offensive Strikes
-* **Phase 3.0 - Cortex (Neural JS Extraction):** Downloads JavaScript bundles and utilizes Shannon Entropy calculations to differentiate between actual cryptographic secrets and random webpack hashes, drastically reducing false positives. Actively probes extracted API endpoints for 200 OK responses.
-* **Phase 4.0 - CORS Cartographer:** Dynamically tests Cross-Origin Resource Sharing configurations to identify API hijacking vulnerabilities.
-* **Phase 4.5 - Reflection Cartography:** Injects canary payloads into discovered parameters (from the Spider) to identify unescaped HTML reflections (Pre-XSS vectors).
-* **Phase 4.8 - The OAST Protocol:** Hunts for Blind Server-Side Request Forgery (SSRF) and Out-of-Band interactions by poisoning HTTP headers with unique RequestRepo tracking payloads.
-
-### Phase 5: Chaos
-* **Phase 5.0 - Auto-Calibrated Content Discovery:** Directory fuzzing using `FFUF`. Armed with Auto-Calibration to detect when a server is lying (Soft-404s/Catch-Alls), filtering out the noise to deliver strictly validated assets.
+* **The Stateful Graph Engine:** Replaces flat JSON dumps with a relational SQLite graph. Utilizing Deterministic MD5 Hashing and `UPSERT` diffing, the Delta Engine natively tracks temporal changes across the attack surface, only alerting on modified or new infrastructure.
+* **Zero-Dependency Native I/O:** Eradicates supply chain risks. No `httpx`, no `subfinder`, no `cloud_enum`. Powered by `aiohttp` and `asyncio`, Sentinel-X handles its own concurrency, network pooling, and heuristic tech-fingerprinting natively in memory.
+* **Asynchronous Backpressure & OOM Protection:** Engineered with strict `asyncio.Semaphore` governors and chunked event loops. It can process 100,000+ assets simultaneously without causing Out-of-Memory (OOM) failures or OS socket exhaustion.
+* **Graceful SIGINT Interception:** The orchestrator intercepts `Ctrl+C` commands, safely draining active TCP connections and flushing the WAL cache to prevent database corruption during manual overrides.
 
 ---
 
-## 🛡️ Disclaimer
-ARBITER is an automated security evaluation tool. It is designed strictly for authorized penetration testing, bug bounty hunting on sanctioned programs, and academic security research. The operators assume no liability for the misuse of this framework.
+## ⚔️ The Kill-Chain Pipeline
+
+### Phase 1: Native OSINT & Intelligence Gathering
+* **The Omniscient Archivist:** Concurrent, in-memory scrapers querying `crt.sh`, `HackerTarget`, `AlienVault`, and `URLScan.io` via pure async Python—eliminating the need for third-party reconnaissance binaries.
+* **Horizontal & Infrastructure Forensics:** Maps ASN/CIDR blocks, hunts for dangling NS pointers (Subdomain Takeovers), and extracts exposed verification tokens.
+
+### Phase 2: Active Profiling & Surface Mapping
+* **Native Probing & The Stealth Governor:** A custom HTTP engine utilizing exponential backoff and rate-limiting. Employs "Wappalyzer Lite" logic to heuristically fingerprint Nginx, React, AWS, and Next.js entirely in memory.
+* **The AST Spider:** Maps standard HTML links while aggressively extracting hidden Webpack and React JavaScript bundles to feed the Neural Cortex.
+* **Graph-Based Cloud Recon:** Instantly cross-references the mapped SQLite graph to identify exposed AWS, Azure, and GCP infrastructure without sending a single noisy brute-force request.
+
+### Phase 3: The AST Neural Cortex (Offensive SAST)
+* **Abstract Syntax Tree Extraction:** Abandons traditional Regex. The Cortex downloads JS bundles and compiles them into logical execution trees in memory. By mathematically resolving variable concatenations and performing Static Taint Analysis, it extracts the "Shadow APIs" that developers forgot they exposed.
+
+### Phase 4: The Weaponized Nuclei Pipeline
+* **Direct-to-RAM Execution:** The only remaining external dependency, retained strictly for its crowdsourced CVE templates. Feeds both root hosts and AST-extracted Shadow APIs directly into Nuclei's standard input stream. Unleashes deep-scan templates (`-tags exposure,vulnerabilities,misconfiguration`) while catching silent binary crashes.
+
+### Phase 5: The Native API Fuzzer (Polyglot & Chronos)
+* **Semantic Swagger Engine:** Actively hunts for exposed `openapi.json` and `swagger.json` blueprints, dynamically expanding the attack surface by parsing undocumented backend routes.
+* **Polyglot Payload Injection:** Recognizes that modern Web 3.0 APIs reject standard `GET` attacks. Automatically crafts structural JSON bodies (`{"email": "admin'--"}`) to inject SQLi, LFI, and XSS natively via `POST`.
+* **Chronos (Temporal Blind Fuzzing):** Bypasses modern ORMs (like Prisma/Sequelize) that swallow database errors. Injects temporal payloads (`pg_sleep(6)`) and uses high-precision perf-counters to measure network time dilation, catching invisible blind vulnerabilities.
+
+### Phase 6: The Heuristic Brain (HUD)
+* **Threat Prioritization Matrix:** Eliminates alert fatigue. The decision engine analyzes HTTP status codes, tech stacks, and URL context to automatically route findings. It knows an exposed Pre-Production API is a **P1 Critical**, while a dead 404 Webmail server is **P4 Noise**.
+
+---
+
+## 🛡️ Operational Directives
+Sentinel-X is an automated security evaluation tool. It is designed strictly for authorized penetration testing, bug bounty hunting on sanctioned programs, and academic security research. The architect assumes no liability for the misuse of this framework.

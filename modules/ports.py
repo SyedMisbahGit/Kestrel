@@ -29,18 +29,18 @@ def is_cdn(domain):
 def run_ports(session, config):
     console.print("[bold blue]━━ PHASE 1.5: PORT SCANNING (CDN SHIELD ACTIVE) ━━[/bold blue]")
     
-    if not session.subdomains:
+    if not session.get_subdomains():
         log.warning("No subdomains found to scan.")
         return
 
     direct_targets = []
     cdn_targets = []
     
-    console.print(f"[cyan]  + Analyzing {len(session.subdomains)} hosts for CDN routing (50 Threads)...[/cyan]")
+    console.print(f"[cyan]  + Analyzing {len(session.get_subdomains())} hosts for CDN routing (50 Threads)...[/cyan]")
     
     # THE UPGRADE: Multi-threaded CDN classification
     with ThreadPoolExecutor(max_workers=50) as executor:
-        results = executor.map(is_cdn, session.subdomains)
+        results = executor.map(is_cdn, session.get_subdomains())
         for domain, is_fronted in results:
             if is_fronted:
                 cdn_targets.append(domain)

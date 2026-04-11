@@ -48,7 +48,7 @@ def run_permutations(session, config):
     """
     console.print("[bold blue]━━ PHASE 1.8: SUBDOMAIN PERMUTATIONS ━━[/bold blue]")
     
-    bases = list(set(session.subdomains))
+    bases = list(set(session.get_subdomains()))
     if not bases:
         log.warning("No base subdomains to permute.")
         return
@@ -92,7 +92,7 @@ def run_permutations(session, config):
                 console.print(f"[green]  + Found Hidden Sub: {res}[/green]")
 
     if valid_new_subs:
-        session.subdomains.extend(list(valid_new_subs))
+        session.get_subdomains().extend(list(valid_new_subs))
         console.print(f"INFO     Permutations found {len(valid_new_subs)} validated subdomains.")
     else:
         console.print("[dim]  + No valid new subdomains found via permutations.[/dim]")

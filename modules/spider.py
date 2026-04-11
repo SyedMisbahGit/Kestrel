@@ -1,83 +1,60 @@
-import re
-import logging
 import asyncio
 import aiohttp
-from urllib.parse import urljoin, urlparse
+import logging
+import re
+from urllib.parse import urljoin
 from rich.console import Console
 
-console = Console()
 log = logging.getLogger("rich")
+console = Console()
 
-# Extract href and action attributes
-LINK_REGEX = re.compile(r'(?:href|action)=[\'"]([^\'"]+)[\'"]', re.IGNORECASE)
+JS_REGEX = re.compile(r'src=["\']([^"\']+\.js[^"\']*)["\']', re.IGNORECASE)
+HREF_REGEX = re.compile(r'href=["\']([^"\']+)["\']', re.IGNORECASE)
 
-async def fetch_and_parse(session, url, base_domain):
-    local_urls = set()
+async def crawl_target(session_client, url, state_session):
     try:
-        # 5-second timeout, bypass SSL verification
-        async with session.get(url, timeout=5, ssl=False) as response:
-            if response.status != 200:
-                return local_urls
-            
-            html = await response.text()
-            matches = LINK_REGEX.findall(html)
-            
-            for match in matches:
-                if match.startswith(('mailto:', 'javascript:', 'tel:', '#')): continue
+        async with session_client.get(url, timeout=10, ssl=False) as response:
+            if response.status == 200:
+                html = await response.text()
                 
-                full_url = urljoin(url, match)
-                parsed_full = urlparse(full_url)
-                
-                # Verify it belongs to the target domain
-                if parsed_full.netloc == base_domain:
-                    # Ignore static media files
-                    if not full_url.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.css', '.svg', '.pdf', '.woff', '.js')):
-                        local_urls.add(full_url)
-                        
-                # Memory constraint: Max 25 links per host
-                if len(local_urls) >= 25: break
-                
-    except Exception:
-        pass
-    return local_urls
+                js_files = JS_REGEX.findall(html)
+                for js in js_files:
+                    state_session.add_crawled_url(urljoin(url, js))
 
-async def run_async_spider(targets):
-    crawled_urls = set()
-    connector = aiohttp.TCPConnector(limit_per_host=10, limit=100, verify_ssl=False)
+                links = HREF_REGEX.findall(html)
+                for link in links:
+                    if link.startswith('/') or url in link:
+                        state_session.add_crawled_url(urljoin(url, link))
+    except Exception:
+        pass 
+
+async def deploy_spider(state_session, targets):
+    # OOM Protection: Chunking
+    CHUNK_SIZE = 500 
+    connector = aiohttp.TCPConnector(limit=50) # Connection pool limit
     
-    # Custom User-Agent to evade basic WAFs
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    
-    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
-        tasks = []
-        for target in targets:
-            base_domain = urlparse(target).netloc
-            tasks.append(fetch_and_parse(session, target, base_domain))
-        
-        # Execute all concurrent requests
-        results = await asyncio.gather(*tasks)
-        for res in results:
-            crawled_urls.update(res)
+    async with aiohttp.ClientSession(connector=connector) as client:
+        # Process targets in strict memory-safe batches
+        for i in range(0, len(targets), CHUNK_SIZE):
+            chunk = targets[i:i + CHUNK_SIZE]
+            tasks = [crawl_target(client, target['url'] if isinstance(target, dict) else target, state_session) for target in chunk]
             
-    return list(crawled_urls)
+            # Await the chunk to finish before loading the next batch into RAM
+            await asyncio.gather(*tasks)
+            
+            # Optional: Add a tiny sleep to let the OS clear TCP sockets
+            await asyncio.sleep(0.1)
 
 def run_spider(session, config):
-    console.print("[bold blue]━━ PHASE 2.2: THE SPIDER (ASYNC SURFACE MAPPING) ━━[/bold blue]")
+    console.print("[bold blue]━━ PHASE 2.2: THE SPIDER (ASYNC BACKPRESSURE ACTIVE) ━━[/bold blue]")
     
-    targets = [host.get('url') for host in session.live_hosts if host.get('url')]
-    if not targets:
-        log.warning("No live hosts to crawl. Skipping.")
+    live_hosts = session.get_live_hosts()
+    if not live_hosts:
+        console.print("WARNING  No live hosts to crawl. Skipping.")
         return
 
-    console.print(f"INFO     Deploying Async Spider to {len(targets)} targets...")
+    console.print(f"INFO     Deploying Async Spider to {len(live_hosts)} targets (Chunk Size: 500)...")
+    asyncio.run(deploy_spider(session, live_hosts))
     
-    # Trigger the asyncio event loop
-    loop = asyncio.get_event_loop()
-    new_urls = loop.run_until_complete(run_async_spider(targets))
-    
-    session.crawled_urls.extend(new_urls)
-    
-    if new_urls:
-        console.print(f"[green]  + Spider Complete. Mapped {len(new_urls)} hidden endpoints.[/green]")
-    else:
-        console.print("[dim]  + Spider Complete. No internal links found.[/dim]")
+    total_crawled = len(session.get_crawled_urls())
+    console.print(f"  + Spider Complete. Mapped and injected {total_crawled} endpoints/bundles for analysis.")

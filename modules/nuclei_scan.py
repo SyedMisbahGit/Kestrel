@@ -1,95 +1,71 @@
-import json
 import subprocess
+import json
 import logging
 from rich.console import Console
-from rich.panel import Panel
 
 console = Console()
 log = logging.getLogger("rich")
 
 def run_nuclei(session, config):
-    """
-    Phase 4: The Nuclei Pipeline
-    Streams live hosts and crawled URLs directly into Nuclei for template-based vulnerability scanning.
-    """
-    console.print("[bold blue]━━ PHASE 4: THE NUCLEI PIPELINE (CVE & MISCONFIG MAPPING) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 4: THE NUCLEI PIPELINE (CVE & MISCONFIG MAPPING) ━━[/bold blue]")
 
-    # Gather all valid endpoints from previous phases
-    targets = [host.get('url') for host in session.live_hosts if isinstance(host, dict) and host.get('url')]
-    if hasattr(session, 'crawled_urls') and session.crawled_urls:
-        targets.extend(list(session.crawled_urls))
-        
-    targets = list(set(targets)) # Deduplicate
+    targets = set()
+    for h in session.get_live_hosts():
+        if isinstance(h, dict) and 'url' in h: targets.add(h['url'])
+        elif isinstance(h, str): targets.add(h)
+    for u in session.get_crawled_urls():
+        if isinstance(u, dict) and 'url' in u: targets.add(u['url'])
+        elif isinstance(u, str): targets.add(u)
 
     if not targets:
-        log.warning("No targets available for the Nuclei pipeline. Skipping.")
+        console.print("WARNING  No targets available for the Nuclei pipeline. Skipping.")
         return
 
-    console.print(f"INFO     Piping {len(targets)} targets directly into Nuclei memory stream...")
+    console.print(f"INFO     Piping {len(targets)} targets into Nuclei...")
+    
+    # Pre-Flight: Force Template Update to prevent blind failures
+    console.print("INFO     Synchronizing Nuclei Templates...")
+    subprocess.run(["nuclei", "-ut", "-silent"], capture_output=True)
 
-    # The Command: -ni disables interactsh to speed up scans, -silent keeps standard output clean
+    target_list = "\n".join(targets)
+    
+    # Added -as (Automatic Scan based on Wappalyzer) and lowered severity to include LOW
     cmd = [
-        "nuclei",
-        "-silent",
-        "-jsonl",
-        "-ni" 
+        "nuclei", "-silent", "-json", 
+        "-as", # Automatic Tech-based scan
+        "-severity", "low,medium,high,critical",
+        "-c", "50"
     ]
 
-    findings = 0
     try:
-        # Load targets into RAM buffer
-        target_str = "\n".join(targets)
-        
-        # Open Subprocess Pipe
-        process = subprocess.Popen(
-            cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout, stderr = process.communicate(input=target_list)
 
-        # Stream targets in, read JSON out
-        stdout, _ = process.communicate(input=target_str)
+        # UN-BLINDING THE ENGINE: Catch silent binary crashes
+        if stderr and "error" in stderr.lower():
+            log.error(f"Nuclei Engine Error: {stderr.strip()}")
 
+        vulns = []
         for line in stdout.splitlines():
             if not line.strip(): continue
             try:
                 data = json.loads(line)
-                vuln_name = data.get("info", {}).get("name", "Unknown Vulnerability")
-                severity = data.get("info", {}).get("severity", "info").upper()
-                url = data.get("matched-at", "Unknown URL")
-                desc = data.get("info", {}).get("description", "No description provided.")
-
-                # Filter for impact to keep the HUD clean
-                if severity in ["HIGH", "CRITICAL", "MEDIUM"]:
-                    color = "red" if severity in ["HIGH", "CRITICAL"] else "orange1"
-                    console.print(Panel(
-                        f"[bold {color}]{severity}: {vuln_name}[/bold {color}]\n"
-                        f"Target: {url}\n"
-                        f"Info: {str(desc)[:100]}...",
-                        title="⚠️ NUCLEI STRIKE", border_style=color
-                    ))
-
-                    # Inject into SQLite Core
-                    session.vulnerabilities.append({
-                        "name": vuln_name,
-                        "severity": severity,
-                        "url": url,
-                        "info": desc
-                    })
-                    findings += 1
-
+                vulns.append(data)
+                
+                info = data.get('info', {})
+                sev = info.get('severity', 'info').upper()
+                name = info.get('name', 'Unknown')
+                url = data.get('matched-at', '')
+                color = "red" if sev in ["HIGH", "CRITICAL"] else "yellow" if sev == "MEDIUM" else "cyan"
+                console.print(f"[{color}]  ! [{sev}] {name} -> {url}[/{color}]")
             except json.JSONDecodeError:
-                continue
+                pass
 
-    except FileNotFoundError:
-        log.error("Nuclei binary not found. Ensure it is installed and in your system PATH.")
-        log.info("Install command: go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest")
+        if vulns:
+            session.vulnerabilities.extend(vulns)
+            console.print(f"  + Nuclei pipeline complete. {len(vulns)} vulnerabilities mapped into State Graph.")
+        else:
+            console.print("  + Nuclei pipeline complete. No automated vulnerabilities detected.")
+
     except Exception as e:
-        log.error(f"Nuclei pipeline failed: {e}")
-
-    if findings == 0:
-        console.print("[green]  + Nuclei pipeline complete. No high-severity vulnerabilities detected.[/green]")
-    else:
-        console.print(f"INFO     Nuclei execution finished. Logged {findings} verified vulnerabilities.")
+        log.error(f"Nuclei execution failed: {e}")

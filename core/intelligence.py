@@ -20,7 +20,9 @@ def analyze_host(host):
     url = host.get('url', '').lower()
     title = host.get('title', '').lower()
     status = host.get('status', 0)
-    tech = [t.lower() for t in host.get('tech', [])]
+    
+    # Safely convert tech array to strings to prevent attribute errors
+    tech = [str(t).lower() for t in host.get('tech', [])]
     
     # Default State
     priority = "P3"
@@ -32,17 +34,16 @@ def analyze_host(host):
 
     # Rule 2: High-Value Targets (P1)
     if P1_URL_KWS.search(url) or P1_TITLE_KWS.search(title):
-        context = []
-        if 'api' in url: context.append("API Endpoint")
-        if re.search(r'(dev|stage|test|uat)', url): context.append("Pre-Production")
-        if re.search(r'(admin|internal|corp|vpn)', url): context.append("Internal/Admin")
-        if 'login' in url or 'auth' in url or P1_TITLE_KWS.search(title): context.append("Auth/Portal")
+        ctx = []
+        if 'api' in url: ctx.append("API Endpoint")
+        if re.search(r'(dev|stage|test|uat)', url): ctx.append("Pre-Production")
+        if re.search(r'(admin|internal|corp|vpn)', url): ctx.append("Internal/Admin")
+        if 'login' in url or 'auth' in url or P1_TITLE_KWS.search(title): ctx.append("Auth/Portal")
         
-        return "P1", " | ".join(context) if context else "High-Interest Asset"
+        return "P1", " | ".join(ctx) if ctx else "High-Interest Asset"
 
     # Rule 3: Interesting Tech or Standard App (P2)
-    # If it's returning 200 OK and running dynamic tech or cloud buckets
-    dynamic_tech = any(x in str(tech) for x in ['react', 'vue', 'angular', 'php', 'node', 'express', 's3', 'cloudfront'])
+    dynamic_tech = any(x in str(tech) for x in ['react', 'vue', 'angular', 'php', 'node', 'express', 's3', 'cloudfront', 'next.js'])
     if status == 200 and dynamic_tech:
         return "P2", "Dynamic Application / User-Facing"
     
@@ -66,7 +67,6 @@ def run_intelligence(session, config):
     categorized = {"P1": [], "P2": [], "P3": [], "P4": []}
     
     for host in live_hosts:
-        # Some hosts might just be strings if legacy data, ensure dict
         if not isinstance(host, dict): continue
         
         priority, context = analyze_host(host)
@@ -84,7 +84,9 @@ def run_intelligence(session, config):
         table.add_column("Intelligence Context", style="yellow")
         
         for h in categorized["P1"]:
-            table.add_row(h['url'], str(h['status']), h['context'])
+            # Inject Delta Logic [NEW] tag visually
+            url_display = f"[bold green][NEW][/bold green] {h['url']}" if h.get('_is_new') else h['url']
+            table.add_row(url_display, str(h['status']), h['context'])
         console.print(table)
 
     # 2. Print P2 (Secondary Focus)
@@ -94,12 +96,13 @@ def run_intelligence(session, config):
         table.add_column("Status", justify="center")
         table.add_column("Intelligence Context", style="cyan")
         
-        for h in categorized["P2"]:
+        for i, h in enumerate(categorized["P2"]):
             # Limit output to prevent screen flooding. Show top 15.
-            if categorized["P2"].index(h) > 15:
+            if i > 15:
                 table.add_row("...", "...", f"+ {len(categorized['P2']) - 15} more hosts")
                 break
-            table.add_row(h['url'], str(h['status']), h['context'])
+            url_display = f"[bold green][NEW][/bold green] {h['url']}" if h.get('_is_new') else h['url']
+            table.add_row(url_display, str(h['status']), h['context'])
         console.print(table)
 
     # 3. Summarize P3 and P4 (Reduce the noise)

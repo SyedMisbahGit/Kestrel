@@ -1,84 +1,107 @@
-import subprocess
-import requests
+import asyncio
+import aiohttp
 import logging
 import re
-from concurrent.futures import ThreadPoolExecutor
 from rich.console import Console
 
 console = Console()
 log = logging.getLogger("rich")
 
-def fetch_wayback(domain):
+# --- NATIVE OSINT SCRAPERS ---
+
+async def fetch_crtsh(client, domain):
     try:
-        r = requests.get(f"http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=json&collapse=urlkey&limit=5000", timeout=15)
-        if r.status_code == 200:
-            urls = [x[2] for x in r.json()[1:]]
-            subs = set()
-            regex = re.compile(r'https?://([a-zA-Z0-9.-]+)')
-            for url in urls:
-                match = regex.search(url)
-                if match and match.group(1).endswith(domain):
-                    subs.add(match.group(1))
-            return subs
-    except Exception:
-        pass
+        async with client.get(f"https://crt.sh/?q=%25.{domain}&output=json", timeout=15) as r:
+            if r.status == 200:
+                data = await r.json()
+                subs = {row['name_value'].lower() for row in data if domain in row['name_value']}
+                # Clean wildcard prefixes
+                return {s.replace('*.', '') for s in subs}
+    except Exception: pass
     return set()
 
-def fetch_alienvault(domain):
+async def fetch_hackertarget(client, domain):
     try:
-        r = requests.get(f"https://otx.alienvault.com/api/v1/indicators/domain/{domain}/passive_dns", timeout=15)
-        if r.status_code == 200:
-            return {x['hostname'] for x in r.json().get('passive_dns', []) if domain in x['hostname']}
-    except Exception:
-        pass
+        async with client.get(f"https://api.hackertarget.com/hostsearch/?q={domain}", timeout=15) as r:
+            if r.status == 200:
+                text = await r.text()
+                return {line.split(',')[0].lower() for line in text.splitlines() if domain in line}
+    except Exception: pass
     return set()
 
-def fetch_urlscan(domain):
+async def fetch_alienvault(client, domain):
     try:
-        r = requests.get(f"https://urlscan.io/api/v1/search/?q=domain:{domain}&size=1000", timeout=15)
-        if r.status_code == 200:
-            return {x['page']['domain'] for x in r.json().get('results', []) if 'page' in x and domain in x['page'].get('domain', '')}
-    except Exception:
-        pass
+        async with client.get(f"https://otx.alienvault.com/api/v1/indicators/domain/{domain}/passive_dns", timeout=15) as r:
+            if r.status == 200:
+                data = await r.json()
+                return {x['hostname'].lower() for x in data.get('passive_dns', []) if domain in x['hostname']}
+    except Exception: pass
     return set()
 
-def run_recon(session, config):
-    console.print("[bold blue]━━ PHASE 1: PASSIVE RECON & THE ARCHIVIST ━━[/bold blue]")
-    domain = session.domain
-    
-    # 1. Subfinder
-    console.print("INFO     Running Subfinder...")
-    cmd = ["subfinder", "-d", domain, "-silent"]
+async def fetch_urlscan(client, domain):
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        subs = set(result.stdout.splitlines())
-        session.subdomains.extend(list(subs))
-        console.print(f"INFO     Subfinder found {len(subs)} subdomains")
-    except Exception as e:
-        log.error(f"Subfinder failed: {e}")
+        async with client.get(f"https://urlscan.io/api/v1/search/?q=domain:{domain}&size=1000", timeout=15) as r:
+            if r.status == 200:
+                data = await r.json()
+                return {x['page']['domain'].lower() for x in data.get('results', []) if 'page' in x and domain in x.get('page', {}).get('domain', '')}
+    except Exception: pass
+    return set()
 
-    # 2. The Archivist (Multi-threaded Historical Recon)
-    console.print("INFO     Deploying The Archivist (Wayback, AlienVault, URLScan)...")
-    historical_subs = set()
-    
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        futures = {
-            executor.submit(fetch_wayback, domain): "Wayback Machine",
-            executor.submit(fetch_alienvault, domain): "AlienVault OTX",
-            executor.submit(fetch_urlscan, domain): "URLScan.io"
+async def fetch_wayback(client, domain):
+    try:
+        async with client.get(f"http://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=json&collapse=urlkey&limit=5000", timeout=15) as r:
+            if r.status == 200:
+                data = await r.json()
+                urls = [x[2] for x in data[1:]]
+                subs = set()
+                regex = re.compile(r'https?://([a-zA-Z0-9.-]+)')
+                for url in urls:
+                    match = regex.search(url)
+                    if match and match.group(1).endswith(domain):
+                        subs.add(match.group(1).lower())
+                return subs
+    except Exception: pass
+    return set()
+
+async def deploy_omniscient_engine(domain):
+    results = {}
+    async with aiohttp.ClientSession() as client:
+        tasks = {
+            "crt.sh": fetch_crtsh(client, domain),
+            "HackerTarget": fetch_hackertarget(client, domain),
+            "AlienVault OTX": fetch_alienvault(client, domain),
+            "URLScan.io": fetch_urlscan(client, domain),
+            "Wayback Machine": fetch_wayback(client, domain)
         }
         
-        for future in futures:
-            source = futures[future]
-            try:
-                res = future.result()
-                historical_subs.update(res)
-                console.print(f"[green]  + {source} returned {len(res)} historical assets.[/green]")
-            except Exception:
-                console.print(f"[red]  ! {source} query failed or timed out.[/red]")
-
-    if historical_subs:
-        session.subdomains.extend(list(historical_subs))
+        # Await all API calls concurrently
+        completed = await asyncio.gather(*tasks.values(), return_exceptions=True)
         
-    total_unique = len(set(session.subdomains))
-    console.print(f"INFO     Total Unique Subdomains Found: {total_unique}")
+        for name, res in zip(tasks.keys(), completed):
+            if isinstance(res, set):
+                results[name] = res
+            else:
+                results[name] = set()
+                
+    return results
+
+def run_recon(session, config):
+    console.print("\n[bold blue]━━ PHASE 1: NATIVE OSINT INTELLIGENCE ENGINE ━━[/bold blue]")
+    domain = session.domain
+    
+    console.print("INFO     Deploying concurrent API scrapers (Zero Third-Party Dependencies)...")
+    
+    results = asyncio.run(deploy_omniscient_engine(domain))
+    
+    total_found = set()
+    for source, subs in results.items():
+        if subs:
+            total_found.update(subs)
+            console.print(f"[green]  + {source} returned {len(subs)} assets.[/green]")
+        else:
+            console.print(f"[dim]  ! {source} query returned 0 assets or timed out.[/dim]")
+
+    if total_found:
+        session.add_subdomain(list(total_found))
+        
+    console.print(f"INFO     Total Unique Subdomains Discovered: {len(total_found)}")

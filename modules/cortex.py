@@ -1,76 +1,123 @@
-import re
 import logging
 import asyncio
 import aiohttp
-from urllib.parse import urljoin
 from rich.console import Console
+try:
+    from pyjsparser import parse
+except ImportError:
+    parse = None
 
-console = Console()
 log = logging.getLogger("rich")
+console = Console()
 
-# Regex to catch API paths (e.g., /api/v2/users) and hidden URLs inside JS
-ENDPOINT_REGEX = re.compile(r'(?:"|\')(((?:[a-zA-Z]{1,10}://|/)[^"\'\s]+|([a-zA-Z0-9_\-]+/)+[a-zA-Z0-9_\-]+))(?:"|\')')
+class ASTTaintAnalyzer:
+    def __init__(self):
+        self.variables = {}
+        self.endpoints = set()
 
-async def extract_js_endpoints(session, js_url):
-    endpoints = set()
+    def traverse(self, node):
+        if not isinstance(node, dict): return
+        
+        # 1. State Tracking: Variable Declarations
+        if node.get('type') == 'VariableDeclarator':
+            id_node = node.get('id')
+            init_node = node.get('init')
+            if id_node and init_node and id_node.get('type') == 'Identifier':
+                var_name = id_node.get('name')
+                if init_node.get('type') == 'Literal':
+                    self.variables[var_name] = init_node.get('value')
+        
+        # 2. Sink Detection: Finding the API Calls (fetch, axios, http)
+        if node.get('type') == 'CallExpression':
+            callee = node.get('callee')
+            if self._is_api_sink(callee):
+                args = node.get('arguments', [])
+                if args:
+                    # Weaponized Taint Resolution
+                    endpoint = self._resolve_argument(args[0])
+                    if endpoint and isinstance(endpoint, str) and (endpoint.startswith('/') or endpoint.startswith('http')):
+                        self.endpoints.add(endpoint)
+
+        # 3. Recursive Graph Traversal
+        for key, value in node.items():
+            if isinstance(value, dict):
+                self.traverse(value)
+            elif isinstance(value, list):
+                for item in value:
+                    self.traverse(item)
+
+    def _is_api_sink(self, callee):
+        """Heuristic identification of network execution sinks."""
+        if not callee: return False
+        if callee.get('type') == 'Identifier' and callee.get('name') in ['fetch', 'request']:
+            return True
+        if callee.get('type') == 'MemberExpression':
+            obj = callee.get('object', {})
+            prop = callee.get('property', {})
+            if obj.get('name') in ['axios', '$http', 'http'] and prop.get('name') in ['get', 'post', 'put', 'delete', 'request']:
+                return True
+        return False
+
+    def _resolve_argument(self, arg):
+        """Recursively trace variables and concatenations backward through the AST."""
+        if not arg: return ""
+        # Base case: Literal String
+        if arg.get('type') == 'Literal':
+            return str(arg.get('value'))
+        # Taint Resolution: Variable Lookup
+        if arg.get('type') == 'Identifier':
+            return str(self.variables.get(arg.get('name'), ''))
+        # Concatenation: Binary Expression (e.g., base_url + "/users")
+        if arg.get('type') == 'BinaryExpression' and arg.get('operator') == '+':
+            left = self._resolve_argument(arg.get('left'))
+            right = self._resolve_argument(arg.get('right'))
+            return str(left) + str(right)
+        return ""
+
+async def analyze_js_file(session_client, url, session):
     try:
-        async with session.get(js_url, timeout=5, ssl=False) as response:
+        async with session_client.get(url, timeout=10) as response:
             if response.status == 200:
-                content = await response.text()
-                matches = ENDPOINT_REGEX.findall(content)
-                for match in matches:
-                    path = match[0]
-                    # Filter out standard junk, CSS, and HTML strings
-                    if not path.endswith(('.js', '.css', '.html', '.png', '.svg', '.woff2')):
-                        if path.startswith('/') or 'api' in path.lower():
-                            endpoints.add(path)
+                js_code = await response.text()
+                if parse:
+                    try:
+                        # Compile JS into logical tree
+                        ast_tree = parse(js_code)
+                        analyzer = ASTTaintAnalyzer()
+                        analyzer.traverse(ast_tree)
+                        
+                        # Inject extracted Shadow APIs back into the Omni-Adapter
+                        for ep in analyzer.endpoints:
+                            full_url = f"https://{url.split('/')[2]}{ep}" if ep.startswith('/') else ep
+                            session.add_crawled_url(full_url)
+                    except Exception:
+                        pass # Ignore highly obfuscated syntax errors
     except Exception:
         pass
-    return js_url, endpoints
 
-async def run_async_cortex(js_urls):
-    extracted_data = {}
-    connector = aiohttp.TCPConnector(limit_per_host=10, limit=50, verify_ssl=False)
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    
-    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
-        tasks = [extract_js_endpoints(session, url) for url in js_urls]
-        results = await asyncio.gather(*tasks)
-        
-        for url, endpoints in results:
-            if endpoints:
-                extracted_data[url] = endpoints
-                
-    return extracted_data
+async def run_cortex_async(session, js_urls):
+    async with aiohttp.ClientSession() as client:
+        tasks = [analyze_js_file(client, url, session) for url in js_urls]
+        await asyncio.gather(*tasks)
 
 def run_cortex(session, config):
-    console.print("[bold blue]━━ PHASE 3: CORTEX (NEURAL JS EXTRACTION) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 3: CORTEX (AST NEURAL EXTRACTION) ━━[/bold blue]")
+    if not parse:
+        log.warning("pyjsparser not installed. Run: pip install pyjsparser")
+        return
+
+    # Extract clean strings safely from the Omni-Adapter database
+    js_urls = []
+    for u in session.get_crawled_urls():
+        if isinstance(u, dict) and u.get('url', '').endswith('.js'):
+            js_urls.append(u['url'])
+        elif isinstance(u, str) and u.endswith('.js'):
+            js_urls.append(u)
     
-    # 1. Gather all JS files found by the Spider
-    js_targets = []
-    if hasattr(session, 'crawled_urls') and session.crawled_urls:
-        js_targets = [url for url in session.crawled_urls if url.lower().endswith('.js')]
-        
-    if not js_targets:
+    if not js_urls:
         log.warning("No JavaScript bundles found. Skipping Cortex.")
         return
 
-    console.print(f"INFO     Analyzing {len(js_targets)} JavaScript bundles for hidden APIs...")
-    
-    loop = asyncio.get_event_loop()
-    extracted_data = loop.run_until_complete(run_async_cortex(js_targets))
-    
-    total_endpoints = 0
-    for js_file, endpoints in extracted_data.items():
-        console.print(f"[cyan]  + Bundle: {js_file.split('/')[-1]}[/cyan] -> Found {len(endpoints)} routes")
-        total_endpoints += len(endpoints)
-        
-        # Pipe these newly found API endpoints back into the target pool for Nuclei
-        for ep in endpoints:
-            full_route = urljoin(js_file, ep)
-            session.crawled_urls.append(full_route)
-
-    if total_endpoints > 0:
-        console.print(f"INFO     Cortex extracted and injected {total_endpoints} hidden API endpoints.")
-    else:
-        console.print("[dim]  + No actionable endpoints found in JS bundles.[/dim]")
+    console.print(f"INFO     Compiling {len(js_urls)} JS bundles into Abstract Syntax Trees...")
+    asyncio.run(run_cortex_async(session, js_urls))
+    console.print("  + AST Taint Analysis Complete. Extracted Shadow APIs injected into state graph.")

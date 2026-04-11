@@ -3,7 +3,6 @@ import json
 import os
 import logging
 import uuid
-import hashlib
 
 log = logging.getLogger("rich")
 
@@ -13,29 +12,19 @@ class DBList:
         self.table = table
         self.run_id = run_id
 
-    def _generate_id(self, item):
-        """Generates a deterministic hash based on the URL or raw string to prevent JSON ordering collisions."""
-        if isinstance(item, dict):
-            core_id = item.get('url', item.get('matched-at', str(item)))
-        else:
-            core_id = str(item)
-        return hashlib.md5(core_id.encode()).hexdigest()
-
     def append(self, item):
-        item_id = self._generate_id(item)
-        val = json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else str(item)
+        val = json.dumps(item) if isinstance(item, (dict, list)) else str(item)
         c = self.conn.cursor()
         try:
-            # Upsert now relies on the deterministic MD5 hash, not the raw JSON string
+            # THE DELTA ENGINE: UPSERT Logic
             query = f"""
-                INSERT INTO {self.table} (id, data, first_run_id, last_run_id) 
-                VALUES (?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET 
-                data = excluded.data,
+                INSERT INTO {self.table} (data, first_run_id, last_run_id) 
+                VALUES (?, ?, ?)
+                ON CONFLICT(data) DO UPDATE SET 
                 last_run_id = ?,
                 updated_at = CURRENT_TIMESTAMP
             """
-            c.execute(query, (item_id, val, self.run_id, self.run_id, self.run_id))
+            c.execute(query, (val, self.run_id, self.run_id, self.run_id))
             self.conn.commit()
         except Exception as e:
             log.error(f"DB Append Error in {self.table}: {e}")
@@ -43,14 +32,13 @@ class DBList:
     def extend(self, items):
         if not items: return
         try:
-            vals = [(self._generate_id(i), json.dumps(i, sort_keys=True) if isinstance(i, (dict, list)) else str(i), 
+            vals = [(json.dumps(i) if isinstance(i, (dict, list)) else str(i), 
                      self.run_id, self.run_id, self.run_id) for i in items]
             c = self.conn.cursor()
             query = f"""
-                INSERT INTO {self.table} (id, data, first_run_id, last_run_id) 
-                VALUES (?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET 
-                data = excluded.data,
+                INSERT INTO {self.table} (data, first_run_id, last_run_id) 
+                VALUES (?, ?, ?)
+                ON CONFLICT(data) DO UPDATE SET 
                 last_run_id = ?,
                 updated_at = CURRENT_TIMESTAMP
             """
@@ -61,14 +49,17 @@ class DBList:
 
     def __iter__(self):
         c = self.conn.cursor()
+        # Fetch the data and the temporal metadata
         c.execute(f"SELECT data, first_run_id FROM {self.table}")
         for row in c.fetchall():
             try:
                 obj = json.loads(row[0])
+                # Inject the diffing state directly into the dictionary
                 if isinstance(obj, dict):
                     obj['_is_new'] = (row[1] == self.run_id)
                 yield obj
             except json.JSONDecodeError:
+                # For basic strings (like subdomains)
                 yield row[0]
 
     def __len__(self):
@@ -76,17 +67,24 @@ class DBList:
         c.execute(f"SELECT COUNT(*) FROM {self.table}")
         return c.fetchone()[0]
 
+    def clear(self):
+        c = self.conn.cursor()
+        c.execute(f"DELETE FROM {self.table}")
+        self.conn.commit()
+
 class TargetSession:
     def __init__(self, domain, mode="standard"):
         self.domain = domain
         self.mode = mode
-        self.run_id = str(uuid.uuid4())
+        self.run_id = str(uuid.uuid4()) # Unique ID for this specific scan execution
         
         os.makedirs("data/sessions", exist_ok=True)
         self.db_path = f"data/sessions/{domain.replace('.', '_')}.db"
         
         self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self.conn.execute("PRAGMA journal_mode=WAL;")
+        self.conn.execute("PRAGMA synchronous=NORMAL;")
+        self.conn.execute("PRAGMA temp_store=MEMORY;")
         
         self._init_db()
 
@@ -100,10 +98,10 @@ class TargetSession:
         c = self.conn.cursor()
         tables = ["subdomains", "live_hosts", "vulnerabilities", "cidrs", "crawled_urls"]
         for t in tables:
+            # New Schema with Temporal Tracking
             c.execute(f"""
                 CREATE TABLE IF NOT EXISTS {t} (
-                    id TEXT PRIMARY KEY, 
-                    data TEXT, 
+                    data TEXT UNIQUE, 
                     first_run_id TEXT, 
                     last_run_id TEXT,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -112,32 +110,8 @@ class TargetSession:
             """)
         self.conn.commit()
 
-    # --- OMNI-ADAPTER LAYER ---
-    def add_subdomain(self, sub=None, **kwargs):
-        if sub:
-            if isinstance(sub, (list, set)): self.subdomains.extend(list(sub))
-            else: self.subdomains.append(sub)
+    def save(self): pass
 
-    def get_subdomains(self): return list(self.subdomains)
-
-    def add_live_host(self, host=None, **kwargs):
-        if host is None and kwargs: host = kwargs
-        if host:
-            if isinstance(host, (list, set)): self.live_hosts.extend(list(host))
-            else: self.live_hosts.append(host)
-            
-    def get_live_hosts(self): return list(self.live_hosts)
-
-    def add_crawled_url(self, url=None, **kwargs):
-        if url:
-            if isinstance(url, (list, set)): self.crawled_urls.extend(list(url))
-            else: self.crawled_urls.append(url)
-
-    def get_crawled_urls(self): return list(self.crawled_urls)
-
-    def commit(self): pass
-    def save(self): pass 
-    def close(self): self.conn.close()
     def purge(self):
         self.conn.close()
         if os.path.exists(self.db_path): os.remove(self.db_path)

@@ -58,8 +58,8 @@ def run_dns_forensics(session, config):
                     sub = str(name)
                     if sub != "@" and sub != "*":
                         full_sub = f"{sub}.{domain}"
-                        if full_sub not in session.subdomains:
-                            session.subdomains.append(full_sub)
+                        if full_sub not in session.get_subdomains():
+                            session.add_subdomain(full_sub)
                             extracted_subs.append(full_sub)
                 
                 console.print(Panel(

@@ -80,7 +80,7 @@ def run_takeover(session, config):
     console.print("[bold blue]━━ PHASE 1.9: THE SEIZURE (SUBDOMAIN TAKEOVER) ━━[/bold blue]")
     
     # Target all discovered subdomains
-    targets = list(set(session.subdomains))
+    targets = list(set(session.get_subdomains()))
     if not targets:
         log.warning("No targets to check for takeover.")
         return

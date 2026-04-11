@@ -1,100 +1,60 @@
-import subprocess
 import logging
-import os
-import re
 from rich.console import Console
+from rich.table import Table
 
 console = Console()
 log = logging.getLogger("rich")
 
 def run_cloud(session, config):
-    """
-    Orchestrates Cloud Enumeration with Strict Timeouts.
-    """
-    console.print("[bold blue]━━ PHASE 2.5: CLOUD RECON ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 2.5: CLOUD RECON (GRAPH-BASED INTELLIGENCE) ━━[/bold blue]")
+    
+    live_hosts = session.get_live_hosts()
+    if not live_hosts:
+        console.print("WARNING  No hosts available for cloud footprinting.")
+        return
 
-    # 1. Extract Keyword
-    domain_parts = session.domain.split('.')
-    keyword = domain_parts[0]
-    if len(domain_parts) > 2:
-        keyword = domain_parts[-2]
-    
-    log.info(f"Derived Cloud Keyword: [bold]{keyword}[/bold]")
-    
+    # 1. Define the Cloud Provider Signatures we are looking for
+    cloud_signatures = {
+        'AWS S3': ['Amazon S3', 's3.amazonaws.com'],
+        'AWS EC2 / CloudFront': ['Amazon Web Services', 'Amazon CloudFront'],
+        'Microsoft Azure': ['Microsoft Azure', 'Azure', 'azureedge.net'],
+        'Google Cloud': ['Google Cloud', 'Google Cloud CDN', 'storage.googleapis.com'],
+        'DigitalOcean': ['DigitalOcean', 'digitalocean.com'],
+        'Heroku': ['Heroku', 'herokuapp.com'],
+        'Vercel/Netlify': ['Vercel', 'Netlify']
+    }
+
     cloud_assets = []
 
-    # 2. Run S3Enum (Fast)
-    cloud_assets.extend(run_s3enum(keyword, config))
-    
-    # 3. Run Cloud_Enum (Slow - Skip in Stealth)
-    if session.mode in ['standard', 'loud', 'balanced']:
-        cloud_assets.extend(run_cloud_enum(keyword, config))
+    # 2. Traverse the Intelligence Graph
+    for host in live_hosts:
+        if not isinstance(host, dict): continue
+        
+        url = host.get('url', '')
+        tech = str(host.get('tech', [])).lower()
+        cname = host.get('cname', '').lower() # Assuming HTTPX grabbed CNAMEs
+        
+        detected_providers = []
+        for provider, sigs in cloud_signatures.items():
+            if any(sig.lower() in tech or sig.lower() in cname for sig in sigs):
+                detected_providers.append(provider)
+        
+        if detected_providers:
+            cloud_assets.append({
+                "url": url,
+                "providers": ", ".join(detected_providers)
+            })
+
+    # 3. Output the Intelligence
+    if cloud_assets:
+        table = Table(title="☁️ EXPOSED CLOUD INFRASTRUCTURE", style="cyan", header_style="bold cyan")
+        table.add_column("Asset URL", style="white")
+        table.add_column("Cloud Provider Identity", style="yellow")
+        
+        for asset in cloud_assets:
+            table.add_row(asset['url'], asset['providers'])
+        console.print(table)
+        console.print(f"  + Extracted {len(cloud_assets)} cloud footprints directly from the State Graph.")
     else:
-        log.info("Skipping Cloud_Enum (Stealth Mode)")
+        console.print("  + No identifiable cloud infrastructure exposed on live hosts.")
 
-    session.cloud_assets = cloud_assets
-    log.info(f"Total Cloud Assets Found: {len(cloud_assets)}")
-
-def run_s3enum(keyword, config):
-    bin_path = config['tools']['s3enum']['path']
-    wordlist = config['tools']['s3enum']['wordlist']
-    
-    if not os.path.exists(bin_path):
-        log.warning("S3Enum binary missing. Skipping.")
-        return []
-
-    log.info("Running S3Enum (AWS)...")
-    cmd = [bin_path, "-wordlist", wordlist, "-suffix", "", "-threads", "10", keyword]
-    
-    found = []
-    try:
-        # 2 Minute Timeout for S3
-        process = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-        for line in process.stdout.splitlines():
-            if "amazonaws.com" in line:
-                clean_url = line.strip()
-                if "http" not in clean_url: clean_url = f"https://{clean_url}"
-                found.append({"provider": "aws", "type": "bucket", "url": clean_url})
-                console.print(f"[green]  + AWS Bucket: {clean_url}[/green]")
-    except subprocess.TimeoutExpired:
-        log.warning("S3Enum timed out. Moving on.")
-    except Exception as e:
-        log.error(f"S3Enum failed: {e}")
-    return found
-
-def run_cloud_enum(keyword, config):
-    script_path = config['tools']['cloud_enum']['path']
-    
-    if not os.path.exists(script_path):
-        return []
-
-    log.info("Running Cloud_Enum (Multi-Cloud)...")
-    outfile = f"data/cloud_enum_{keyword}.txt"
-    cmd = ["python3", script_path, "-k", keyword, "-l", outfile]
-    
-    found = []
-    try:
-        # 3 Minute Hard Limit
-        subprocess.run(cmd, capture_output=True, text=True, timeout=180)
-        
-        if os.path.exists(outfile):
-            with open(outfile, 'r') as f:
-                content = f.read()
-            urls = re.findall(r'https?://[\w\-\.]+(?:s3\.amazonaws\.com|blob\.core\.windows\.net|storage\.googleapis\.com)', content)
-            
-            for url in set(urls):
-                provider = "unknown"
-                if "windows.net" in url: provider = "azure"
-                elif "googleapis" in url: provider = "gcp"
-                elif "amazonaws" in url: provider = "aws"
-                
-                found.append({"provider": provider, "type": "storage", "url": url})
-                console.print(f"[green]  + {provider.upper()} Asset: {url}[/green]")
-            os.remove(outfile)
-            
-    except subprocess.TimeoutExpired:
-        log.warning("[yellow]Cloud_Enum timed out (3m limit). Moving to next phase.[/yellow]")
-    except Exception as e:
-        log.error(f"Cloud_Enum failed: {e}")
-        
-    return found

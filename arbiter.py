@@ -1,136 +1,86 @@
 import typer
-import yaml
-import sys
 import logging
-import shutil
+import yaml
 import os
-from rich.logging import RichHandler
+import sys
 from rich.console import Console
-from rich.panel import Panel
-from rich.align import Align
-from rich.prompt import Confirm
+
+# Core
+from core.state import TargetSession
 from core.intelligence import run_intelligence
 
-# --- THE UPGRADE: SQLite Memory Core ---
-from core.state import TargetSession
-
-# Import Modules
+# Modules
 from modules.recon import run_recon
 from modules.horizontal import run_horizontal
 from modules.dns_forensics import run_dns_forensics
-from modules.permutations import run_permutations
 from modules.ports import run_ports
+from modules.permutations import run_permutations
 from modules.probing import run_probing
 from modules.spider import run_spider
+from modules.takeover import run_takeover
 from modules.cloud import run_cloud
 from modules.email import run_email
 from modules.github_recon import run_github
-from modules.takeover import run_takeover
 from modules.cortex import run_cortex
-from modules.offensive import run_offensive
-from modules.mining import run_mining
-from modules.oast import run_oast
-from modules.chaos import run_chaos
 from modules.nuclei_scan import run_nuclei
-from modules.report import run_report
+from modules.fuzzer import run_fuzzer
 
-# Setup Logging
-logging.basicConfig(
-    level="INFO", 
-    format="%(message)s", 
-    datefmt="[%X]", 
-    handlers=[RichHandler(rich_tracebacks=True, markup=True, show_time=False)]
-)
-log = logging.getLogger("rich")
+app = typer.Typer()
 console = Console()
-
-# Define App
-app = typer.Typer(help="ARBITER: System Integrity Evaluator")
+log = logging.getLogger("rich")
 
 def load_config():
-    try:
-        with open("config/settings.yaml", "r") as f: return yaml.safe_load(f)
-    except: return {}
-
-CONFIG = load_config()
-
-BANNER = """
-[bold cyan]
-   ▄▄▄       ██▀███   ▄▄▄▄    ██▓▄▄▄█████▓▓█████  ██▀███  
-  ▒████▄    ▓██ ▒ ██▒▓█████▄ ▓██▒▓  ██▒ ▓▒▓█   ▀ ▓██ ▒ ██▒
-  ▒██  ▀█▄  ▓██ ░▄█ ▒▒██▒ ▄██▒██▒▒ ▓██░ ▒░▒███   ▓██ ░▄█ ▒
-  ░██▄▄▄▄██ ▒██▀▀█▄  ▒██░█▀  ░██░░ ▓██▓ ░ ▒▓█  ▄ ▒██▀▀█▄  
-   ▓█   ▓██▒░██▓ ▒██▒░▓█  ▀█▓░██░  ▒██▒ ░ ░▒████▒░██▓ ▒██▒
-   ▒▒   ▓▒█░░ ▒▓ ░▒▓░░▒▓███▀▒░▓    ▒ ░░   ░░ ▒░ ░░ ▒▓ ░▒▓░
-    ▒   ▒▒ ░  ░▒ ░ ▒░▒░▒   ░  ▒ ░    ░      ░ ░  ░▒ ░ ▒░
-    ░   ▒     ░░   ░  ░    ░  ▒ ░  ░         ░     ░░   ░ 
-        ░  ░   ░      ░       ░              ░  ░   ░     
-                       ░                                  
-[/bold cyan][bold white]SYSTEM INTEGRITY EVALUATOR // v2.0[/bold white]
-"""
-
-@app.callback()
-def main(): pass
+    config_path = "config/settings.yaml"
+    if os.path.exists(config_path):
+        with open(config_path, "r") as f:
+            return yaml.safe_load(f) or {}
+    return {}
 
 @app.command()
-def scan(target: str = typer.Argument(...), mode: str = typer.Option("stealth", "--mode", "-m"), resume: bool = typer.Option(False, "--resume", "-r")):
-    console.print(Align.center(BANNER))
-    console.print(Panel.fit(f"[bold cyan]TARGET ACQUIRED:[/bold cyan] {target}\n[bold cyan]PROTOCOL:[/bold cyan] {mode.upper()}", border_style="cyan"))
+def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False, "--resume")):
+    console.print("\n[bold]SYSTEM INTEGRITY EVALUATOR // v2.0[/bold]\n")
+    config = load_config()
+    session = TargetSession(target, mode)
 
-    # Initialize SQLite Core Engine
-    # (SQLite naturally handles resuming without duplicating data thanks to 'UNIQUE' constraints)
-    session = TargetSession(target)
-    
-    # In-memory phase tracker for the current run
-    completed_phases = []
+    def safe_run(name, func):
+        try:
+            func(session, config)
+        except Exception as e:
+            log.error(f"{name} failed: {e}")
 
     try:
-        phases = [
-            ("recon", run_recon), 
-            ("horizontal", run_horizontal), 
-            ("dns_forensics", run_dns_forensics), 
-            ("ports", run_ports), 
-            ("permutations", run_permutations),
-            ("probing", run_probing), 
-            ("spider", run_spider), 
-            ("takeover", run_takeover), 
-            ("cloud", run_cloud),
-            ("email", run_email), 
-            ("github", run_github), 
-            ("cortex", run_cortex), 
-            ("nuclei", run_nuclei),
-            ("intelligence", run_intelligence),            
-            ("oast", run_oast), 
-            ("chaos", run_chaos)
-        ]
-
-        for name, func in phases:
-            if name not in completed_phases or name == "intelligence":
-                func(session, CONFIG)
-                completed_phases.append(name)
-
-        run_report(session, CONFIG)
-        console.print(f"[bold green]>> EVALUATION COMPLETE.[/bold green]")
-
-        # --- GHOST PROTOCOL ---
-        if Confirm.ask("[bold yellow]Do you want to SAVE the mission data locally?[/bold yellow]"):
-            console.print(f"[green]✔ Data preserved in output/{target} and data/sessions/{target.replace('.', '_')}.db[/green]")
-        else:
-            console.print(f"[red]! PURGING MISSION DATA...[/red]")
-            output_dir = f"output/{target}"
+        # THE DIRECTED ACYCLIC GRAPH (DAG)
+        if not resume:
+            safe_run("RECON", run_recon)
+            safe_run("HORIZONTAL", run_horizontal)
+            safe_run("DNS FORENSICS", run_dns_forensics)
+            safe_run("PORT SCAN", run_ports)
+            safe_run("PERMUTATIONS", run_permutations)
+            safe_run("PROBING", run_probing)
+            safe_run("SPIDER", run_spider)
+            safe_run("TAKEOVER", run_takeover)
+            safe_run("CLOUD", run_cloud)
+            safe_run("EMAIL", run_email)
+            safe_run("GITHUB", run_github)
+            safe_run("CORTEX", run_cortex)
             
-            if os.path.exists(output_dir):
-                shutil.rmtree(output_dir)
-            
-            # Fire the SQLite Purge command
-            session.purge()
-            console.print(f"[red]✔ TRACE DELETED.[/red]")
+        safe_run("NUCLEI", run_nuclei)
+        safe_run("FUZZER", run_fuzzer)
+        safe_run("INTELLIGENCE", run_intelligence)
 
     except KeyboardInterrupt:
-        sys.exit(1)
-    except Exception as e:
-        console.print(f"[red]SYSTEM FAILURE: {e}[/red]")
-        sys.exit(1)
+        # THE GRACEFUL SHUTDOWN TRAP
+        console.print("\n[bold red]⚠️ SIGINT RECEIVED: INITIATING GRACEFUL SHUTDOWN...[/bold red]")
+        console.print("INFO     Flushing Write-Ahead Logs and securing State Graph...")
+        if hasattr(session, 'close'):
+            session.close()
+        console.print("[green]  + State Graph secured. Terminating pipeline.[/green]")
+        sys.exit(130) # Standard exit code for SIGINT
+        
+    finally:
+        # Ensure cleanup always happens, even on standard exit
+        if hasattr(session, 'close'):
+            session.close()
 
 if __name__ == "__main__":
     app()

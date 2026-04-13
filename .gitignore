@@ -1,29 +1,30 @@
-# Environments
+# 1. Credentials & Environments
 venv/
 env/
 .env
+config/settings.yaml
+config/proxies.txt
+!config/templates/
 
-# Python Caches
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Kestrel Data & State
+# 2. Kestrel Intelligence Data (NEVER PUSH)
 data/sessions/
 data/js/
 *.db
 *.db-shm
 *.db-wal
+
+# 3. OAST Daemon Artifacts
 .oast_logs.json
 .oast_payload.txt
-resume.cfg
 
-# IDEs & OS
+# 4. Python Caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# 5. OS & IDE
 .vscode/
 .idea/
 .DS_Store
-
-# Configs (Keep the template, ignore the real one containing your keys)
-config/settings.yaml
-!config/templates/settings.yaml

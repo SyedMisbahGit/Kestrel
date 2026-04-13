@@ -141,7 +141,14 @@ async def deploy_fuzzer(session_state, api_targets):
 def run_fuzzer(session, config):
     console.print("\n[bold blue]━━ PHASE 5: NATIVE API FUZZER (SEMANTIC ROUTING & OAST) ━━[/bold blue]")
     urls = [u['url'] if isinstance(u, dict) else u for u in session.get_crawled_urls()]
-    api_targets = [t for t in urls if '?' in t and not re.search(r'\.(css|js|png|jpg|svg|woff2|ico)(\?.*)?$', t, re.I)]
+        api_targets = set()
+    for t in urls:
+        try:
+            if '?' in t and not re.search(r'\.(css|js|png|jpg|svg|woff2|ico)(\?.*)?$', t, re.I):
+                urlparse(t) # Trigger ValueError if mathematically malformed
+                api_targets.add(t)
+        except ValueError: pass
+    api_targets = list(api_targets)
     
     if not api_targets:
         console.print("WARNING  No parameterized endpoints found in State Graph. Skipping Fuzzer.")

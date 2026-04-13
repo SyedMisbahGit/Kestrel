@@ -10,6 +10,7 @@ from rich.console import Console
 # Core
 from core.state import TargetSession
 from core.intelligence import run_intelligence
+from core.mesh import mesh
 
 # Modules
 from modules.osint import run_osint
@@ -24,6 +25,9 @@ from modules.nuclei_scan import run_nuclei
 from modules.fuzzer import run_fuzzer
 from modules.oast import run_oast
 from modules.notifier import run_notifier
+from modules.cloud import run_cloud
+from modules.umbrella import run_umbrella
+from modules.unmask import run_unmask
 
 app = typer.Typer()
 console = Console()
@@ -37,10 +41,34 @@ def load_config():
     return {}
 
 @app.command()
-def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False, "--resume")):
+def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False, "--resume"), cookie: str = typer.Option(None, "--cookie"), header: str = typer.Option(None, "--header")):
+    KESTREL_LOGO = """[bold cyan]
+      _______  _______  _______  _______  ______   _______  _       
+     | \\    /|(  ____ \\(  ____ \\__   __/(  __  \\ (  ____ \\( \\      
+     |  \\  / /| (    \\/| (    \\/   ) (   | (  \\  )| (    \\/| (      
+     |  (_/ / | (__    | (_____    | |   | |   ) || (__    | |      
+     |   _ (  |  __)   (_____  )   | |   | |   | ||  __)   | |      
+     |  ( \\ \\ | (            ) |   | |   | |   ) || (      | |      
+     |  /  \\ \\| (____/\\/\\____) |   | |   | (__/  )| (____/\\| (____/\\
+     |_/    \\/(_______/\\_______)   )_(   (______/ (_______/(_______/
+    [/bold cyan][bold white]
+                      > THE TARGETED EASM ARCHITECTURE // v3.0
+                      > ENGAGE PASSIVELY. STRIKE DETERMINISTICALLY.
+    [/bold white]"""
+    console.print(KESTREL_LOGO)
     console.print("\n[bold]SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
     config = load_config()
     session = TargetSession(target, mode)
+    
+    # Auth-Injection Matrix
+    session.auth_cookies = dict(item.split("=", 1) for item in cookie.split("; ") if "=" in item) if cookie else {}
+    session.auth_headers = {header.split(":", 1)[0].strip(): header.split(":", 1)[1].strip()} if header and ":" in header else {}
+    if session.auth_cookies or session.auth_headers:
+        console.print("[bold magenta]  [*] STATEFUL AUTHENTICATION MATRIX ARMED.[/bold magenta]")
+
+    # --- ARM THE PROXY MESH ---
+    console.print("INFO     Initializing Tactical Routing Protocol...")
+    mesh.arm_mesh("config/proxies.txt")
 
     def safe_run(name, func):
         try:
@@ -98,10 +126,12 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             # Stage 1: Recon & Expansion
             safe_run("OSINT", run_osint)           # Phase 1: Native SSL + API Circuit Breaker
             safe_run("HORIZONTAL", run_horizontal) # Phase 1.1: Origin / CDN Shield
+            safe_run("UMBRELLA", run_umbrella)     # Phase 1.2: Corporate SSL Pivot
             safe_run("VERTICAL", run_vertical)     # Phase 1.3: Async DNS Bruteforce
-            safe_run("PORT SCAN", run_ports)       # Phase 1.5: Shielded Port Scan
+            safe_run("CLOUD", run_cloud)           # Phase 1.4: Cloud Storage Sniper
+            safe_run("PORTS", run_ports)           # Phase 1.5: Shielded Port Scan
+            safe_run("UNMASK", run_unmask)         # Phase 1.6: Origin Unmasking via Shodan
             safe_run("PERMUTATIONS", run_permutations) # Phase 1.8: Subdomain Mutations
-            
             # Stage 2: Application Mapping
             safe_run("PROBING", run_probing)       # Phase 2: Favicon/Tech Profiling
             safe_run("SPIDER", run_spider)         # Phase 2.2: Skeleton Hash Spider

@@ -1,72 +1,96 @@
 import asyncio
+import aiohttp
 import socket
 import logging
+import ipaddress
 from rich.console import Console
 
 console = Console()
 log = logging.getLogger("rich")
 
-# --- THE CDN SHIELD ---
-CDN_DOMAINS = ["cloudflare", "akamai", "fastly", "cloudfront", "incapdns", "sucuri", "edgecast"]
+TOP_PORTS = [80, 443, 8080, 8443, 3000, 5000, 8000, 9000, 22, 21, 3306, 5432, 27017, 6379]
 
-# Top 25 most common exposed infrastructure ports
-TOP_PORTS = [21, 22, 23, 25, 53, 80, 110, 111, 135, 139, 143, 443, 445, 993, 995, 1723, 3306, 3389, 5900, 8080, 8443, 8888, 9000, 9200, 27017]
+async def fetch_cdn_cidrs():
+    """Fetches official CDN edge-node CIDR blocks dynamically."""
+    cidrs = []
+    urls = [
+        "https://www.cloudflare.com/ips-v4/",
+        "https://api.fastly.com/public-ip-list"
+    ]
+    try:
+        async with aiohttp.ClientSession() as client:
+            # Fetch Cloudflare
+            async with client.get(urls[0], timeout=5) as r:
+                if r.status == 200:
+                    text = await r.text()
+                    cidrs.extend([line.strip() for line in text.splitlines() if line.strip()])
+            
+            # Fetch Fastly
+            async with client.get(urls[1], timeout=5) as r:
+                if r.status == 200:
+                    data = await r.json()
+                    cidrs.extend(data.get("addresses", []))
+    except Exception:
+        pass
+    return [ipaddress.ip_network(cidr, strict=False) for cidr in cidrs]
 
-async def check_port(host, port, sem):
+def is_cdn_ip(ip_str, cdn_networks):
+    """Mathematically verifies if an IP belongs to a known CDN edge network."""
+    try:
+        ip_obj = ipaddress.ip_address(ip_str)
+        return any(ip_obj in net for net in cdn_networks)
+    except ValueError:
+        return False
+
+async def check_port(sem, target, port, session_state):
     async with sem:
         try:
-            fut = asyncio.open_connection(host, port)
-            reader, writer = await asyncio.wait_for(fut, timeout=1.0)
+            conn = asyncio.open_connection(target, port)
+            reader, writer = await asyncio.wait_for(conn, timeout=1.5)
+            console.print(f"[green]  + [OPEN] {target}:{port}[/green]")
             writer.close()
             await writer.wait_closed()
-            return port
-        except Exception:
-            return None
-
-async def scan_host(host, sem_global):
-    async with sem_global:
-        is_cdn = False
-        try:
-            # Resolve CNAME to detect CDN routing
-            _, aliases, _ = socket.gethostbyname_ex(host)
-            for alias in aliases:
-                if any(cdn in alias.lower() for cdn in CDN_DOMAINS):
-                    is_cdn = True
-                    break
-        except Exception:
+            # In a real setup, you'd save this to your state graph
+        except (asyncio.TimeoutError, ConnectionRefusedError, OSError):
             pass
 
-        # If CDN is detected, deep port scanning is useless. Stick to web ports.
-        target_ports = [80, 443] if is_cdn else TOP_PORTS
-        
-        sem_local = asyncio.Semaphore(20)
-        tasks = [check_port(host, p, sem_local) for p in target_ports]
-        results = await asyncio.gather(*tasks)
-        
-        open_ports = [p for p in results if p]
-        return is_cdn, len(open_ports)
-
-async def deploy_port_scanner(targets):
-    sem_global = asyncio.Semaphore(50)
-    tasks = [scan_host(target, sem_global) for target in targets]
-    results = await asyncio.gather(*tasks)
+async def deploy_port_scan(session_state, targets):
+    console.print("INFO     Fetching dynamic edge-node CIDR blocks (Cloudflare, Fastly)...")
+    cdn_networks = await fetch_cdn_cidrs()
     
-    cdn_count = sum(1 for r in results if r[0])
-    total_ports = sum(r[1] for r in results)
-    return cdn_count, total_ports
+    sem = asyncio.Semaphore(200) # Control open file descriptors
+    tasks = []
+    
+    scannable_targets = []
+    for t in targets:
+        # Resolve to IP to check against CDN filter
+        try:
+            ip = socket.gethostbyname(t)
+            if is_cdn_ip(ip, cdn_networks):
+                console.print(f"[dim]  * {t} ({ip}) is a CDN Edge Node. Bypassing port scan (Assuming 80/443).[/dim]")
+                continue
+            scannable_targets.append(t)
+        except socket.gaierror:
+            pass
+
+    if not scannable_targets:
+        console.print("[yellow]WARNING  All active hosts are shielded by CDNs. Zero viable targets for deep port scanning.[/yellow]")
+        return
+
+    console.print(f"INFO     Executing Deep Port Scan on {len(scannable_targets)} Origin IPs...")
+    for target in scannable_targets:
+        for port in TOP_PORTS:
+            tasks.append(check_port(sem, target, port, session_state))
+            
+    await asyncio.gather(*tasks)
 
 def run_ports(session, config):
-    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (CDN SHIELD ACTIVE) ━━[/bold blue]")
-    targets = session.get_subdomains()
+    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (EDGE-NODE DROP FILTER ACTIVE) ━━[/bold blue]")
+    targets = [sub for sub in session.get_subdomains()]
     
     if not targets:
         console.print("WARNING  No targets available for port scanning.")
         return
         
-    console.print(f"  + Analyzing {len(targets)} hosts for CDN routing...")
-    
-    cdn_count, total_ports = asyncio.run(deploy_port_scanner(targets))
-    
-    if cdn_count > 0:
-        console.print(f"  [yellow]! Bypassing deep scan for {cdn_count} CDN-fronted hosts.[/yellow]")
-    console.print(f"  + Port Scan Complete. Found {total_ports} open ports across infrastructure.")
+    asyncio.run(deploy_port_scan(session, targets))
+    console.print("  + Port Scan Complete. CDN Traps successfully bypassed.")

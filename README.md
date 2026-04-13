@@ -1,48 +1,42 @@
-# SENTINEL-X (Codename: Arbiter v2.0)
+# KESTREL (The Targeted EASM Architecture)
 
-> **"A Zero-Dependency, Native Python Intelligence Apparatus for Modern Attack Surface Management."**
+> **"Hover passively. Calculate deterministically. Strike with absolute precision."**
 
-Sentinel-X is not a scanner; it is a stateful decision engine. Designed to bypass the limitations of third-party wrappers, regular expressions, and blind fuzzing, Sentinel-X is a 100% self-contained Python architecture. 
+Kestrel (formerly Sentinel-X) is not a vulnerability scanner; it is a deterministic, stateful attack surface management (EASM) architecture. Designed to bypass the limitations of third-party wrappers, regular expressions, and WAF tarpits, Kestrel is a 100% self-contained Python intelligence engine.
 
-It does not rely on Go binaries or shell sub-processes. Instead, it utilizes an embedded SQLite Write-Ahead Logging (WAL) core, Abstract Syntax Tree (AST) compilation, and native asynchronous network pools to hunt for vulnerabilities on modern Web 3.0 infrastructure.
-
----
-
-## 🧠 The Masterclass Architecture
-
-* **The Stateful Graph Engine:** Replaces flat JSON dumps with a relational SQLite graph. Utilizing Deterministic MD5 Hashing and `UPSERT` diffing, the Delta Engine natively tracks temporal changes across the attack surface, only alerting on modified or new infrastructure.
-* **Zero-Dependency Native I/O:** Eradicates supply chain risks. No `httpx`, no `subfinder`, no `cloud_enum`. Powered by `aiohttp` and `asyncio`, Sentinel-X handles its own concurrency, network pooling, and heuristic tech-fingerprinting natively in memory.
-* **Asynchronous Backpressure & OOM Protection:** Engineered with strict `asyncio.Semaphore` governors and chunked event loops. It can process 100,000+ assets simultaneously without causing Out-of-Memory (OOM) failures or OS socket exhaustion.
-* **Graceful SIGINT Interception:** The orchestrator intercepts `Ctrl+C` commands, safely draining active TCP connections and flushing the WAL cache to prevent database corruption during manual overrides.
+It abandons probabilistic guessing. Instead, it utilizes an embedded SQLite Write-Ahead Logging (WAL) core, native Local OAST daemons, Abstract Syntax Tree (AST) reverse-engineering, and Double-Blind temporal verification to extract mathematical proof of exploitation on modern Web 3.0 infrastructure.
 
 ---
 
-## ⚔️ The Kill-Chain Pipeline
+## 🧠 Core Engineering Principles
 
-### Phase 1: Native OSINT & Intelligence Gathering
-* **The Omniscient Archivist:** Concurrent, in-memory scrapers querying `crt.sh`, `HackerTarget`, `AlienVault`, and `URLScan.io` via pure async Python—eliminating the need for third-party reconnaissance binaries.
-* **Horizontal & Infrastructure Forensics:** Maps ASN/CIDR blocks, hunts for dangling NS pointers (Subdomain Takeovers), and extracts exposed verification tokens.
+* **Deterministic Exploitation:** Eliminates WAF hallucinations. If Cloudflare dynamically delays a request, Kestrel's Double-Blind Cache-Buster mathematically compares active payloads (`SLEEP(6)`) against control payloads (`SLEEP(0)`) to prove native backend execution.
+* **The Stateful Graph Engine:** Replaces flat JSON dumps with a relational SQLite graph. The Delta Engine natively tracks temporal changes across the attack surface, dropping duplicate hosts and mapping the "Blast Radius" of critical bugs across shared root cookies.
+* **Zero-Dependency Reconnaissance:** Eradicates supply-chain bottlenecks. No `subfinder` or `httpx`. Powered by `aiohttp`, `aiodns`, and native C-Ares, Kestrel directly carves SSL certificates, calculates BGP ASN origins, and executes 1,000+ concurrent UDP blasts entirely in memory.
 
-### Phase 2: Active Profiling & Surface Mapping
-* **Native Probing & The Stealth Governor:** A custom HTTP engine utilizing exponential backoff and rate-limiting. Employs "Wappalyzer Lite" logic to heuristically fingerprint Nginx, React, AWS, and Next.js entirely in memory.
-* **The AST Spider:** Maps standard HTML links while aggressively extracting hidden Webpack and React JavaScript bundles to feed the Neural Cortex.
-* **Graph-Based Cloud Recon:** Instantly cross-references the mapped SQLite graph to identify exposed AWS, Azure, and GCP infrastructure without sending a single noisy brute-force request.
+---
 
-### Phase 3: The AST Neural Cortex (Offensive SAST)
-* **Abstract Syntax Tree Extraction:** Abandons traditional Regex. The Cortex downloads JS bundles and compiles them into logical execution trees in memory. By mathematically resolving variable concatenations and performing Static Taint Analysis, it extracts the "Shadow APIs" that developers forgot they exposed.
+## ⚔️ The Kestrel Kill-Chain
 
-### Phase 4: The Weaponized Nuclei Pipeline
-* **Direct-to-RAM Execution:** The only remaining external dependency, retained strictly for its crowdsourced CVE templates. Feeds both root hosts and AST-extracted Shadow APIs directly into Nuclei's standard input stream. Unleashes deep-scan templates (`-tags exposure,vulnerabilities,misconfiguration`) while catching silent binary crashes.
+### Stage 1: Intelligence & Expansion
+* **Phase 1: Hybrid Intelligence Engine:** Abandons brittle APIs. Uses a highly concurrent Circuit Breaker array to query OSINT, while simultaneously connecting to the target to rip Subject Alternative Names (SANs) directly from live SSL cryptography.
+* **Phase 1.1: CDN Shield & Origin Unmasking:** Resolves apex domains, bypassing BGP/CIDR horizontal expansion if the target is shielded by Cloudflare or Fastly, saving hours of wasted port scanning.
+* **Phase 1.3: Vertical DNS Bruteforcing:** Unleashes a high-velocity UDP blast using native `c-ares`. Automatically detects wildcard configurations (`*.target.com`) and establishes a cryptographic "Wildcard Sinkhole" to drop false positives before mapping undocumented shadow IT.
 
-### Phase 5: The Native API Fuzzer (Polyglot & Chronos)
-* **Semantic Swagger Engine:** Actively hunts for exposed `openapi.json` and `swagger.json` blueprints, dynamically expanding the attack surface by parsing undocumented backend routes.
-* **Polyglot Payload Injection:** Recognizes that modern Web 3.0 APIs reject standard `GET` attacks. Automatically crafts structural JSON bodies (`{"email": "admin'--"}`) to inject SQLi, LFI, and XSS natively via `POST`.
-* **Chronos (Temporal Blind Fuzzing):** Bypasses modern ORMs (like Prisma/Sequelize) that swallow database errors. Injects temporal payloads (`pg_sleep(6)`) and uses high-precision perf-counters to measure network time dilation, catching invisible blind vulnerabilities.
+### Stage 2: Application Mapping & Resurrection
+* **Phase 2: Favicon Fingerprinting:** Bypasses header-stripping WAFs. Fetches the raw `favicon.ico`, encodes it, and calculates its MurmurHash3 value to mathematically profile the exact backend framework (e.g., Spring Boot, Next.js).
+* **Phase 2.2: The Ghost Archive & Skeleton Spider:** Queries the internet's memory (Wayback Machine/AlienVault) to resurrect unlinked, historical "Zombie" APIs. The live spider then maps the current perimeter, utilizing a structural "Skeleton Hash" depth-limiter to dynamically identify and drop infinite crawler traps (like calendars).
+* **Phase 3: Cortex & Project Ghost:** Upgrades from regex to compiler-level SAST. Hunts for leaked `.map` files to completely reconstruct minified Webpack/React repositories in memory. Employs an Esprima AST (Abstract Syntax Tree) parser to execute Taint Tracking, concatenating hidden variables to reveal undocumented Shadow APIs.
 
-### Phase 6: The Heuristic Brain (HUD)
-* **Threat Prioritization Matrix:** Eliminates alert fatigue. The decision engine analyzes HTTP status codes, tech stacks, and URL context to automatically route findings. It knows an exposed Pre-Production API is a **P1 Critical**, while a dead 404 Webmail server is **P4 Noise**.
+### Stage 3: Surgical Exploitation
+* **Phase 4: Targeted Nuclei Pipeline:** Stops blind spraying. Reads the exact Tech-Stack ontology from the SQLite Graph (Phase 2) and restricts Nuclei to firing *only* mathematically relevant CVEs (e.g., deploying only Nginx/PHP payloads against a profiled server).
+* **Phase 5: Semantic Parameter Routing:** Upgrades the fuzzer from a sledgehammer to a scalpel. Semantically classifies parameters (`?user=` vs `?url=`) and routes the exact vulnerability class needed, injecting native cache-busters to bypass CDN edge rules.
+* **Phase 8: The Local OAST Engine:** Total WAF evasion. Spawns a background `interactsh` daemon locally, generates unique RSA keypairs, injects them via the Fuzzer, and reads the local JSON logs to cryptographically prove Blind SSRF and Log4j execution without relying on intercepted third-party APIs.
+
+### Stage 4: Contextual Delivery
+* **Phase 7 & 6: Blast Radius & Delta Comm:** Evaluates if a compromised staging server shares a wildcard root domain with a High-Value Target (HVT), elevating the severity automatically before dispatching the clean delta report directly to the Operator's Telegram HUD.
 
 ---
 
 ## 🛡️ Operational Directives
-Sentinel-X is an automated security evaluation tool. It is designed strictly for authorized penetration testing, bug bounty hunting on sanctioned programs, and academic security research. The architect assumes no liability for the misuse of this framework.
+Kestrel is an automated, enterprise-grade security evaluation framework. It is designed strictly for authorized penetration testing, bug bounty hunting on sanctioned programs, and advanced academic security research. The architect assumes no liability for the deployment or misuse of this framework.

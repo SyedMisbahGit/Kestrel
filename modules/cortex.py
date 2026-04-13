@@ -1,4 +1,3 @@
-from core.ui import print_briefing
 import asyncio
 import aiohttp
 import logging
@@ -8,6 +7,7 @@ import math
 import esprima
 from urllib.parse import urlparse
 from rich.console import Console
+from core.ui import print_briefing
 
 console = Console()
 log = logging.getLogger("rich")
@@ -41,9 +41,11 @@ class TaintTracker:
         if node.type == "Literal" and isinstance(node.value, str):
             val = node.value
             if val.startswith(('/', 'http', 'api/')) and len(val) > 4: self.endpoints.add(val)
-            if 16 <= len(val) <= 128 and " " not in val and not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val) and not val.startswith(('http', 'data:image')):
-                entropy = calculate_shannon_entropy(val)
-                if entropy > 4.4: self.entropy_secrets.add((val, round(entropy, 2)))
+            if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(('/', 'http')):
+                if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
+                    if not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
+                        entropy = calculate_shannon_entropy(val)
+                        if entropy > 4.5: self.entropy_secrets.add((val, round(entropy, 2)))
         for key, val in vars(node).items():
             if isinstance(val, list):
                 for item in val: self.walk(item)
@@ -57,7 +59,6 @@ class TaintTracker:
 
 async def extract_target(client, js_url, session_state):
     vulnerabilities = []
-    # 1. Source Map Hunt
     try:
         async with client.get(f"{js_url}.map", timeout=8, ssl=False) as response:
             if response.status == 200:
@@ -73,7 +74,6 @@ async def extract_target(client, js_url, session_state):
                                 vulnerabilities.append({"type": "VULN", "name": f"Source Map Leak: {sec_name}", "matched-at": js_url, "info": {"severity": "CRITICAL"}})
     except Exception: pass
     
-    # 2. AST Extraction & Entropy
     try:
         async with client.get(js_url, timeout=8, ssl=False) as response:
             if response.status == 200:
@@ -106,13 +106,21 @@ def run_cortex(session, config):
         fallback="If Webpack is secure, Kestrel will calculate Shannon Entropy (H > 4.4) on all string literals to mathematically detect proprietary, non-regex secrets.",
         command="curl -s https://target.com/main.js.map | jq '.sources'"
     )
-        raw_urls = [x['url'] if isinstance(x, dict) else x for x in session.get_crawled_urls()]
+    
+    raw_urls = [u['url'] if isinstance(u, dict) else u for u in session.get_crawled_urls()]
     js_targets = set()
     for u in raw_urls:
         try:
-            if urlparse(u).path.endswith('.js'): js_targets.add(u)
-        except ValueError: pass
+            if urlparse(u).path.endswith('.js'):
+                js_targets.add(u)
+        except ValueError:
+            pass
+            
     js_targets = list(js_targets)
-    if not js_targets: return
+    if not js_targets:
+        console.print("WARNING  No JavaScript bundles found. Skipping Cortex.")
+        return
+        
     console.print(f"INFO     Deploying Neural Extraction & Entropy Math against {len(js_targets)} bundles...")
     asyncio.run(deploy_cortex(session, js_targets))
+    console.print("  + AST Compilation Complete. Shadow APIs and Proprietary Tokens injected into state graph.")

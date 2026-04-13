@@ -1,35 +1,56 @@
-# Kestrel Architecture Documentation
+# KESTREL
+> **"Engage passively. Calculate deterministically. Strike with absolute precision."**
 
-## Overview
-Kestrel is a high-performance web server designed for hosting ASP.NET Core applications. It supports HTTP/1.x and HTTP/2, and it is built on top of the libuv library.
+```text
+      _______  _______  _______  _______  ______   _______  _       
+     | \    /|(  ____ \(  ____ \__   __/(  __  \ (  ____ \( \      
+     |  \  / /| (    \/| (    \/   ) (   | (  \  )| (    \/| (      
+     |  (_/ / | (__    | (_____    | |   | |   ) || (__    | |      
+     |   _ (  |  __)   (_____  )   | |   | |   | ||  __)   | |      
+     |  ( \ \ | (            ) |   | |   | |   ) || (      | |      
+     |  /  \ \| (____/\/\____) |   | |   | (__/  )| (____/\| (____/\
+     |_/    \/(_______/\_______)   )_(   (______/ (_______/(_______/
+                      
+           > THE TARGETED EASM ARCHITECTURE // v3.0
+```
+Kestrel (formerly Sentinel-X) is a deterministic, stateful Enterprise Attack Surface Management (EASM) architecture. Designed to bypass the limitations of third-party wrappers, regular expressions, and WAF tarpits, Kestrel is a 100% self-contained Python intelligence engine.
 
-## Architecture Components
+It abandons probabilistic guessing. Instead, it utilizes an embedded SQLite Write-Ahead Logging (WAL) core, native Local OAST daemons, Abstract Syntax Tree (AST) reverse-engineering, Distributed Proxy Meshing, and Double-Blind temporal verification to extract mathematical proof of exploitation on modern Web 3.0 infrastructure.
 
-### 1. Application Framework
-- **ASP.NET Core:** Built on the ASP.NET Core framework which provides a powerful platform for building web applications.
+---
+🧠 Core Engineering Principles
 
-### 2. HTTP Protocol Implementation
-- **HTTP/1.x and HTTP/2:** Supports both protocols ensuring compatibility with modern web browsers.
+    Deterministic Exploitation: Eliminates WAF hallucinations. If Cloudflare dynamically delays a request, Kestrel's Double-Blind Cache-Buster mathematically compares active payloads against control payloads to prove native backend execution.
 
-### 3. Connection Management
-- **Connections:** Manages incoming connections efficiently using asynchronous I/O operations.
+    Compiler-Level Extraction: Upgrades from regex to Esprima AST. Kestrel downloads JS bundles, bypasses minification via .map leaks, compiles the code into logical execution trees, and calculates Shannon Entropy to extract undocumented API routes and proprietary JWTs.
 
-### 4. Handlers
-- **Request Handlers:** Processes incoming requests and sends responses back to clients.
+    The Phantom DOM: Bypasses heavily obfuscated SPAs (React/Vue/Angular). Spawns a local headless Chromium interceptor, injects stateful authentication cookies, and silently maps background XHR traffic as the framework hydrates.
 
-### 5. Middleware
-- **Middleware Pipeline:** Defines a sequence of operations to be performed on a request and response.
+    Distributed Proxy Meshing: Absolute immunity to volumetric IP bans. Vends rotating residential IPs asynchronously to the spider and fuzzer, decoupling attack velocity from network identity.
 
-### 6. Logging
-- **Logging Mechanism:** Implements a logging framework to track errors, warnings, and informative messages.
+⚔️ The Kill-Chain
+Stage 1: Strategic Reconnaissance
 
-## Detailed Flowchart Diagram
-![Kestrel Architecture Flowchart](path/to/flowchart.png)
+    BGP Routing & Origin Unmasking: Resolves apex domains via Team Cymru BGP to map ASNs. Hashes primary visual assets (Favicons) and pivots across the IPv4 space to expose naked origin servers hiding behind Cloudflare.
 
-## Operational Directives
-- **Start Server:** Initialize Kestrel server with the required configurations.
-- **Handle Request:** Listen for incoming HTTP requests and direct them to the correct handler.
-- **Process Response:** Generate responses based on the request processing flow.
+    The Corporate Umbrella: Extracts the X.509 Cryptographic Identity from the target and mathematically pivots across global Certificate Transparency (CT) logs to find cross-brand corporate acquisitions.
 
-## Conclusion
-Kestrel stands out as a robust option for hosting ASP.NET Core applications, offering excellent performance and reliability.
+    The Cloud Sniper: Generates thousands of environment-specific mutations (e.g., target-dev-backup) and interrogates AWS S3, GCP Storage, and Azure Blobs natively to find unauthenticated corporate hard drives.
+
+Stage 2: Deep Perimeter Mapping
+
+    Edge-Node Drop Filters: Downloads live CIDR blocks from Cloudflare/Fastly. If an IP matches a CDN, Kestrel mathematically drops the port scan, preventing WAF tarpitting and reducing network noise by 95%.
+
+    The Ghost Archive: Queries the internet's memory (Wayback Machine/AlienVault) to resurrect unlinked, historical "Zombie" APIs before the live Spider even touches the network.
+
+Stage 3: Exploitation & Context
+
+    Targeted Ontology: Reads the exact Tech-Stack ontology from the SQLite Graph and restricts Nuclei to firing only mathematically relevant CVEs.
+
+    Semantic Routing: Semantically classifies parameters (?user= vs ?url=) and routes the exact vulnerability class needed, injecting native cache-busters to bypass edge caching.
+
+    Local OAST Engine: Total WAF evasion. Spawns a background interactsh daemon locally, generates unique RSA keypairs, and reads the local JSON logs to cryptographically prove Blind SSRF and Log4j execution.
+
+🛡️ Operational Directives
+
+Kestrel is an automated, enterprise-grade security evaluation framework. It is designed strictly for authorized penetration testing, bug bounty hunting on sanctioned programs, and advanced academic security research. The architect assumes no liability for the deployment or misuse of this framework.

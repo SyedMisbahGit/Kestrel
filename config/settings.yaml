@@ -54,3 +54,7 @@ tools:
   cloud_enum:
     path: "/home/syed/cloud_enum/cloud_enum.py"
 github_token: "YOUR_GITHUB_TOKEN"
+
+telegram:
+  token: "8536970715:AAETovhKWz7Nov4x7cgXW9OWPCjGvuwLUuc"
+  chat_id: "1250556896"

@@ -26,7 +26,6 @@ DETECTIONS = {
     "LFI": re.compile(r'(root:x:0:0:|\[extensions\]|boot loader)', re.I)
 }
 
-# --- THE SEMANTIC ROUTER ---
 SEMANTIC_MAP = {
     "SQLi": ["id", "user", "uid", "cat", "sort", "page", "num"],
     "XSS": ["q", "search", "query", "name", "keyword", "msg", "term"],
@@ -37,7 +36,7 @@ SEMANTIC_MAP = {
 def classify_param(param):
     p = param.lower()
     targets = [vuln for vuln, keywords in SEMANTIC_MAP.items() if any(k in p for k in keywords)]
-    return targets if targets else ["SQLi", "XSS"] # Default safe heuristics if unknown
+    return targets if targets else ["SQLi", "XSS"]
 
 async def measure_baseline(client, url):
     try:
@@ -52,27 +51,24 @@ async def fuzz_endpoint(client, url, session_state):
     query_params = parse_qs(parsed.query)
     if not query_params: return []
 
-    # Setup OAST identity
     url_hash = hashlib.md5(url.encode()).hexdigest()[:8]
-    oast_domain = f"{url_hash}.{session_state.run_id.replace('-', '')[:8]}.requestrepo.com"
-    oast_headers = {
-        "User-Agent": f"Mozilla/5.0 ({oast_domain})",
-        "X-Forwarded-For": oast_domain,
-        "Referer": f"http://{oast_domain}"
-    }
+    try:
+        with open(".oast_payload.txt", "r") as f:
+            base_oast = f.read().strip()
+        oast_domain = f"{url_hash}.{base_oast}"
+    except:
+        oast_domain = f"{url_hash}.oast.fun"
+    oast_headers = {"User-Agent": f"Mozilla/5.0 ({oast_domain})", "X-Forwarded-For": oast_domain, "Referer": f"http://{oast_domain}"}
 
-    # 1. Blind Header SSRF Injection (Always runs)
     try:
         async with client.get(url, headers=oast_headers, timeout=5, ssl=False) as r: pass
     except Exception: pass
 
     baseline = await measure_baseline(client, url)
 
-    # 2. Semantic Parameter Routing
     for param, values in query_params.items():
         target_vulns = classify_param(param)
 
-        # Route 1: Parameter-based SSRF -> Inject OAST Token
         if "SSRF" in target_vulns:
             fuzzed_params = query_params.copy()
             fuzzed_params[param] = [f"http://{oast_domain}"]
@@ -81,7 +77,6 @@ async def fuzz_endpoint(client, url, session_state):
                 async with client.get(target_url, timeout=5, ssl=False) as r: pass
             except Exception: pass
 
-        # Route 2: Standard Reflection / Error (SQLi, XSS, LFI)
         for vuln_type in [v for v in target_vulns if v in PAYLOADS]:
             for payload in PAYLOADS[vuln_type]:
                 fuzzed_params = query_params.copy()
@@ -95,12 +90,16 @@ async def fuzz_endpoint(client, url, session_state):
                             break
                 except Exception: pass
 
-        # Route 3: Chronos Double-Blind (Only if SQLi is semantically relevant)
         if "SQLi" in target_vulns and baseline <= 4.0:
             for vuln_type, matrix in CHRONOS_MATRIX.items():
+                
+                # --- NATIVE CACHE-BUSTER INJECTION ---
+                cb_hash = hashlib.md5(str(time.time()).encode()).hexdigest()[:6]
+                
                 fuzzed_params = query_params.copy()
-
                 fuzzed_params[param] = [matrix["active"]]
+                fuzzed_params["cb"] = [cb_hash] # Injects ?cb=123456 natively
+                
                 active_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
                 active_delay = 0
                 try:
@@ -112,6 +111,9 @@ async def fuzz_endpoint(client, url, session_state):
 
                 if active_delay >= 5.5:
                     fuzzed_params[param] = [matrix["control"]]
+                    cb_hash2 = hashlib.md5(str(time.time() + 1).encode()).hexdigest()[:6]
+                    fuzzed_params["cb"] = [cb_hash2]
+                    
                     control_url = urlunparse(parsed._replace(query=urlencode(fuzzed_params, doseq=True)))
                     control_delay = 0
                     try:
@@ -139,8 +141,6 @@ async def deploy_fuzzer(session_state, api_targets):
 def run_fuzzer(session, config):
     console.print("\n[bold blue]━━ PHASE 5: NATIVE API FUZZER (SEMANTIC ROUTING & OAST) ━━[/bold blue]")
     urls = [u['url'] if isinstance(u, dict) else u for u in session.get_crawled_urls()]
-    
-    # Filter strictly for URLs with query parameters, ignoring static assets
     api_targets = [t for t in urls if '?' in t and not re.search(r'\.(css|js|png|jpg|svg|woff2|ico)(\?.*)?$', t, re.I)]
     
     if not api_targets:

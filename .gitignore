@@ -1,17 +1,29 @@
-# Python
-__pycache__/
-*.py[cod]
+# Environments
 venv/
+env/
 .env
 
-# Scan Data
-data/sessions/*
-data/wordlists/*
-data/temp_*
-output/*
-!output/.gitkeep
-!data/.gitkeep
+# Python Caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Logs and Configs
-*.log
+# Kestrel Data & State
+data/sessions/
+data/js/
+*.db
+*.db-shm
+*.db-wal
+.oast_logs.json
+.oast_payload.txt
+resume.cfg
+
+# IDEs & OS
+.vscode/
+.idea/
 .DS_Store
+
+# Configs (Keep the template, ignore the real one containing your keys)
+config/settings.yaml
+!config/templates/settings.yaml

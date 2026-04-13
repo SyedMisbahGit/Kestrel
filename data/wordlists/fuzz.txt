@@ -1,0 +1,5 @@
+.env
+.git/HEAD
+api/v1/users
+server-status
+backup.zip

@@ -1,42 +1,94 @@
-# KESTREL (The Targeted EASM Architecture)
+# KESTREL 🦅 
+> **"Engage passively. Calculate deterministically. Strike with absolute precision."**
 
-> **"Hover passively. Calculate deterministically. Strike with absolute precision."**
+```text
+      _______  _______  _______  _______  ______   _______  _       
+     | \    /|(  ____ \(  ____ \__   __/(  __  \ (  ____ \( \      
+     |  \  / /| (    \/| (    \/   ) (   | (  \  )| (    \/| (      
+     |  (_/ / | (__    | (_____    | |   | |   ) || (__    | |      
+     |   _ (  |  __)   (_____  )   | |   | |   | ||  __)   | |      
+     |  ( \ \ | (            ) |   | |   | |   ) || (      | |      
+     |  /  \ \| (____/\/\____) |   | |   | (__/  )| (____/\| (____/\
+     |_/    \/(_______/\_______)   )_(   (______/ (_______/(_______/
+                      
+           > THE TARGETED EASM ARCHITECTURE // v3.0
 
-Kestrel (formerly Sentinel-X) is not a vulnerability scanner; it is a deterministic, stateful attack surface management (EASM) architecture. Designed to bypass the limitations of third-party wrappers, regular expressions, and WAF tarpits, Kestrel is a 100% self-contained Python intelligence engine.
+Kestrel (formerly Sentinel-X) is a deterministic, stateful Enterprise Attack Surface Management (EASM) architecture. Designed to bypass the limitations of third-party wrappers, regular expressions, and WAF tarpits, Kestrel is a 100% self-contained Python intelligence engine.
 
-It abandons probabilistic guessing. Instead, it utilizes an embedded SQLite Write-Ahead Logging (WAL) core, native Local OAST daemons, Abstract Syntax Tree (AST) reverse-engineering, and Double-Blind temporal verification to extract mathematical proof of exploitation on modern Web 3.0 infrastructure.
+It abandons probabilistic guessing. Instead, it utilizes an embedded SQLite Write-Ahead Logging (WAL) core, native Local OAST daemons, Abstract Syntax Tree (AST) reverse-engineering, Distributed Proxy Meshing, and Double-Blind temporal verification to extract mathematical proof of exploitation on modern Web 3.0 infrastructure.
+🏗️ The Kestrel Architecture
+Code snippet
 
----
+flowchart TD
+    subgraph Stage 1: Intelligence & Expansion
+        A[Target Input] --> B[Phase 1: OSINT Circuit Breakers]
+        B --> C[Phase 1.1: BGP Horizontal Recon]
+        C --> D[Phase 1.2: Corporate SSL Umbrella Pivot]
+        D --> E[Phase 1.3: Vertical DNS Bruteforce]
+        E --> F[Phase 1.4: Native Cloud Storage Sniper]
+        F --> G[Phase 1.5: Edge-Node Drop Port Scan]
+        G --> H[Phase 1.6: Origin Unmasking via Shodan]
+        H --> I[Phase 1.8: Subdomain Permutations]
+    end
 
-## 🧠 Core Engineering Principles
+    subgraph Stage 2: Application Mapping
+        I --> J[Phase 2: Favicon/Protocol Probing]
+        J --> K[Phase 2.2: Ghost Archive & Phantom DOM]
+        K --> L[Phase 3: Cortex AST & Shannon Entropy]
+    end
 
-* **Deterministic Exploitation:** Eliminates WAF hallucinations. If Cloudflare dynamically delays a request, Kestrel's Double-Blind Cache-Buster mathematically compares active payloads (`SLEEP(6)`) against control payloads (`SLEEP(0)`) to prove native backend execution.
-* **The Stateful Graph Engine:** Replaces flat JSON dumps with a relational SQLite graph. The Delta Engine natively tracks temporal changes across the attack surface, dropping duplicate hosts and mapping the "Blast Radius" of critical bugs across shared root cookies.
-* **Zero-Dependency Reconnaissance:** Eradicates supply-chain bottlenecks. No `subfinder` or `httpx`. Powered by `aiohttp`, `aiodns`, and native C-Ares, Kestrel directly carves SSL certificates, calculates BGP ASN origins, and executes 1,000+ concurrent UDP blasts entirely in memory.
+    subgraph Stage 3: Surgical Exploitation
+        L --> M[Phase 4: Tech-Stack Targeted Nuclei]
+        L --> N[Phase 5: Semantic API Fuzzer]
+        N --> O[Phase 8: Local Interactsh OAST Daemon]
+    end
 
----
+    subgraph Stage 4: Contextual Delivery
+        M --> P[Phase 7: Blast Radius Risk Engine]
+        O --> P
+        P --> Q[Phase 6: Telegram HUD Alerts]
+    end
 
-## ⚔️ The Kestrel Kill-Chain
+    %% Auth Matrix & Proxy Mesh influence mapping and exploitation
+    AuthMatrix[(Stateful Auth Matrix)] -.-> K
+    AuthMatrix -.-> L
+    ProxyMesh[(Distributed Proxy Mesh)] -.-> K
+    ProxyMesh -.-> M
+    ProxyMesh -.-> N
 
-### Stage 1: Intelligence & Expansion
-* **Phase 1: Hybrid Intelligence Engine:** Abandons brittle APIs. Uses a highly concurrent Circuit Breaker array to query OSINT, while simultaneously connecting to the target to rip Subject Alternative Names (SANs) directly from live SSL cryptography.
-* **Phase 1.1: CDN Shield & Origin Unmasking:** Resolves apex domains, bypassing BGP/CIDR horizontal expansion if the target is shielded by Cloudflare or Fastly, saving hours of wasted port scanning.
-* **Phase 1.3: Vertical DNS Bruteforcing:** Unleashes a high-velocity UDP blast using native `c-ares`. Automatically detects wildcard configurations (`*.target.com`) and establishes a cryptographic "Wildcard Sinkhole" to drop false positives before mapping undocumented shadow IT.
+🧠 Core Engineering Principles
 
-### Stage 2: Application Mapping & Resurrection
-* **Phase 2: Favicon Fingerprinting:** Bypasses header-stripping WAFs. Fetches the raw `favicon.ico`, encodes it, and calculates its MurmurHash3 value to mathematically profile the exact backend framework (e.g., Spring Boot, Next.js).
-* **Phase 2.2: The Ghost Archive & Skeleton Spider:** Queries the internet's memory (Wayback Machine/AlienVault) to resurrect unlinked, historical "Zombie" APIs. The live spider then maps the current perimeter, utilizing a structural "Skeleton Hash" depth-limiter to dynamically identify and drop infinite crawler traps (like calendars).
-* **Phase 3: Cortex & Project Ghost:** Upgrades from regex to compiler-level SAST. Hunts for leaked `.map` files to completely reconstruct minified Webpack/React repositories in memory. Employs an Esprima AST (Abstract Syntax Tree) parser to execute Taint Tracking, concatenating hidden variables to reveal undocumented Shadow APIs.
+    Deterministic Exploitation: Eliminates WAF hallucinations. If Cloudflare dynamically delays a request, Kestrel's Double-Blind Cache-Buster mathematically compares active payloads against control payloads to prove native backend execution.
 
-### Stage 3: Surgical Exploitation
-* **Phase 4: Targeted Nuclei Pipeline:** Stops blind spraying. Reads the exact Tech-Stack ontology from the SQLite Graph (Phase 2) and restricts Nuclei to firing *only* mathematically relevant CVEs (e.g., deploying only Nginx/PHP payloads against a profiled server).
-* **Phase 5: Semantic Parameter Routing:** Upgrades the fuzzer from a sledgehammer to a scalpel. Semantically classifies parameters (`?user=` vs `?url=`) and routes the exact vulnerability class needed, injecting native cache-busters to bypass CDN edge rules.
-* **Phase 8: The Local OAST Engine:** Total WAF evasion. Spawns a background `interactsh` daemon locally, generates unique RSA keypairs, injects them via the Fuzzer, and reads the local JSON logs to cryptographically prove Blind SSRF and Log4j execution without relying on intercepted third-party APIs.
+    Compiler-Level Extraction: Upgrades from regex to Esprima AST. Kestrel downloads JS bundles, bypasses minification via .map leaks, compiles the code into logical execution trees, and calculates Shannon Entropy to extract undocumented API routes and proprietary JWTs.
 
-### Stage 4: Contextual Delivery
-* **Phase 7 & 6: Blast Radius & Delta Comm:** Evaluates if a compromised staging server shares a wildcard root domain with a High-Value Target (HVT), elevating the severity automatically before dispatching the clean delta report directly to the Operator's Telegram HUD.
+    The Phantom DOM: Bypasses heavily obfuscated SPAs (React/Vue/Angular). Spawns a local headless Chromium interceptor, injects stateful authentication cookies, and silently maps background XHR traffic as the framework hydrates.
 
----
+    Distributed Proxy Meshing: Absolute immunity to volumetric IP bans. Vends rotating residential IPs asynchronously to the spider and fuzzer, decoupling attack velocity from network identity.
 
-## 🛡️ Operational Directives
+⚔️ The Kill-Chain
+Stage 1: Strategic Reconnaissance
+
+    BGP Routing & Origin Unmasking: Resolves apex domains via Team Cymru BGP to map ASNs. Hashes primary visual assets (Favicons) and pivots across the IPv4 space to expose naked origin servers hiding behind Cloudflare.
+
+    The Corporate Umbrella: Extracts the X.509 Cryptographic Identity from the target and mathematically pivots across global Certificate Transparency (CT) logs to find cross-brand corporate acquisitions.
+
+    The Cloud Sniper: Generates thousands of environment-specific mutations (e.g., target-dev-backup) and interrogates AWS S3, GCP Storage, and Azure Blobs natively to find unauthenticated corporate hard drives.
+
+Stage 2: Deep Perimeter Mapping
+
+    Edge-Node Drop Filters: Downloads live CIDR blocks from Cloudflare/Fastly. If an IP matches a CDN, Kestrel mathematically drops the port scan, preventing WAF tarpitting and reducing network noise by 95%.
+
+    The Ghost Archive: Queries the internet's memory (Wayback Machine/AlienVault) to resurrect unlinked, historical "Zombie" APIs before the live Spider even touches the network.
+
+Stage 3: Exploitation & Context
+
+    Targeted Ontology: Reads the exact Tech-Stack ontology from the SQLite Graph and restricts Nuclei to firing only mathematically relevant CVEs.
+
+    Semantic Routing: Semantically classifies parameters (?user= vs ?url=) and routes the exact vulnerability class needed, injecting native cache-busters to bypass edge caching.
+
+    Local OAST Engine: Total WAF evasion. Spawns a background interactsh daemon locally, generates unique RSA keypairs, and reads the local JSON logs to cryptographically prove Blind SSRF and Log4j execution.
+
+🛡️ Operational Directives
+
 Kestrel is an automated, enterprise-grade security evaluation framework. It is designed strictly for authorized penetration testing, bug bounty hunting on sanctioned programs, and advanced academic security research. The architect assumes no liability for the deployment or misuse of this framework.

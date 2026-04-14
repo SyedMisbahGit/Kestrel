@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  kestrel:
+    build: .
+    image: kestrel:v3.0
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./output:/app/output
+    network_mode: "host" # Allows local OAST daemon to bind properly

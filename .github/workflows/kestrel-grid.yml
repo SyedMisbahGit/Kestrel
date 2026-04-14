@@ -66,3 +66,6 @@ jobs:
           git add -f data/sessions/*.db targets.txt data/training_ledger.csv
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
           git push origin main
+          
+          echo "Triggering Neural Network Training..."
+          curl -X POST "https://bytesyed-kestrel-brain.hf.space/train"

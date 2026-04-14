@@ -84,7 +84,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
 
         # Spawn Daemon (FIX: Merge stderr into stdout to catch Go's startup logs)
         daemon = subprocess.Popen(
-            ["interactsh-client", "-json", "-o", ".oast_logs.json"], 
+            [(os.path.expanduser("~/go/bin/interactsh-client") if os.path.exists(os.path.expanduser("~/go/bin/interactsh-client")) else "interactsh-client"), "-json", "-o", ".oast_logs.json"], 
             stdout=subprocess.PIPE, 
             stderr=subprocess.STDOUT, 
             text=True

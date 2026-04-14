@@ -1,11 +1,11 @@
-name: Kestrel 24/7 Queue Strike
+name: Kestrel Grid Autonomous Engine
 on:
   schedule:
-    - cron: '0 */3 * * *' # Runs every 3 hours
-  workflow_dispatch:      # Manual trigger
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
 
 jobs:
-  hunt:
+  recon:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -23,19 +23,15 @@ jobs:
           pip install -r requirements.txt
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
           
-          # Native Playwright Installation via Python Module
           playwright install chromium
           python -m playwright install-deps chromium
 
       - name: Rotate Queue and Identify Target
         id: queue
         run: |
-          # Get the first line that isn't a comment or empty
           TARGET=$(grep -v '^#' targets.txt | grep -v '^$' | head -n 1)
           echo "TARGET=$TARGET" >> $GITHUB_ENV
           echo "Scanning target: $TARGET"
-          
-          # Move that target to the bottom of the file
           sed -i "1{h;d};\$G" targets.txt 
 
       - name: Execute Kestrel Strike

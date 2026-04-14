@@ -57,6 +57,6 @@ jobs:
         run: |
           git config --local user.email "kestrel-bot@github.com"
           git config --local user.name "Kestrel Intelligence Bot"
-          git add data/sessions/*.db targets.txt
+          git add -f data/sessions/*.db targets.txt
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated]" || echo "No changes"
           git push origin main

@@ -23,12 +23,17 @@ jobs:
           echo "Installing Interactsh and Nuclei via Go..."
           go install -v github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest
           go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+          
+          # 🚨 INJECT GO BINARIES INTO THE GLOBAL RUNNER PATH 🚨
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+          
           ~/go/bin/nuclei -update-templates
 
       - name: Install Python Requirements & Playwright
         run: |
           pip install -r requirements.txt
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
+          
           playwright install chromium
           python -m playwright install-deps chromium
 

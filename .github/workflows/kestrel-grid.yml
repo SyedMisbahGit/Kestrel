@@ -29,11 +29,11 @@ jobs:
           # 2. Download and Install Pre-compiled ProjectDiscovery Binaries
           echo "Injecting Interactsh and Nuclei into System Core..."
           wget -q https://github.com/projectdiscovery/interactsh/releases/download/v1.1.8/interactsh-client_1.1.8_linux_amd64.zip
-          unzip -q interactsh-client_1.1.8_linux_amd64.zip
+          unzip -o -q interactsh-client_1.1.8_linux_amd64.zip
           sudo mv interactsh-client /usr/local/bin/
           
           wget -q https://github.com/projectdiscovery/nuclei/releases/download/v3.2.0/nuclei_3.2.0_linux_amd64.zip
-          unzip -q nuclei_3.2.0_linux_amd64.zip
+          unzip -o -q nuclei_3.2.0_linux_amd64.zip
           sudo mv nuclei /usr/local/bin/
           
           # 3. Update Nuclei Templates

@@ -20,13 +20,11 @@ jobs:
 
       - name: Install System Core (Python + Playwright + OAST + Nuclei)
         run: |
-          # 1. Install Python Environment
           pip install -r requirements.txt
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
           playwright install chromium
           python -m playwright install-deps chromium
 
-          # 2. Download and Install Pre-compiled ProjectDiscovery Binaries
           echo "Injecting Interactsh and Nuclei into System Core..."
           wget -q https://github.com/projectdiscovery/interactsh/releases/download/v1.1.8/interactsh-client_1.1.8_linux_amd64.zip
           unzip -o -q interactsh-client_1.1.8_linux_amd64.zip
@@ -36,7 +34,6 @@ jobs:
           unzip -o -q nuclei_3.2.0_linux_amd64.zip
           sudo mv nuclei /usr/local/bin/
           
-          # 3. Update Nuclei Templates
           nuclei -update-templates
 
       - name: Rotate Queue and Identify Target
@@ -51,6 +48,7 @@ jobs:
         run: python arbiter.py ${{ env.TARGET }} --mode standard
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SHODAN_API: ${{ secrets.SHODAN_API }}
 
       - name: Commit State and Rotated Queue

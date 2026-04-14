@@ -18,6 +18,19 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install ProjectDiscovery Binaries (OAST & Nuclei)
+        run: |
+          echo "Installing Interactsh and Nuclei via Go..."
+          go install -v github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest
+          go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+          
+          # Move binaries to a global PATH location so Python's subprocess can find them
+          sudo cp ~/go/bin/interactsh-client /usr/local/bin/
+          sudo cp ~/go/bin/nuclei /usr/local/bin/
+          
+          # Update Nuclei templates
+          nuclei -update-templates
+
       - name: Install Python Requirements & Playwright
         run: |
           pip install -r requirements.txt

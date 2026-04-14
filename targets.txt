@@ -1,6 +1,32 @@
-tesla.com
-dropbox.com
-whatsapp.com
-stripe.com
-# ... add the rest of your 100 domains here
-bugcrowd.com
+# === THE KESTREL 25-NODE TRAINING QUEUE ===
+
+# --- TOP 10 FORTUNE 500 ---
+walmart.com
+amazon.com
+apple.com
+cvs.com
+unitedhealthgroup.com
+exxonmobil.com
+berkshirehathaway.com
+google.com
+mckesson.com
+chevron.com
+
+# --- TOP 8 HACKERONE PUBLIC PROGRAMS ---
+yahoo.com
+paypal.com
+uber.com
+twitter.com
+ibm.com
+snapchat.com
+airbnb.com
+spotify.com
+
+# --- 7 MEDIUM / MID-MARKET SaaS ---
+cal.com
+vercel.com
+netlify.com
+postman.com
+framer.com
+figma.com
+notion.so

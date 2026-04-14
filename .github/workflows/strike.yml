@@ -1,0 +1,42 @@
+name: Kestrel Automated Strike
+on:
+  schedule:
+    - cron: '0 */12 * * *' # Runs every 12 hours
+  workflow_dispatch:      # Allows you to click "Run" manually
+
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 librandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2
+
+      - name: Install Python Requirements
+        run: |
+          pip install -r requirements.txt
+          pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
+          playwright install chromium
+
+      - name: Execute Kestrel Strike
+        run: python arbiter.py ${{ secrets.TARGET_DOMAIN }} --mode standard
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          SHODAN_API: ${{ secrets.SHODAN_API }}
+
+      - name: Save Intelligence State
+        run: |
+          git config --local user.email "kestrel-bot@github.com"
+          git config --local user.name "Kestrel Intelligence Bot"
+          git add data/sessions/*.db
+          git commit -m "Update Intelligence Graph [Automated]" || echo "No changes to commit"
+          git push

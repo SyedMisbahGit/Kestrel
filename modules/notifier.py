@@ -1,65 +1,96 @@
-import asyncio
-import aiohttp
-import logging
-from rich.console import Console
+import requests
+import os
 
-console = Console()
-log = logging.getLogger("rich")
-
-async def send_telegram_message(token, chat_id, text):
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True}
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload, timeout=10) as r:
-                if r.status != 200: log.error(f"Telegram Error: {await r.text()}")
-    except Exception as e: log.error(f"Telegram failed: {e}")
-
-async def dispatch_alerts(token, chat_id, messages):
-    await asyncio.gather(*[send_telegram_message(token, chat_id, msg) for msg in messages])
-
-def run_notifier(session, config):
-    console.print("\n[bold blue]━━ PHASE 6: CONTINUOUS ALERTING (TELEGRAM ENGINE) ━━[/bold blue]")
-
-    tg_config = config.get("telegram", {})
-    token = tg_config.get("token")
-    chat_id = tg_config.get("chat_id")
-
-    if not token or not chat_id: return
-
-    new_hosts = [h for h in session.get_live_hosts() if isinstance(h, dict) and h.get('_is_new')]
-    new_vulns = [v for v in session.vulnerabilities if isinstance(v, dict) and v.get('_is_new')]
-
-    if not new_hosts and not new_vulns:
-        console.print("  + No temporal changes. Communications silence maintained.")
+def send_intelligence_payload(node, vuln, base_sev, elevated_sev, context, ml_confidence, details):
+    """Dispatches a rich HTML-formatted intelligence payload to Telegram."""
+    token = os.getenv("TELEGRAM_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    
+    if not token or not chat_id:
+        print("[!] Telegram credentials missing. Skipping alert.")
         return
 
-    console.print(f"INFO     Dispatching {len(new_hosts)} hosts and {len(new_vulns)} vulnerabilities to Telegram...")
-    messages = []
+    # Dynamic visual indicators
+    sev_emoji = "🔴" if elevated_sev == "CRITICAL" else "🟠" if elevated_sev == "HIGH" else "🟡"
     
-    if new_hosts:
-        msg = "<b>🚨 SENTINEL-X: NEW INFRASTRUCTURE</b>\n\n"
-        for h in new_hosts[:15]:
-            msg += f"• {h.get('url', 'Unknown')} [<code>{h.get('status', 'N/A')}</code>]\n"
-        messages.append(msg)
+    # Format the payload using Telegram-supported HTML
+    message = f"""
+🦅 <b>KESTREL INTELLIGENCE PAYLOAD</b> 🦅
 
-    if new_vulns:
-        msg = "<b>⚠️ SENTINEL-X: NEW VULNERABILITIES</b>\n\n"
-        for v in new_vulns[:15]:
-            # Absolute Type Enforcement to prevent 'str' object has no attribute 'get'
-            info = v.get('info', {})
-            if not isinstance(info, dict): 
-                info = {}
-                
-            name = info.get('name') or v.get('name') or 'Unknown Vulnerability'
-            sev = info.get('severity', 'HIGH').upper()
-            url = v.get('matched-at', 'Unknown Endpoint')
-            
-            emoji = "🔴" if sev in ["HIGH", "CRITICAL"] else "🟠" if sev == "MEDIUM" else "🔵"
-            msg += f"{emoji} <b>[{sev}]</b> {name}\n  └ <code>{url}</code>\n\n"
-            
-        messages.append(msg)
+🎯 <b>Target:</b> <code>{node}</code>
+{sev_emoji} <b>Severity:</b> {elevated_sev} <i>(Base: {base_sev})</i>
 
-    if messages:
-        asyncio.run(dispatch_alerts(token, chat_id, messages))
-        console.print("  + Telegram dispatch complete.")
+🧠 <b>ML Confidence:</b> {ml_confidence}%
+💥 <b>Vulnerability:</b> {vuln}
+🕸️ <b>Graph Context:</b> {context}
+
+📝 <b>Extracted Data:</b>
+<code>{details}</code>
+
+🔍 <a href="https://{node}">Open Target</a> | <a href="https://shodan.io/search?query={node}">Shodan</a> | <a href="https://crt.sh/?q={node}">CRT.sh</a>
+"""
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True # Prevents massive preview boxes from cluttering the chat
+    }
+    
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code != 200:
+            print(f"[!] Telegram API Error: {response.text}")
+    except Exception as e:
+        print(f"[!] Failed to route intelligence payload: {e}")
+
+# Quick CLI test block
+if __name__ == "__main__":
+    send_intelligence_payload(
+        node="staging.payments.tesla.com",
+        vuln="High Entropy Token (H=4.82)",
+        base_sev="HIGH",
+        elevated_sev="CRITICAL",
+        context="LATERAL PIVOT RISK (Shares root with admin)",
+        ml_confidence=94.2,
+        details="sk_live_51H... [Tap to copy]"
+    )
+
+def run_notifier(target, db_path):
+    """Backward compatibility wrapper for arbiter.py"""
+    import sqlite3
+    import os
+    from modules.oracle import ask_brain
+    
+    if not os.path.exists(db_path): return
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        # Extract only High/Critical findings to avoid spamming your phone
+        cursor.execute("SELECT node, vulnerability, severity FROM vulnerabilities WHERE severity IN ('HIGH', 'CRITICAL')")
+        for row in cursor.fetchall():
+            node, vuln, severity = row
+            
+            # Query the ML Brain to see if we should drop this alert
+            # (Using dummy length/density values until the full pipeline is wired)
+            ml_data = ask_brain(len(node), 1)
+            
+            if ml_data.get("recommendation") != "DROP":
+                send_intelligence_payload(
+                    node=node,
+                    vuln=vuln,
+                    base_sev=severity,
+                    elevated_sev=severity,
+                    context="Unmapped Node", # Will be updated by Graph Engine
+                    ml_confidence=ml_data.get("confidence_percentage", 0.0),
+                    details="Review database for payload specifics."
+                )
+    except Exception as e:
+        print(f"[!] Alert routing error: {e}")
+    finally:
+        conn.close()
+
+def run(target, db_path):
+    run_notifier(target, db_path)

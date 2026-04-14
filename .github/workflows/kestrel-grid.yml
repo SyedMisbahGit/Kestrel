@@ -18,14 +18,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install System Core (Python + Playwright + OAST + Nuclei)
+      - name: Install System Core
         run: |
           pip install -r requirements.txt
-          pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
+          pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml pandas
           playwright install chromium
           python -m playwright install-deps chromium
 
-          echo "Injecting Interactsh and Nuclei into System Core..."
           wget -q https://github.com/projectdiscovery/interactsh/releases/download/v1.1.8/interactsh-client_1.1.8_linux_amd64.zip
           unzip -o -q interactsh-client_1.1.8_linux_amd64.zip
           sudo mv interactsh-client /usr/local/bin/
@@ -51,10 +50,19 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SHODAN_API: ${{ secrets.SHODAN_API }}
 
+      - name: Synthesize Training Data (ML Brain)
+        run: |
+          echo "Executing Random Forest Pre-processor..."
+          for db in data/sessions/*.db; do
+            if [ -f "$db" ]; then
+              python modules/brain.py "$db"
+            fi
+          done
+
       - name: Commit State and Rotated Queue
         run: |
           git config --local user.email "kestrel-bot@github.com"
           git config --local user.name "Kestrel Intelligence Bot"
-          git add -f data/sessions/*.db targets.txt
-          git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated]" || echo "No changes"
+          git add -f data/sessions/*.db targets.txt data/training_ledger.csv
+          git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
           git push origin main

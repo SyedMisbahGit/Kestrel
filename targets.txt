@@ -1,0 +1,5 @@
+tesla.com
+dropbox.com
+whatsapp.com
+stripe.com
+# ... add the rest of your 100 domains here

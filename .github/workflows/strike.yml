@@ -1,8 +1,8 @@
-name: Kestrel Automated Strike
+name: Kestrel 24/7 Queue Strike
 on:
   schedule:
-    - cron: '0 */12 * * *' # Runs every 12 hours
-  workflow_dispatch:      # Allows you to click "Run" manually
+    - cron: '0 */3 * * *' # Runs every 3 hours (8 times a day)
+  workflow_dispatch:      # Manual trigger
 
 jobs:
   hunt:
@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -27,16 +29,27 @@ jobs:
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
           playwright install chromium
 
+      - name: Rotate Queue and Identify Target
+        id: queue
+        run: |
+          # Get the first line that isn't a comment or empty
+          TARGET=$(grep -v '^#' targets.txt | grep -v '^$' | head -n 1)
+          echo "TARGET=$TARGET" >> $GITHUB_ENV
+          echo "Scanning target: $TARGET"
+          
+          # Move that target to the bottom of the file
+          sed -i "1{h;d};\$G" targets.txt 
+
       - name: Execute Kestrel Strike
-        run: python arbiter.py ${{ secrets.TARGET_DOMAIN }} --mode standard
+        run: python arbiter.py ${{ env.TARGET }} --mode standard
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           SHODAN_API: ${{ secrets.SHODAN_API }}
 
-      - name: Save Intelligence State
+      - name: Commit State and Rotated Queue
         run: |
           git config --local user.email "kestrel-bot@github.com"
           git config --local user.name "Kestrel Intelligence Bot"
-          git add data/sessions/*.db
-          git commit -m "Update Intelligence Graph [Automated]" || echo "No changes to commit"
-          git push
+          git add data/sessions/*.db targets.txt
+          git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated]" || echo "No changes"
+          git push origin main

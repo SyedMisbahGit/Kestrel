@@ -1,7 +1,7 @@
 name: Kestrel 24/7 Queue Strike
 on:
   schedule:
-    - cron: '0 */3 * * *' # Runs every 3 hours (8 times a day)
+    - cron: '0 */3 * * *' # Runs every 3 hours
   workflow_dispatch:      # Manual trigger
 
 jobs:
@@ -9,25 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 librandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2
-
-      - name: Install Python Requirements
+      - name: Install Python Requirements & Playwright
         run: |
           pip install -r requirements.txt
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml
+          
+          # Native Playwright Installation & System Dependency Resolution
           playwright install chromium
+          sudo playwright install-deps chromium
 
       - name: Rotate Queue and Identify Target
         id: queue

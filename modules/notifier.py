@@ -1,7 +1,9 @@
 import requests
 import os
+    import time
 
-def send_intelligence_payload(node, vuln, base_sev, elevated_sev, context, ml_confidence, details):
+def time.sleep(1.5)
+                send_intelligence_payload(node, vuln, base_sev, elevated_sev, context, ml_confidence, details):
     """Dispatches a rich HTML-formatted intelligence payload to Telegram."""
     token = os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
@@ -47,7 +49,8 @@ def send_intelligence_payload(node, vuln, base_sev, elevated_sev, context, ml_co
 
 # Quick CLI test block
 if __name__ == "__main__":
-    send_intelligence_payload(
+    time.sleep(1.5)
+                send_intelligence_payload(
         node="staging.payments.tesla.com",
         vuln="High Entropy Token (H=4.82)",
         base_sev="HIGH",
@@ -61,6 +64,7 @@ def run_notifier(target, db_path):
     """Backward compatibility wrapper for arbiter.py"""
     import sqlite3
     import os
+    import time
     from modules.oracle import ask_brain
     
     if not os.path.exists(db_path): return
@@ -78,6 +82,7 @@ def run_notifier(target, db_path):
             ml_data = ask_brain(len(node), 1)
             
             if ml_data.get("recommendation") != "DROP":
+                time.sleep(1.5)
                 send_intelligence_payload(
                     node=node,
                     vuln=vuln,

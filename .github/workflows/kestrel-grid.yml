@@ -77,4 +77,4 @@ jobs:
           git push origin main
           
           echo "Triggering Neural Network Training..."
-          curl -X POST "https://bytesyed-kestrel-brain.hf.space/train" || true
+          curl -X POST "https://kestrel-brain.hf.space/train" || true

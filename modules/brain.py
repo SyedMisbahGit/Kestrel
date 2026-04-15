@@ -6,37 +6,39 @@ def synthesize_training_data(db_path, output_csv="data/training_ledger.csv"):
     if not os.path.exists(db_path): return
     
     conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
     
     try:
-        # Dynamically map the SQLite schema
-        cursor.execute("PRAGMA table_info(vulnerabilities)")
-        columns = [info[1] for info in cursor.fetchall()]
-        
-        if not columns:
-            print(f"[!] Brain: Table 'vulnerabilities' is empty or missing in {db_path}")
+        # 1. Verify table exists
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vulnerabilities'")
+        if not cursor.fetchone():
+            print(f"[*] Brain: Table 'vulnerabilities' missing in {db_path} (Empty Scan)")
             return
             
-        node_col = 'node' if 'node' in columns else 'url'
-        vuln_col = 'vulnerability' if 'vulnerability' in columns else 'type'
-        sev_col = 'severity' if 'severity' in columns else 'severity'
-
-        # Feature Extraction SQL using dynamic columns
-        query = f"""
-        SELECT 
-            length({node_col}) as url_length,
-            {vuln_col} as vulnerability,
-            {sev_col} as severity,
-            (SELECT count(*) FROM vulnerabilities v2 WHERE v2.{node_col} = v1.{node_col}) as cluster_density
-        FROM vulnerabilities v1
-        """
+        # 2. Pull raw data without referencing column names
+        df_raw = pd.read_sql_query("SELECT * FROM vulnerabilities", conn)
         
-        df = pd.read_sql_query(query, conn)
+        if df_raw.empty:
+            print(f"[*] Brain: No vulnerabilities found in {db_path}")
+            return
+            
+        # 3. Extract features positionally (Col 0: Node, Col 1: Vuln, Col 2: Severity)
+        node_series = df_raw.iloc[:, 0].astype(str)
+        vuln_series = df_raw.iloc[:, 1].astype(str)
+        sev_series = df_raw.iloc[:, 2].astype(str)
         
-        # Simple Labeling Logic
-        df['is_false_positive'] = df['vulnerability'].apply(lambda x: 1 if "Entropy" in str(x) and "H=4.5" in str(x) else 0)
+        # 4. Build the Mathematical Feature Matrix
+        df = pd.DataFrame({
+            'url_length': node_series.apply(len),
+            'vulnerability': vuln_series,
+            'severity': sev_series,
+            'cluster_density': node_series.map(node_series.value_counts())
+        })
         
-        # Append to master ledger
+        # 5. Labeling Logic for the Random Forest
+        df['is_false_positive'] = df['vulnerability'].apply(lambda x: 1 if "Entropy" in x and "H=4.5" in x else 0)
+        
+        # 6. Append to Cloud Ledger
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         header = not os.path.exists(output_csv)
         df.to_csv(output_csv, mode='a', index=False, header=header)

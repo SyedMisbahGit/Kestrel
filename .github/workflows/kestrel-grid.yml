@@ -53,6 +53,7 @@ jobs:
       - name: Synthesize Training Data (ML Brain)
         run: |
           echo "Executing Random Forest Pre-processor..."
+          shopt -s nullglob
           for db in data/sessions/*.db; do
             if [ -f "$db" ]; then
               python modules/brain.py "$db"
@@ -63,9 +64,17 @@ jobs:
         run: |
           git config --local user.email "kestrel-bot@github.com"
           git config --local user.name "Kestrel Intelligence Bot"
-          git add -f data/sessions/*.db targets.txt data/training_ledger.csv
+          
+          # Always commit the rotated queue
+          git add targets.txt
+          
+          # Fault-tolerant staging: Only add dynamic files if they exist
+          shopt -s nullglob
+          for db in data/sessions/*.db; do git add -f "$db"; done
+          if [ -f data/training_ledger.csv ]; then git add data/training_ledger.csv; fi
+          
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
           git push origin main
           
           echo "Triggering Neural Network Training..."
-          curl -X POST "https://bytesyed-kestrel-brain.hf.space/train"
+          curl -X POST "https://bytesyed-kestrel-brain.hf.space/train" || true

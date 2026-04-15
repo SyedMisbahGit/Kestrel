@@ -1,4 +1,3 @@
-# === THE KESTREL 25-NODE TRAINING QUEUE ===
 
 # --- TOP 10 FORTUNE 500 ---
 walmart.com
@@ -30,3 +29,4 @@ postman.com
 framer.com
 figma.com
 notion.so
+# === THE KESTREL 25-NODE TRAINING QUEUE ===

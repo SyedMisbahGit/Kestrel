@@ -1,9 +1,8 @@
 import requests
 import os
-    import time
+import time
 
-def time.sleep(1.5)
-                send_intelligence_payload(node, vuln, base_sev, elevated_sev, context, ml_confidence, details):
+def send_intelligence_payload(node, vuln, base_sev, elevated_sev, context, ml_confidence, details):
     """Dispatches a rich HTML-formatted intelligence payload to Telegram."""
     token = os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
@@ -12,10 +11,8 @@ def time.sleep(1.5)
         print("[!] Telegram credentials missing. Skipping alert.")
         return
 
-    # Dynamic visual indicators
     sev_emoji = "🔴" if elevated_sev == "CRITICAL" else "🟠" if elevated_sev == "HIGH" else "🟡"
     
-    # Format the payload using Telegram-supported HTML
     message = f"""
 🦅 <b>KESTREL INTELLIGENCE PAYLOAD</b> 🦅
 
@@ -37,7 +34,7 @@ def time.sleep(1.5)
         "chat_id": chat_id,
         "text": message,
         "parse_mode": "HTML",
-        "disable_web_page_preview": True # Prevents massive preview boxes from cluttering the chat
+        "disable_web_page_preview": True
     }
     
     try:
@@ -47,48 +44,40 @@ def time.sleep(1.5)
     except Exception as e:
         print(f"[!] Failed to route intelligence payload: {e}")
 
-# Quick CLI test block
-if __name__ == "__main__":
-    time.sleep(1.5)
-                send_intelligence_payload(
-        node="staging.payments.tesla.com",
-        vuln="High Entropy Token (H=4.82)",
-        base_sev="HIGH",
-        elevated_sev="CRITICAL",
-        context="LATERAL PIVOT RISK (Shares root with admin)",
-        ml_confidence=94.2,
-        details="sk_live_51H... [Tap to copy]"
-    )
-
 def run_notifier(target, db_path):
     """Backward compatibility wrapper for arbiter.py"""
     import sqlite3
-    import os
-    import time
-    from modules.oracle import ask_brain
     
     if not os.path.exists(db_path): return
     
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
-        # Extract only High/Critical findings to avoid spamming your phone
-        cursor.execute("SELECT node, vulnerability, severity FROM vulnerabilities WHERE severity IN ('HIGH', 'CRITICAL')")
+        from modules.oracle import ask_brain
+        cursor.execute("SELECT * FROM vulnerabilities")
+        columns = [desc[0] for desc in cursor.description]
+        
+        node_idx = columns.index('node') if 'node' in columns else (columns.index('url') if 'url' in columns else 0)
+        vuln_idx = columns.index('vulnerability') if 'vulnerability' in columns else (columns.index('type') if 'type' in columns else 1)
+        sev_idx = columns.index('severity') if 'severity' in columns else 2
+
         for row in cursor.fetchall():
-            node, vuln, severity = row
+            node = str(row[node_idx])
+            vuln = str(row[vuln_idx])
+            severity = str(row[sev_idx]).upper()
             
-            # Query the ML Brain to see if we should drop this alert
-            # (Using dummy length/density values until the full pipeline is wired)
+            if severity not in ('HIGH', 'CRITICAL'): continue
+            
             ml_data = ask_brain(len(node), 1)
             
             if ml_data.get("recommendation") != "DROP":
-                time.sleep(1.5)
+                time.sleep(1.5) # The Telegram Rate-Limit Throttle
                 send_intelligence_payload(
                     node=node,
                     vuln=vuln,
                     base_sev=severity,
                     elevated_sev=severity,
-                    context="Unmapped Node", # Will be updated by Graph Engine
+                    context="Unmapped Node", 
                     ml_confidence=ml_data.get("confidence_percentage", 0.0),
                     details="Review database for payload specifics."
                 )

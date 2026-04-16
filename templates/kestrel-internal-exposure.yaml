@@ -1,0 +1,25 @@
+id: kestrel-internal-exposure
+info:
+  name: Kestrel Internal Exposure Snipe
+  author: Arbiter
+  severity: high
+  description: Detects exposure of internal dev/admin services on mapped perimeters.
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/"
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "Jira Dashboard"
+          - "Atlassian Confluence"
+          - "GitLab"
+          - "Jenkins"
+          - "Grafana"
+          - "Kibana"
+          - "phpMyAdmin"
+      - type: regex
+        regex:
+          - '(?i)x-amz-bucket-region'
+          - '(?i)x-jenkins'

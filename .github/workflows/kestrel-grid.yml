@@ -81,7 +81,7 @@ jobs:
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
           git push origin main
 
-          - name: Trigger Neural Network Training
-            run: |
-              echo "Triggering Neural Network Training..."
-              curl -X POST "https://kestrel-brain.hf.space/train" || true
+       - name: Trigger Neural Network Training
+         run: |
+          echo "Triggering Neural Network Training..."
+          curl -X POST "https://kestrel-brain.hf.space/train" || true

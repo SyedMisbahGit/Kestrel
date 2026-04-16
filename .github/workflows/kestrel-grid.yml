@@ -28,11 +28,11 @@ jobs:
           wget -q https://github.com/projectdiscovery/interactsh/releases/download/v1.1.8/interactsh-client_1.1.8_linux_amd64.zip
           unzip -o -q interactsh-client_1.1.8_linux_amd64.zip
           sudo mv interactsh-client /usr/local/bin/
-          
+
           wget -q https://github.com/projectdiscovery/nuclei/releases/download/v3.2.0/nuclei_3.2.0_linux_amd64.zip
           unzip -o -q nuclei_3.2.0_linux_amd64.zip
           sudo mv nuclei /usr/local/bin/
-          
+
           nuclei -update-templates
 
       - name: Rotate Queue and Identify Target
@@ -43,13 +43,18 @@ jobs:
           echo "Scanning target: $TARGET"
           sed -i "1{h;d};\$G" targets.txt 
 
-      - name: Execute Kestrel Strike
-        run: python arbiter.py ${{ env.TARGET }} --mode standard
-        env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          SHODAN_API: ${{ secrets.SHODAN_API }}
+      - name: Execute Kestrel Core
+        run: |
+          # Read the first line of targets.txt
+          TARGET=$(head -n 1 targets.txt | tr -d '\r')
 
+          if [ -z "$TARGET" ]; then
+            echo "Queue is empty. Halting execution."
+            exit 0
+          fi
+
+          echo "Engaging target: $TARGET"
+          python arbiter.py $TARGET --mode standard
       - name: Synthesize Training Data (ML Brain)
         run: |
           echo "Executing Random Forest Pre-processor..."

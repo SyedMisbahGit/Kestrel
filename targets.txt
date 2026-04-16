@@ -1,0 +1,10 @@
+zerodha.com
+comolho.com
+hackerone.com
+bugcrowd.com
+amazon.com
+apple.com
+microsoft.com
+class.com
+chatgpt.com
+vercel.com

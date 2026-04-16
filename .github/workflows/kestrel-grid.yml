@@ -69,17 +69,19 @@ jobs:
         run: |
           git config --local user.email "kestrel-bot@github.com"
           git config --local user.name "Kestrel Intelligence Bot"
-          
+
           # Always commit the rotated queue
           git add targets.txt
-          
+
           # Fault-tolerant staging: Only add dynamic files if they exist
           shopt -s nullglob
           for db in data/sessions/*.db; do git add -f "$db"; done
           if [ -f data/training_ledger.csv ]; then git add data/training_ledger.csv; fi
-          
+
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
           git push origin main
-          
-          echo "Triggering Neural Network Training..."
-          curl -X POST "https://kestrel-brain.hf.space/train" || true
+
+          - name: Trigger Neural Network Training
+            run: |
+              echo "Triggering Neural Network Training..."
+              curl -X POST "https://kestrel-brain.hf.space/train" || true

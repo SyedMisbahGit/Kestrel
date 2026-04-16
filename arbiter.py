@@ -145,7 +145,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
         # Stage 4: Intelligence & Delivery
         safe_run("INTELLIGENCE", run_intelligence) # Phase 7: Blast Radius Graph
         def phase6_notifier(session, config):
-            db_path = f"data/sessions/{session.target.replace('.', '_')}.db"
+            db_path = f"data/sessions/{target.replace('.', '_')}.db"
             run_notifier(session.target, db_path)
         safe_run("NOTIFIER", phase6_notifier)         # Phase 6: Telegram Delta
 

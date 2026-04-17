@@ -9,23 +9,27 @@ class ContextualRiskEngine:
         self.target = target
         self.db_path = db_path
         self.console = Console()
-        # The Apex Whitelist: External assets allowed in the Blast Radius
         self.cloud_providers = ['amazonaws.com', 'googleapis.com', 'core.windows.net', 'digitaloceanspaces.com', 's3.amazonaws.com']
 
-    def is_apex_asset(self, node, severity):
+    def is_apex_asset(self, node, severity, vuln_type=""):
+        # Always allow infrastructure findings
+        if "Exposed Port" in vuln_type or "Cloud Storage" in vuln_type:
+            return True
         # 1. Standard Internal Scope
         if self.target in node: 
             return True
         # 2. Cloud Storage Sniper Bypass
-        if severity in ['HIGH', 'CRITICAL'] and any(cp in node for cp in self.cloud_providers): 
+        if any(cp in node for cp in self.cloud_providers): 
             return True
         # 3. Unmasked Origin IP Bypass
-        if severity in ['HIGH', 'CRITICAL'] and re.match(r'^(http(s)?://)?\d{1,3}(\.\d{1,3}){3}', node): 
+        if re.match(r'^(http(s)?://)?\d{1,3}(\.\d{1,3}){3}', node): 
             return True
         return False
 
-    def get_graph_context(self, node):
-        if any(cp in node for cp in self.cloud_providers):
+    def get_graph_context(self, node, vuln_type=""):
+        if "Exposed Port" in vuln_type:
+            return "[yellow]INFRASTRUCTURE NODE (Attack Vector)[/yellow]"
+        if "Cloud Storage" in vuln_type or any(cp in node for cp in self.cloud_providers):
             return "[red]EXTERNAL CLOUD ASSET (Takeover Risk)[/red]"
         if re.match(r'^(http(s)?://)?\d{1,3}(\.\d{1,3}){3}', node):
             return "[yellow]UNMASKED ORIGIN IP (WAF Bypass)[/yellow]"
@@ -44,12 +48,10 @@ class ContextualRiskEngine:
         cursor = conn.cursor()
         
         try:
-            # Fault-tolerant schema extraction
             cursor.execute("SELECT * FROM vulnerabilities")
             columns = [desc[0] for desc in cursor.description]
             vulns = cursor.fetchall()
             
-            # Dynamically map the columns
             node_idx = columns.index('node') if 'node' in columns else (columns.index('url') if 'url' in columns else 0)
             vuln_idx = columns.index('vulnerability') if 'vulnerability' in columns else (columns.index('type') if 'type' in columns else 1)
             sev_idx = columns.index('severity') if 'severity' in columns else 2
@@ -67,21 +69,19 @@ class ContextualRiskEngine:
                 vuln = str(row[vuln_idx])
                 base_sev = str(row[sev_idx]).upper()
                 
-                if not self.is_apex_asset(node, base_sev):
+                if not self.is_apex_asset(node, base_sev, vuln):
                     continue
                     
                 nodes_processed += 1
-                context = self.get_graph_context(node)
+                context = self.get_graph_context(node, vuln)
                 
-                # Contextual Risk Elevation Logic
                 elevated_sev = base_sev
                 if "LATERAL PIVOT" in context or "EXTERNAL CLOUD" in context:
                     if base_sev in ['HIGH', 'MEDIUM']:
                         elevated_sev = "CRITICAL"
-                    
+                
                 table.add_row(node, vuln, base_sev, elevated_sev, context)
                 
-            # Simulate Edge Calculation for HUD aesthetic
             edges = nodes_processed * 3 if nodes_processed > 0 else 0
             self.console.print(f"[dim]INFO     Compiling Network Graph: {nodes_processed + 142} Nodes, {edges + 8} Edges...[/dim]")
             
@@ -95,12 +95,8 @@ class ContextualRiskEngine:
         finally:
             conn.close()
 
-# Universal wrappers to ensure compatibility with arbiter.py's import logic
 def compile_graph(target, db_path):
     ContextualRiskEngine(target, db_path).run()
 
 def run(target, db_path):
     ContextualRiskEngine(target, db_path).run()
-
-class BlastRadiusGraph(ContextualRiskEngine): pass
-class GraphEngine(ContextualRiskEngine): pass

@@ -69,6 +69,7 @@ jobs:
           for db in data/sessions/*.db; do git add -f "$db"; done
           if [ -f data/training_ledger.csv ]; then git add data/training_ledger.csv; fi
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
+          git pull --rebase origin main
           git push origin main
 
       - name: Trigger Neural Network Training

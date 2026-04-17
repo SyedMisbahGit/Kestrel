@@ -62,6 +62,15 @@ class TaintTracker:
 
 async def extract_target(client, js_url, session_state):
     vulnerabilities = []
+    
+    # 1. HARD PERIMETER: Do not scan binary extensions, images, or third-party domains
+    skip_extensions = ('.pdf', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.woff', '.woff2', '.ttf', '.eot', '.mp4', '.mp3')
+    if js_url.lower().endswith(skip_extensions):
+        return vulnerabilities
+        
+    if js_url.startswith('http') and session_state.domain not in js_url:
+        return vulnerabilities
+
     try:
         async with client.get(f"{js_url}.map", timeout=8, ssl=False) as response:
             if response.status == 200:
@@ -80,11 +89,19 @@ async def extract_target(client, js_url, session_state):
     try:
         async with client.get(js_url, timeout=8, ssl=False) as response:
             if response.status == 200:
+                # 2. CONTENT TYPE SHIELD: Abort if the server returns a binary stream instead of text
+                content_type = response.headers.get('Content-Type', '')
+                if 'application/pdf' in content_type or 'image/' in content_type or 'video/' in content_type:
+                    return vulnerabilities
+                    
+                text_data = await response.text()
                 tracker = TaintTracker()
-                tracker.walk(esprima.parseScript(await response.text(), {"tolerant": True}))
+                tracker.walk(esprima.parseScript(text_data, {"tolerant": True}))
+                
                 for endpoint in tracker.endpoints:
                     if not endpoint.startswith('http'): endpoint = "/".join(js_url.split('/')[:3]) + ("/" if not endpoint.startswith('/') else "") + endpoint
                     session_state.add_crawled_url(endpoint)
+                    
                 for secret, entropy in tracker.entropy_secrets:
                     console.print(f"[bold red]  ! [HIGH] Proprietary Token Detected [H: {entropy}]: {secret[:10]}...[/bold red]")
                     vulnerabilities.append({"type": "VULN", "name": f"High Entropy Anomaly (H={entropy})", "matched-at": js_url, "info": {"severity": "HIGH"}})

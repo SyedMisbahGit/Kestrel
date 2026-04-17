@@ -44,8 +44,7 @@ class TaintTracker:
             if val.startswith(('/', 'http', 'api/')) and len(val) > 4: self.endpoints.add(val)
             if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(('/', 'http')):
                 if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
-                    if is_whitelisted(val): continue
-                    if not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
+                    if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
                         entropy = calculate_shannon_entropy(val)
                         if entropy > 4.5: self.entropy_secrets.add((val, round(entropy, 2)))
         for key, val in vars(node).items():

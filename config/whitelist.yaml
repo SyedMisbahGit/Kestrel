@@ -1,0 +1,7 @@
+entropy_exclusions:
+  - "awsui_[a-z0-9_-]+"          # AWS UI framework tokens (e.g., awsui_context)
+  - "^[a-f0-9]{32}$"             # MD5 Hashes (Standard Cache busters)
+  - "^[a-f0-9]{40}$"             # SHA1 Hashes (Webpack chunk IDs)
+  - "(?i)react-[a-z0-9_-]+"      # React DOM cache IDs
+  - "tw-[a-z0-9_-]+"             # Tailwind CSS generated classes
+  - "^[0-9]+px$"                 # Random CSS pixel measurements

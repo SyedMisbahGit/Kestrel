@@ -155,6 +155,8 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
         safe_run("INTELLIGENCE", run_intelligence) # Phase 7: Blast Radius Graph
         def phase6_notifier(sess, conf):
             db_path = f"data/sessions/{target.replace('.', '_')}.db"
+            # Enforce 85% Oracle Confidence Threshold
+            os.environ["KESTREL_CONFIDENCE_THRESHOLD"] = "85.0"
             run_notifier(target, db_path)
         safe_run("NOTIFIER", phase6_notifier)
 

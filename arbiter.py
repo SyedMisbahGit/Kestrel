@@ -145,6 +145,12 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             safe_run("PROBING", run_probing)       # Phase 2: Favicon/Tech Profiling
             safe_run("SPIDER", run_spider)         # Phase 2.2: Skeleton Hash Spider
             safe_run("CORTEX", run_cortex)         # Phase 3: Project Ghost & AST
+            
+            # Clean state database of binary/external noise
+            try:
+                from modules.cortex import sanitize_database
+                sanitize_database(f"data/sessions/{target.replace('.', '_')}.db")
+            except: pass
 
         # Stage 3: Exploitation (Always runs, even on --resume)
         safe_run("NUCLEI", run_nuclei)             # Phase 4: Tech-Stack Targeted CVEs

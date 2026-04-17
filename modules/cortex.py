@@ -44,8 +44,6 @@ class TaintTracker:
             if val.startswith(('/', 'http', 'api/')) and len(val) > 4: self.endpoints.add(val)
             if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(('/', 'http')):
                 if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
-                    if val.startswith("http") and session.domain not in val:
-                        continue
                     if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
                         entropy = calculate_shannon_entropy(val)
                         if entropy > 4.5: self.entropy_secrets.add((val, round(entropy, 2)))
@@ -144,3 +142,27 @@ def run_cortex(session, config):
     console.print(f"INFO     Deploying Neural Extraction & Entropy Math against {len(js_targets)} bundles...")
     asyncio.run(deploy_cortex(session, js_targets))
     console.print("  + AST Compilation Complete. Shadow APIs and Proprietary Tokens injected into state graph.")
+
+def sanitize_database(db_path):
+    """Aggressively purges known false positives from the state database before Phase 7."""
+    import sqlite3
+    import os
+    if not os.path.exists(db_path): return
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Hard kill-list for the database
+        noise_patterns = [
+            '%.pdf%', '%.png%', '%.jpg%', '%.svg%', '%.woff%', 
+            '%google.com%', '%facebook.com%', '%twitter.com%', '%linkedin.com%',
+            '%jquery%', '%bootstrap%', '%tailwind%', '%.css%'
+        ]
+        
+        for pattern in noise_patterns:
+            cursor.execute("DELETE FROM vulnerabilities WHERE node LIKE ?", (pattern,))
+            
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log.error(f"Sanitization failed: {e}")

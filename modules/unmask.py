@@ -1,3 +1,4 @@
+from core.cdn import is_cdn_ip
 import asyncio
 import aiohttp
 import codecs
@@ -35,6 +36,7 @@ async def query_shodan_origin(client, fav_hash, api_key):
                 data = await r.json()
                 for match in data.get('matches', []):
                     ip = match.get('ip_str')
+                    if is_cdn_ip(ip): continue
                     org = match.get('org', 'Unknown ASN')
                     origins.add((ip, org))
     except Exception:

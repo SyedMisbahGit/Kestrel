@@ -44,15 +44,10 @@ async def check_bucket(client, sem, provider_name, url, session_state, candidate
 
                     import sqlite3
 
-                    conn = sqlite3.connect(f"data/sessions/{session_state.target.replace('.', '_')}.db")
 
-                    c = conn.cursor()
 
-                    c.execute("INSERT INTO vulnerabilities (node, vulnerability, severity, graph_context) VALUES (?, ?, ?, ?)", (url, f"Exposed {provider_name}", "CRITICAL", "EXTERNAL CLOUD ASSET (Takeover Risk)"))
 
-                    conn.commit()
 
-                    conn.close()
 
                     session_state.cloud_buckets.add(url)
 

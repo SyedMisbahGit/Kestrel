@@ -154,13 +154,14 @@ def sanitize_database(db_path):
         
         # Hard kill-list for the database
         noise_patterns = [
+            "%iglu:%", "%classid%", "%ABCDEFGHIJ%",
             '%.pdf%', '%.png%', '%.jpg%', '%.svg%', '%.woff%', 
             '%google.com%', '%facebook.com%', '%twitter.com%', '%linkedin.com%',
             '%jquery%', '%bootstrap%', '%tailwind%', '%.css%'
         ]
         
         for pattern in noise_patterns:
-            cursor.execute("DELETE FROM vulnerabilities WHERE id LIKE ? OR data LIKE ?", (pattern,))
+            cursor.execute("DELETE FROM vulnerabilities WHERE id LIKE ? OR data LIKE ?", (pattern, pattern))
             
         conn.commit()
         conn.close()

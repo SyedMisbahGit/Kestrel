@@ -11,6 +11,7 @@ from rich.console import Console
 from core.state import TargetSession
 from core.intelligence import run_intelligence
 from core.mesh import mesh
+from core.parser import parse_target
 
 # Modules
 from modules.osint import run_osint
@@ -59,7 +60,15 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
     console.print("\n[bold]SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
     config = load_config()
     session = TargetSession(target, mode)
-    
+
+    # IPv6 & URL Sanitization Matrix
+    sanitized = parse_target(target)
+    if not sanitized:
+        console.print("[bold red]⚠️ FATAL: Invalid Target Format. Halting.[/bold red]")
+        sys.exit(1)
+
+    target = sanitized["host"] # Safely strip to core host
+
     # Auth-Injection Matrix
     session.auth_cookies = dict(item.split("=", 1) for item in cookie.split("; ") if "=" in item) if cookie else {}
     session.auth_headers = {header.split(":", 1)[0].strip(): header.split(":", 1)[1].strip()} if header and ":" in header else {}

@@ -3,6 +3,7 @@ import aiohttp
 import socket
 import logging
 import ipaddress
+import sqlite3
 from rich.console import Console
 
 console = Console()
@@ -48,12 +49,11 @@ async def check_port(sem, target, port, session_state):
             conn = asyncio.open_connection(target, port)
             reader, writer = await asyncio.wait_for(conn, timeout=1.5)
             console.print(f"[green]  + [OPEN] {target}:{port}[/green]")
-                        import sqlite3
-                        conn = sqlite3.connect(f"data/sessions/{session.target.replace('.', '_')}.db")
-                        c = conn.cursor()
-                        c.execute("INSERT INTO vulnerabilities (node, vulnerability, severity, graph_context) VALUES (?, ?, ?, ?)", (f"{host}:{port}", "Exposed Port / Service", "MEDIUM", "Isolated Node"))
-                        conn.commit()
-                        conn.close()
+            conn = sqlite3.connect(f"data/sessions/{session_state.target.replace('.', '_')}.db")
+            c = conn.cursor()
+            c.execute("INSERT INTO vulnerabilities (node, vulnerability, severity, graph_context) VALUES (?, ?, ?, ?)", (f"{host}:{port}", "Exposed Port / Service", "MEDIUM", "Isolated Node"))
+            conn.commit()
+            conn.close()
             session.open_ports.add(f"{host}:{port}")
             writer.close()
             await writer.wait_closed()

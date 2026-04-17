@@ -160,7 +160,7 @@ def sanitize_database(db_path):
         ]
         
         for pattern in noise_patterns:
-            cursor.execute("DELETE FROM vulnerabilities WHERE node LIKE ?", (pattern,))
+            cursor.execute("DELETE FROM vulnerabilities WHERE matched_at LIKE ?", (pattern,))
             
         conn.commit()
         conn.close()

@@ -30,7 +30,14 @@ async def check_bucket(client, sem, provider_name, url, session_state):
                 
                 if status == 200:
                     console.print(f"[bold red]  ! [CRITICAL] Open {provider_name} Bucket Discovered: {url}[/bold red]")
-                    
+                import sqlite3
+                conn = sqlite3.connect(f"data/sessions/{session.target.replace('.', '_')}.db")
+                c = conn.cursor()
+                c.execute("INSERT INTO vulnerabilities (node, vulnerability, severity, graph_context) VALUES (?, ?, ?, ?)", (bucket_url, "Exposed Cloud Storage", "CRITICAL", "EXTERNAL CLOUD ASSET (Takeover Risk)"))
+                conn.commit()
+                conn.close()
+                    session.cloud_buckets.add(bucket_url)
+
                     if "s3.amazonaws" in url:
                         cmd = f"aws s3 ls s3://{candidate} --no-sign-request"
                     else:

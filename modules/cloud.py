@@ -2,6 +2,7 @@ from core.ui import print_briefing
 import asyncio
 import aiohttp
 import logging
+import sqlite3
 from rich.console import Console
 
 console = Console()
@@ -17,48 +18,77 @@ PROVIDERS = {
     "GCP Storage": "https://storage.googleapis.com/{}"
 }
 
-async def check_bucket(client, sem, provider_name, url, session_state):
-    async with sem:
-        try:
-            async with client.get(url, timeout=5, ssl=False) as r:
-                status = r.status
-                text = await r.text()
-                
-                # AWS & GCP logic
-                if "NoSuchBucket" in text or status == 404:
-                    return
-                
-                if status == 200:
-                    console.print(f"[bold red]  ! [CRITICAL] Open {provider_name} Bucket Discovered: {url}[/bold red]")
-                import sqlite3
-                conn = sqlite3.connect(f"data/sessions/{session.target.replace('.', '_')}.db")
-                c = conn.cursor()
-                c.execute("INSERT INTO vulnerabilities (node, vulnerability, severity, graph_context) VALUES (?, ?, ?, ?)", (bucket_url, "Exposed Cloud Storage", "CRITICAL", "EXTERNAL CLOUD ASSET (Takeover Risk)"))
-                conn.commit()
-                conn.close()
-                    session.cloud_buckets.add(bucket_url)
+async def check_bucket(client, sem, provider_name, url, session_state, candidate):
 
-                    if "s3.amazonaws" in url:
-                        cmd = f"aws s3 ls s3://{candidate} --no-sign-request"
-                    else:
-                        cmd = f"curl -s {url} | xmlstarlet format"
-                        
-                    print_briefing(
-                        title="Unauthenticated Cloud Storage",
-                        happening=f"Kestrel mathematically generated the bucket name '{candidate}' and received a 200 OK from {provider_name}, indicating total exposure.",
-                        action="Immediately verify if the bucket contains Terraform states, PII, or internal source code.",
-                        command=cmd,
-                        style="red"
-                    )
-                    session_state.vulnerabilities.append({
-                        "type": "VULN", "name": f"Open {provider_name} Bucket", "matched-at": url, "info": {"severity": "CRITICAL"}
-                    })
-                elif status == 403 or "AccessDenied" in text:
-                    console.print(f"[yellow]  * [INFO] Protected {provider_name} Bucket Found: {url}[/yellow]")
-                    # We log it, but don't flag as critical since it is properly locked
-                    session_state.add_subdomain(url)
+    async with sem:
+
+        try:
+
+            async with client.get(url, timeout=5, ssl=False) as r:
+
+                status = r.status
+
+                text = await r.text()
+
+                
+
+                if "NoSuchBucket" in text or status == 404:
+
+                    return
+
+                
+
+                if status == 200:
+
+                    console.print(f"[bold red]  ! [CRITICAL] Open {provider_name} Bucket Discovered: {url}[/bold red]")
+
+                    import sqlite3
+
+                    conn = sqlite3.connect(f"data/sessions/{session_state.target.replace('.', '_')}.db")
+
+                    c = conn.cursor()
+
+                    c.execute("INSERT INTO vulnerabilities (node, vulnerability, severity, graph_context) VALUES (?, ?, ?, ?)", (url, f"Exposed {provider_name}", "CRITICAL", "EXTERNAL CLOUD ASSET (Takeover Risk)"))
+
+                    conn.commit()
+
+                    conn.close()
+
+                    session_state.cloud_buckets.add(url)
+
                     
+
+                    cmd = f"aws s3 ls s3://{candidate} --no-sign-request" if "s3.amazonaws" in url else f"curl -s {url} | xmlstarlet format"
+
+                    print_briefing(
+
+                        title="Unauthenticated Cloud Storage",
+
+                        happening=f"Kestrel mathematically generated the bucket name '{candidate}' and received a 200 OK from {provider_name}, indicating total exposure.",
+
+                        action="Immediately verify if the bucket contains Terraform states, PII, or internal source code.",
+
+                        command=cmd,
+
+                        style="red"
+
+                    )
+
+                    session_state.vulnerabilities.append({
+
+                        "type": "VULN", "name": f"Open {provider_name} Bucket", "matched-at": url, "info": {"severity": "CRITICAL"}
+
+                    })
+
+                elif status == 403 or "AccessDenied" in text:
+
+                    console.print(f"[yellow]  * [INFO] Protected {provider_name} Bucket Found: {url}[/yellow]")
+
+                    session_state.add_subdomain(url)
+
         except Exception:
+
+            pass
             pass
 
 async def deploy_cloud_sniper(session_state, base_name):
@@ -76,7 +106,7 @@ async def deploy_cloud_sniper(session_state, base_name):
                 
                 for provider, template in PROVIDERS.items():
                     url = template.format(candidate)
-                    tasks.append(check_bucket(client, sem, provider, url, session_state))
+                    tasks.append(check_bucket(client, sem, provider, url, session_state, candidate))
                     
         await asyncio.gather(*tasks)
 

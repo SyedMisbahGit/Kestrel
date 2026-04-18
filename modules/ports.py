@@ -49,7 +49,8 @@ async def check_port(sem, target, port, session_state):
             conn = asyncio.open_connection(target, port)
             reader, writer = await asyncio.wait_for(conn, timeout=1.5)
             console.print(f"[green]  + [OPEN] {target}:{port}[/green]")
-            session.open_ports.add(f"{host}:{port}")
+            session_state.open_ports.add(f"{target}:{port}")
+            session_state.vulnerabilities.append({"type": "VULN", "name": "Exposed Port", "matched-at": f"{target}:{port}", "info": {"severity": "MEDIUM"}})
             writer.close()
             await writer.wait_closed()
             # In a real setup, you'd save this to your state graph

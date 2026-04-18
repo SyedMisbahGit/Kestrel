@@ -1,3 +1,6 @@
+import ssl
+import socket
+import concurrent.futures
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -54,14 +57,37 @@ class HybridIntelligenceEngine:
             print(f"[!] ThreatCrowd failed: {e}")
         return False
 
-    def execute_recon(self):
-        # The Fallback Chain
-        if not self.fetch_crtsh():
-            print("[-] Primary source offline. Initiating fallback chain...")
-            self.fetch_alienvault()
-            self.fetch_threatcrowd()
+    
+    def fetch_native_san(self):
+        print(f"[*] Extracting Native SANs from X.509 Certificate for {self.target}...")
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        try:
+            with socket.create_connection((self.target, 443), timeout=5) as sock:
+                with context.wrap_socket(sock, server_hostname=self.target) as ssock:
+                    cert = ssock.getpeercert()
+                    for san in cert.get('subjectAltName', []):
+                        if san[0] == 'DNS':
+                            self.subdomains.add(san[1].lower())
+            return True
+        except Exception as e:
+            print(f"[!] Native SAN extraction failed: {e}")
+        return False
+def execute_recon(self):
+        print("[*] Initiating Full-Spectrum Reconnaissance...")
+        
+        # Execute all zero-cost sources concurrently for maximum speed
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [
+                executor.submit(self.fetch_crtsh),
+                executor.submit(self.fetch_alienvault),
+                executor.submit(self.fetch_threatcrowd),
+                executor.submit(self.fetch_native_san)
+            ]
+            concurrent.futures.wait(futures)
             
-        # Clean wildcard entries (*.target.com)
+        # Clean wildcard entries (*.target.com) and out-of-scope domains
         clean_subs = {sub.replace('*.', '') for sub in self.subdomains if self.target in sub}
         print(f"[+] Phase 1 Complete: Discovered {len(clean_subs)} unique subdomains.")
         return list(clean_subs)

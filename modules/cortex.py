@@ -4,6 +4,8 @@ import aiohttp
 import logging
 import re
 import json
+import ijson
+import io
 import math
 import esprima
 from urllib.parse import urlparse
@@ -44,9 +46,10 @@ class TaintTracker:
             if val.startswith(('/', 'http', 'api/')) and len(val) > 4: self.endpoints.add(val)
             if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(('/', 'http')):
                 if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
-                    if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
-                        entropy = calculate_shannon_entropy(val)
-                        if entropy > 4.5: self.entropy_secrets.add((val, round(entropy, 2)))
+                    if 16 < len(val) < 64:  # STRICT BOUNDARY: Only math on token-sized strings
+                        if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
+                            entropy = calculate_shannon_entropy(val)
+                            if entropy > 4.5: self.entropy_secrets.add((val, round(entropy, 2)))
         for key, val in vars(node).items():
             if isinstance(val, list):
                 for item in val: self.walk(item)
@@ -72,8 +75,11 @@ async def extract_target(client, js_url, session_state):
     try:
         async with client.get(f"{js_url}.map", timeout=8, ssl=False) as response:
             if response.status == 200:
-                map_data = json.loads(await response.text())
-                sources, contents = map_data.get("sources", []), map_data.get("sourcesContent", [])
+                # ZERO-RAM STREAMING: Parse 50MB files without loading them into memory
+                text_stream = io.StringIO(await response.text())
+                sources = list(ijson.items(text_stream, 'sources.item'))
+                text_stream.seek(0)
+                contents = list(ijson.items(text_stream, 'sourcesContent.item'))
                 if sources and contents:
                     console.print(f"[bold magenta]  [*] PROJECT GHOST: Extracted {len(sources)} dev files from {js_url}[/bold magenta]")
                     for filename, content in zip(sources, contents):

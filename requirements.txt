@@ -5,3 +5,4 @@ requests
 dnspython
 checkdmarc
 psutil
+ijson

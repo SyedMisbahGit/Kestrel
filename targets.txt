@@ -1,4 +1,3 @@
-bugcrowd.com
 amazon.com
 apple.com
 microsoft.com
@@ -8,3 +7,4 @@ vercel.com
 zerodha.com
 comolho.com
 hackerone.com
+bugcrowd.com

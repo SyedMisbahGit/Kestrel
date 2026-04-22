@@ -1,4 +1,3 @@
-amazon.com
 apple.com
 microsoft.com
 class.com
@@ -8,3 +7,4 @@ zerodha.com
 comolho.com
 hackerone.com
 bugcrowd.com
+amazon.com

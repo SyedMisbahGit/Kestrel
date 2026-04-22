@@ -1,4 +1,3 @@
-microsoft.com
 class.com
 chatgpt.com
 vercel.com
@@ -8,3 +7,4 @@ hackerone.com
 bugcrowd.com
 amazon.com
 apple.com
+microsoft.com

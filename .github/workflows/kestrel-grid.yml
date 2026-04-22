@@ -70,7 +70,8 @@ jobs:
           if [ -f data/training_ledger.csv ]; then git add data/training_ledger.csv; fi
           git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
           git stash
-          git pull --rebase origin main
+          git config pull.rebase true
+          git pull -s recursive -X ours origin main
           git push origin main
           git stash drop || true
 

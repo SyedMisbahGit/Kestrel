@@ -160,6 +160,7 @@ def sanitize_database(db_path):
         
         # Hard kill-list for the database
         noise_patterns = [
+            "%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/%",
             "%.html%", "%cloudflare%",
             "%iglu:%", "%classid%", "%ABCDEFGHIJ%",
             '%.pdf%', '%.png%', '%.jpg%', '%.svg%', '%.woff%', 

@@ -49,7 +49,7 @@ class TaintTracker:
                     if 16 < len(val) < 64:  # STRICT BOUNDARY: Only math on token-sized strings
                         if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
                             entropy = calculate_shannon_entropy(val)
-                            if entropy > 4.5: self.entropy_secrets.add((val, round(entropy, 2)))
+                            if entropy > 4.5: masked = val[:4] + "********" + val[-4:] if len(val) > 8 else "****"; self.entropy_secrets.add((masked, round(entropy, 2)))
         for key, val in vars(node).items():
             if isinstance(val, list):
                 for item in val: self.walk(item)

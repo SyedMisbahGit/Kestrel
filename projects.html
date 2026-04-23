@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta content='#0f0826' id='theme-color-meta' name='theme-color'>
+<script>
+(function() {
+  var DARK_COLOR = '#0f0826';
+  var LIGHT_COLOR = '#ffffff';
+  var meta = document.getElementById('theme-color-meta');
+
+  var saved = localStorage.getItem('theme');
+  var supportsScheme = window.matchMedia && window.matchMedia('(prefers-color-scheme)').media !== 'not all';
+  var prefersLight = supportsScheme && window.matchMedia('(prefers-color-scheme: light)').matches;
+  var theme = saved || (supportsScheme ? (prefersLight ? 'light' : 'dark') : 'dark');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark-mode');
+  } else {
+    meta.setAttribute('content', LIGHT_COLOR);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.querySelector('.theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      document.documentElement.classList.toggle('dark-mode');
+      var t = document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light';
+      localStorage.setItem('theme', t);
+      meta.setAttribute('content', t === 'dark' ? DARK_COLOR : LIGHT_COLOR);
+    });
+  });
+})();
+</script>
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="NJmt-iu3Bp08zRQBiAeXKQHEBIJp-_AsjPqGhfGNL0y6qhm47HrqPjrtUs_Ijyt_LWVPyWhr-95I7pej9pt8Mg" />
+<script type='application/ld+json'>
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "DeployHQ",
+  "alternateName": ["Deploybot", "Deploy HQ"],
+  "description": "Automated deployment platform for web applications. Deploy code from Git repositories to servers with zero downtime.",
+  "url": "https://www.deployhq.com/",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://www.deployhq.com/assets/logos/deployhq-logo-9586cdf9994a2286049465b3f9fa9df456051a862066c61031f2a1ed72518f4f.svg",
+    "width": 158,
+    "height": 40
+  },
+  "foundingDate": "2010",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+1-323-238 9740",
+    "contactType": "customer service",
+    "availableLanguage": "English",
+    "areaServed": "Worldwide"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "USA",
+    "addressLocality": "Nevada City"
+  },
+  "parentOrganization": {
+    "@type": "Organization",
+    "name": "saas.group",
+    "url": "https://saas.group",
+    "sameAs": [
+      "https://www.linkedin.com/company/saas-group/",
+      "https://www.crunchbase.com/organization/saas-group"
+    ]
+  },
+  "sameAs": [
+    "https://x.com/deployhq/",
+    "https://twitter.com/deployhq",
+    "https://www.youtube.com/user/deployhq",
+    "https://www.linkedin.com/company/deployhq/",
+    "https://www.g2.com/products/deployhq/reviews/",
+    "https://www.capterra.com/p/10020225/DeployHQ/",
+    "https://www.crunchbase.com/organization/deployhq",
+    "https://www.producthunt.com/products/deployhq",
+    "https://slack.com/apps/AE2KTFUJ1-deployhq",
+    "https://github.com/deployhq"
+  ],
+  "employee": [
+    {
+      "@type": "Person",
+      "name": "Facundo Farias",
+      "jobTitle": "CTO",
+      "url": "https://www.linkedin.com/in/facundofariasg",
+      "sameAs": [
+        "https://www.linkedin.com/in/facundofariasg"
+      ],
+      "worksFor": {
+        "@type": "Organization",
+        "name": "DeployHQ",
+        "url": "https://www.deployhq.com/"
+      }
+    }
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "DeployHQ Services",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Free Plan",
+          "description": "Free deployment service for small projects"
+        },
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      {
+        "@type": "Offer", 
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Solo Plan",
+          "description": "Professional deployment service for individuals"
+        },
+        "priceSpecification": [
+          {
+            "@type": "PriceSpecification",
+            "price": "10",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "PriceSpecification",
+            "price": "10",
+            "priceCurrency": "EUR"
+          },
+          {
+            "@type": "PriceSpecification",
+            "price": "10",
+            "priceCurrency": "GBP"
+          }
+        ]
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Pro Plan",
+          "description": "Advanced deployment service for small teams"
+        },
+        "priceSpecification": [
+          {
+            "@type": "PriceSpecification",
+            "price": "21",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "PriceSpecification",
+            "price": "21",
+            "priceCurrency": "EUR"
+          },
+          {
+            "@type": "PriceSpecification",
+            "price": "21",
+            "priceCurrency": "GBP"
+          }
+        ]
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Business Plan",
+          "description": "Scalable deployment service for growing businesses and teams"
+        },
+        "priceSpecification": [
+          {
+            "@type": "PriceSpecification",
+            "price": "43",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "PriceSpecification",
+            "price": "43",
+            "priceCurrency": "EUR"
+          },
+          {
+            "@type": "PriceSpecification",
+            "price": "43",
+            "priceCurrency": "GBP"
+          }
+        ]
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Enterprise Plan",
+          "description": "Custom deployment solutions for large organizations"
+        },
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Custom pricing available upon request"
+        }
+      }
+    ]
+  }
+}
+
+</script>
+
+<script>
+  // create dataLayer
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({'siteType': 'deployhq-website', 'environment': 'production'});
+  
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+  
+  // set 'denied' as default for both ad and analytics storage, as well as ad_user_data and ad_personalization
+  gtag('consent', 'default', {
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      ad_storage: 'denied',
+      analytics_storage: 'denied',
+      wait_for_update: 2000 // milliseconds to wait for update
+  });
+  
+  // Enable ads data redaction by default [optional]
+  gtag('set', 'ads_data_redaction', true);
+</script>
+
+<link rel="icon" type="image/x-icon" href="/assets/favicon-357ebe39b58f28869358da83948e76e7cadfb0791c97af34abfe346f5e3ef634.png" />
+<meta charset='utf-8'>
+<meta content='-3R1T3gBbzXYORZmZKTyMl4perKafXqtKXi34aqXBTw' name='google-site-verification'>
+<meta content='width=device-width, initial-scale=1' name='viewport'>
+<meta content='production' name='environment'>
+<title>DeployHQ — Deploy Your Website Automatically from Git</title>
+<meta name="description" content="Deploy your website from GitHub, GitLab &amp;amp; Bitbucket automatically. Zero-downtime deployments, build pipelines, one-click rollbacks. Trusted by...">
+<meta name="keywords" content="deploy, deploy code, git deployment, zero downtime deployment, automatic deployment, github deploy, gitlab deploy, bitbucket deploy, continuous deployment, code deployment automation">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.deployhq.com">
+<meta property="og:title" content="DeployHQ — Deploy Your Website Automatically from Git">
+<meta property="og:description" content="Deploy your website from GitHub, GitLab &amp;amp; Bitbucket automatically. Zero-downtime deployments, build pipelines, one-click rollbacks. Trusted by...">
+<meta property="og:image" content="https://www.deployhq.com/images/deploy/opengraph-banner.png">
+<meta property="og:url" content="https://www.deployhq.com">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DeployHQ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@deployhq">
+<meta name="twitter:title" content="DeployHQ — Deploy Your Website Automatically from Git">
+<meta name="twitter:description" content="Deploy your website from GitHub, GitLab &amp;amp; Bitbucket automatically. Zero-downtime deployments, build pipelines, one-click rollbacks. Trusted by...">
+<meta name="twitter:image" content="https://www.deployhq.com/images/deploy/opengraph-banner.png">
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DeployHQ",
+  "alternateName": "Deploybot",
+  "description": "Automated deployment platform for web applications. Deploy code from Git repositories to servers with zero downtime.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web-based",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2027-04-18",
+    "availability": "https://schema.org/InStock",
+    "description": "Free tier available with paid plans starting from $10/month"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DeployHQ",
+    "url": "https://www.deployhq.com"
+  },
+  "softwareVersion": "2.0",
+  "screenshot": "https://www.deployhq.com/images/screenshots/home-screenshot-large.png",
+  "featureList": [
+    "Automated deployments",
+    "Git integration",
+    "Zero downtime deployments",
+    "Build pipelines",
+    "Multiple deployment targets",
+    "Rollback capabilities",
+    "Team collaboration"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.5",
+    "reviewCount": "57"
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Lead Frontend Engineer",
+        "jobTitle": "Lead Frontend Engineer"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "G2",
+        "url": "https://www.g2.com",
+        "sameAs": "https://www.g2.com/products/deployhq/reviews/"
+      },
+      "reviewBody": "removes all that and you dont need to create scripts of any complex code to run node.js builds, it just works! like magic"
+    },
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Head of Development",
+        "jobTitle": "Head of Development"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "G2",
+        "url": "https://www.g2.com",
+        "sameAs": "https://www.g2.com/products/deployhq/reviews/"
+      },
+      "reviewBody": "simplicity of both the UI and zero-to-first-deploy"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "DeployHQ",
+  "url": "https://www.deployhq.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://www.deployhq.com/support/search?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "DeployHQ — Automated Deployment Platform",
+  "url": "https://www.deployhq.com",
+  "description": "Build and deploy code from GitHub, Bitbucket and GitLab to your servers with zero downtime.",
+  "author": {
+    "@type": "Organization",
+    "name": "DeployHQ",
+    "url": "https://www.deployhq.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DeployHQ",
+    "url": "https://www.deployhq.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.deployhq.com/assets/logos/deployhq-logo-9586cdf9994a2286049465b3f9fa9df456051a862066c61031f2a1ed72518f4f.svg"
+    }
+  },
+  "about": {
+    "@type": "Organization",
+    "name": "DeployHQ",
+    "url": "https://www.deployhq.com/about"
+  }
+}</script>
+<link href='/blog/feed.xml' rel='alternate' title='DeployHQ Blog' type='application/rss+xml'>
+<link href='/llms.txt' rel='alternate' title='LLM-friendly site index' type='text/plain'>
+<link href='/llms-full.txt' rel='alternate' title='LLM-friendly full content' type='text/plain'>
+<link rel="preload" href="/assets/DMSans-Regular-f4c37daf53f130725687b7b6ebb890a87c46aba0ad63cf233e3afb3fc1ad1146.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="/assets/DMSans-Medium-825b1bbbf002e5e8472a1332e0afba75ff59228a39c2f611b7f194c942b2e31e.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="/assets/DMSans-Bold-7359a93cfdc3f46a7b40ebfe9d500ab79fb867a5177a8cf2e3ef5916f6da6198.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="/assets/logos/deployhq-logo-9586cdf9994a2286049465b3f9fa9df456051a862066c61031f2a1ed72518f4f.svg" as="image">
+<link rel="preload" href="/assets/backgrounds/hero-glow-c388ceafdadcdd788c3efb91760e346f0bb05383eeecb9b5b83684f2549cd192.png" as="image" fetchpriority="high">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="dns-prefetch" href="//www.googletagmanager.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true">
+<link rel="stylesheet" href="/assets/application-5bc4b788041a0d103f8080716c372df6b0c0eebfa841f66b82e94109d377fb8b.css" media="all" />
+<script src="/packs/js/application-baeb250102c9a823e38b.js" async="async"></script>
+
+</head>
+<body class='page-home page-home-index'>
+<noscript>
+<iframe height='0' src='https://www.googletagmanager.com/ns.html?id=GTM-KF69ZG7T' style='display:none; visibility:hidden' width='0'></iframe>
+</noscript>
+
+<div class='u-skip-links'>
+<a class='u-skip-link' href='#main-content'>Skip to main content</a>
+<a class='u-skip-link' href='#main-navigation'>Skip to navigation</a>
+</div>
+
+<header class='header header--bordered js-header'>
+
+
+
+<div class='container header__container'>
+<section class='header__section'>
+<h3 class='u-visually-hidden'>Header</h3>
+<div class='header__overlay js-header__overlay'></div>
+<nav aria-label='Main navigation' class='header__nav js-header-nav' id='main-navigation' role='navigation'>
+<span class='u-visually-hidden'>Primary Navigation</span>
+<a class="header__branding" href="/"><img alt="DeployHQ" class="header__logo header__logo--light" width="158" height="40" src="/assets/logos/deployhq-logo-dark-5d651de1840ee1ca1ebd14015d57f72b07185615e919747b65852154aeec77d8.svg" />
+<img alt="DeployHQ" class="header__logo header__logo--dark" width="158" height="40" src="/assets/logos/deployhq-logo-9586cdf9994a2286049465b3f9fa9df456051a862066c61031f2a1ed72518f4f.svg" />
+</a><ul class='header__nav-menu' id='header__nav-menu'>
+<li class='header__nav-item header__nav-item--submenu'>
+<a class="header__nav-link js-dropdown-link" aria-expanded="false" aria-haspopup="true" href="/features">Features</a>
+<div class='header__submenu header__submenu--features js-dropdown' role='menu'>
+<div class='header__submenu-columns'>
+<div class='header__submenu-column'>
+<span class='header__submenu-category'>DEPLOYMENTS</span>
+<ul class='header__submenu-items'>
+<li>
+<a class="header__submenu-item-link" href="/features/zero-downtime-deployments"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Zero Downtime Deployments</span>
+<span class='header__submenu-item-desc'>Deploy without interruption</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/turbo-deployments"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+  <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+  <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Turbo Deployments</span>
+<span class='header__submenu-item-desc'>Lightning fast deploys</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/docker-builds"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M22 12.5c-.5-1-2-1.5-3.5-1.5-0.5 0-1 0-1.5.1-.3-1.3-1.2-2.4-2.5-2.9V6h-3V4H9v2H6v2H3v2H1v3c0 3.3 2.7 6 6 6h10c2.8 0 5-2.2 5-5 0-.5 0-1-.5-1.5z"/>
+  <rect x="5" y="8" width="2" height="2"/>
+  <rect x="8" y="8" width="2" height="2"/>
+  <rect x="11" y="8" width="2" height="2"/>
+  <rect x="8" y="5" width="2" height="2"/>
+  <rect x="11" y="5" width="2" height="2"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Docker Builds</span>
+<span class='header__submenu-item-desc'>Container-based builds</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/automatic-deployments"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/>
+  <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+  <path d="M12 2v2"/>
+  <path d="M12 22v-2"/>
+  <path d="m17 20.66-1-1.73"/>
+  <path d="M11 10.27 7 3.34"/>
+  <path d="m20.66 17-1.73-1"/>
+  <path d="m3.34 7 1.73 1"/>
+  <path d="M14 12h8"/>
+  <path d="M2 12h2"/>
+  <path d="m20.66 7-1.73 1"/>
+  <path d="m3.34 17 1.73-1"/>
+  <path d="m17 3.34-1 1.73"/>
+  <path d="m11 13.73-4 6.93"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Automatic Deployment</span>
+<span class='header__submenu-item-desc'>Deploy on every push</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/deploy-behind-firewalls"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy Behind Firewalls</span>
+<span class='header__submenu-item-desc'>Secure private deployments</span>
+</div>
+</a></li>
+</ul>
+</div>
+<div class='header__submenu-column'>
+<span class='header__submenu-category'>FEATURES</span>
+<ul class='header__submenu-items'>
+<li>
+<a class="header__submenu-item-link" href="/features/one-click-rollback"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+  <path d="M3 3v5h5"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>One-Click Rollback</span>
+<span class='header__submenu-item-desc'>Instant rollback capability</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/build-pipelines"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 3v12"/>
+  <circle cx="18" cy="6" r="3"/>
+  <circle cx="6" cy="18" r="3"/>
+  <path d="M18 9a9 9 0 0 1-9 9"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Build Pipelines</span>
+<span class='header__submenu-item-desc'>Custom build workflows</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/deployment-targets"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10"/>
+  <circle cx="12" cy="12" r="6"/>
+  <circle cx="12" cy="12" r="2"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deployment Targets</span>
+<span class='header__submenu-item-desc'>Multi-environment deploys</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/deployment-templates"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+  <polyline points="14 2 14 8 20 8"/>
+  <line x1="16" y1="13" x2="8" y2="13"/>
+  <line x1="16" y1="17" x2="8" y2="17"/>
+  <line x1="10" y1="9" x2="8" y2="9"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deployment Templates</span>
+<span class='header__submenu-item-desc'>Reusable configurations</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/deployment-zones"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10"/>
+  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+  <path d="M2 12h20"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deployment Zones</span>
+<span class='header__submenu-item-desc'>Geographic distribution</span>
+</div>
+</a></li>
+</ul>
+</div>
+<div class='header__submenu-column'>
+<span class='header__submenu-category'>INTEGRATIONS</span>
+<ul class='header__submenu-items'>
+<li>
+<a class="header__submenu-item-link" href="/deploy-from-github"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+  <path d="M9 18c-4.51 2-5-2-7-2"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy from GitHub</span>
+<span class='header__submenu-item-desc'>GitHub integration</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/deploy-from-gitlab"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m22 13.29-3.33-10a.42.42 0 0 0-.14-.18.38.38 0 0 0-.22-.11.39.39 0 0 0-.23.07.42.42 0 0 0-.14.18l-2.26 6.67H8.32L6.06 3.25a.42.42 0 0 0-.14-.18.38.38 0 0 0-.46.04.42.42 0 0 0-.14.18L2 13.29a.74.74 0 0 0 .27.83L12 21l9.73-6.88a.74.74 0 0 0 .27-.83Z"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy from GitLab</span>
+<span class='header__submenu-item-desc'>GitLab integration</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/deploy-from-bitbucket"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3.5 3h17a.5.5 0 0 1 .5.55l-2.5 16.9a.5.5 0 0 1-.5.45H6a.5.5 0 0 1-.5-.45L3 3.55a.5.5 0 0 1 .5-.55Z"/>
+  <path d="M9.5 9h5l-.5 6h-4l-.5-6Z"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy from Bitbucket</span>
+<span class='header__submenu-item-desc'>Bitbucket integration</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/digital-ocean"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy to DigitalOcean</span>
+<span class='header__submenu-item-desc'>DigitalOcean Droplets</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/wordpress"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10"/>
+  <line x1="2" y1="12" x2="22" y2="12"/>
+  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy WordPress</span>
+<span class='header__submenu-item-desc'>WordPress deployments</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/shopify"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+  <path d="M3 6h18"/>
+  <path d="M16 10a4 4 0 0 1-8 0"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deploy to Shopify</span>
+<span class='header__submenu-item-desc'>Shopify deployments</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/deploy-to-game-servers"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Game Servers</span>
+<span class='header__submenu-item-desc'>Deploy to game servers</span>
+</div>
+</a></li>
+</ul>
+</div>
+<div class='header__submenu-column'>
+<span class='header__submenu-category'>DEVELOPER TOOLS</span>
+<ul class='header__submenu-items'>
+<li>
+<a class="header__submenu-item-link" href="/features/api"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="16 18 22 12 16 6"/>
+  <polyline points="8 6 2 12 8 18"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>REST API</span>
+<span class='header__submenu-item-desc'>Full API access</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/ai"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+  <path d="M5 3v4"/>
+  <path d="M19 17v4"/>
+  <path d="M3 5h4"/>
+  <path d="M17 19h4"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>DeployHQ AI</span>
+<span class='header__submenu-item-desc'>AI-powered assistance</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/deployhq-mcp"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+  <line x1="6" y1="6" x2="6.01" y2="6"/>
+  <line x1="6" y1="18" x2="6.01" y2="18"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>MCP Server</span>
+<span class='header__submenu-item-desc'>Model Context Protocol</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/agents"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="4 17 10 11 4 5"/>
+  <line x1="12" y1="19" x2="20" y2="19"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>CLI & Agents</span>
+<span class='header__submenu-item-desc'>Deploy from the terminal</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" rel="noopener" target="_blank" href="https://pagespeed.deployhq.com/"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4.5 14a7.5 7.5 0 0 1 15 0"/>
+  <path d="M12 9v4l3 3"/>
+  <circle cx="12" cy="14" r="1"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>AI PageSpeed</span>
+<span class='header__submenu-item-desc'>Performance insights</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/features/integrations"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+  <path d="m9 12 2 2 4-4"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Powerful Integrations</span>
+<span class='header__submenu-item-desc'>Connect your tools</span>
+</div>
+</a></li>
+</ul>
+</div>
+</div>
+</div>
+</li>
+<li class='header__nav-item'>
+<a class="header__nav-link" href="/pricing">Pricing</a>
+</li>
+<li class='header__nav-item'>
+<a class="header__nav-link" href="/customers">Testimonials</a>
+</li>
+<li class='header__nav-item'>
+<a class="header__nav-link" href="/blog">Blog</a>
+</li>
+<li class='header__nav-item header__nav-item--submenu'>
+<a class="header__nav-link js-dropdown-link" aria-expanded="false" aria-haspopup="true" href="/support">Help</a>
+<div class='header__submenu header__submenu--help js-dropdown' role='menu'>
+<div class='header__submenu-columns'>
+<div class='header__submenu-column'>
+<ul class='header__submenu-items'>
+<li>
+<a class="header__submenu-item-link" href="/support#ask-ai"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M7.5 5.6 10 7 8.6 4.5 10 2 7.5 3.4 5 2l1.4 2.5L5 7zm12 9.8L17 14l1.4 2.5L17 19l2.5-1.4L22 19l-1.4-2.5L22 14zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5zm-7.63 5.29a.9959.9959 0 0 0-1.41 0L1.29 18.96a.9959.9959 0 0 0 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0L16.7 11.05a.9959.9959 0 0 0 0-1.41l-2.33-2.35zM5.21 19.5l-1.41-1.41L13.3 8.6l1.41 1.41L5.21 19.5z"/>
+</svg>
+
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Ask AI</span>
+<span class='header__submenu-item-desc'>Instant AI-powered answers</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/support"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="m50.00001 956.38824c-11.78082 0-23.56599 4.5035-32.53125 13.4688-17.93059112 17.9305-17.93055112 47.10066 0 65.03116 17.93054 17.9305 47.13191 17.9306 65.0625 0 17.93054-17.9305 17.93055-47.10066 0-65.03116-8.96527-8.9653-20.75043-13.4688-32.53125-13.4688zm0 7.9688c7.50843-.0001 15.01102 2.2465 21.46875 6.6874l-8.71875 8.6876c-3.94138-2.2167-8.34149-3.3438-12.75-3.3438s-8.80862 1.1271-12.75 3.3438l-8.71875-8.6876c6.45773-4.4409 13.96032-6.6874 21.46875-6.6874zm-31.34375 16.5624 8.6875 8.7188c-4.42124 7.884-4.42124 17.61606 0 25.49996l-8.6875 8.7188c-8.8956311-12.9119-8.8859911-30.02106 0-42.93756zm62.6875 0c8.88596 12.9165 8.8956 30.02566 0 42.93756l-8.6875-8.7188c4.42124-7.8839 4.42124-17.61596 0-25.49996zm-31.34375 3.4376c4.59824-.0001 9.18731 1.7498 12.71875 5.2812 7.06288 7.0629 7.06288 18.40596 0 25.46876s-18.37462 7.0628-25.4375 0c-7.06287-7.0628-7.06287-18.40586 0-25.46876 3.53144-3.5314 8.12051-5.2812 12.71875-5.2812zm-12.75 40.68736c7.87819 4.4213 17.62181 4.4213 25.5 0l8.71875 8.6876c-12.91434 8.8811-30.02319 8.8811-42.9375 0z" transform="translate(0 -952.36218)"/></svg>
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Support Centre</span>
+<span class='header__submenu-item-desc'>Browse help articles</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/git"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" height="50" viewBox="0 0 50 50" width="50" xmlns="http://www.w3.org/2000/svg"><path d="m7 7c-1.699219 0-3 1.300781-3 3v22c0 .800781.3125 1.398438.8125 2l-4.40625 5.8125c-.300781.300781-.40625.789063-.40625 1.1875v1c0 .800781.304688 1.59375.90625 2.09375.5.601563 1.292969.90625 2.09375.90625h44c.800781 0 1.59375-.304687 2.09375-.90625.5-.601562.90625-1.292969.90625-2.09375v-1c0-.398437-.105469-.886719-.40625-1.1875l-4.40625-5.8125c.5-.5.8125-1.199219.8125-2v-22c0-1.699219-1.300781-3-3-3zm0 2h36c.601563 0 1 .398438 1 1v22c0 .601563-.398437 1-1 1h-36c-.601562 0-1-.398437-1-1v-22c0-.601562.398438-1 1-1zm17 2v20h2v-20zm-14.28125 1c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h10c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-10c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm20 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h10c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-10c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-20 4c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm20 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-20 4c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h10c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-10c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm20 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h10c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-10c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-20 4c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm20 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-20 4c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h10c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-10c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm20 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h10c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-10c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-10.21875 10h11c.300781 0 .710938.199219.8125.5l1.6875 2.5h-16l1.6875-2.5c.199219-.300781.511719-.5.8125-.5z"/></svg>
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Learn Git</span>
+<span class='header__submenu-item-desc'>Git tutorials & guides</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/guides"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" enable-background="new 0 0 100 100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="m45.1 77.7 52.8-30.7-5.7-3.3-47.1 27.4-7.9-4.6-29-16.7v-7.7l36.8 21.3 52.8-30.7-42.8-24.8-52.9 30.7v14.3 14.3l32 18.4 11 6.3 52.8-30.7-5.7-3.3-47.1 27.5-7.9-4.6-29-16.7v-7.7l26 15zm-5.7-41.3c1.6-.8 3.1-1.2 4.4-1.4 1.8-.2 4.3-.1 7.6.2 1.6.2 3.2.2 4.7 0s2.8-.7 4-1.3c1.2-.7 1.9-1.5 2-2.3s-.5-1.6-1.7-2.3c-1-.6-2.1-.9-3.4-.9-.8 0-1.6.1-2.4.3-.9.3-2.1.2-2.9-.3l-4.7-2.7c-.6-.4-.6-.9.1-1.2 2.7-1.4 5.6-1.9 8.8-1.7 3.6.3 7 1.4 10.3 3.3 3.5 2 5.4 4.2 5.7 6.4s-1.1 4.2-4.1 5.9c-1.8 1.1-4.1 1.7-6.8 2s-5.3.2-7.9-.3c-1.6-.2-2.9-.2-3.9.1-.7.2-1.5.4-2.3.8-.6.3-1.6.3-2.2-.1l-5.2-3c-.8-.5-.8-1.1-.1-1.5zm-8.8 5.2 2.7-1.6c.9-.5 2.4-.5 3.3 0l4.2 2.4c.9.5.9 1.4 0 1.9l-2.7 1.6c-.9.5-2.4.5-3.3 0l-4.2-2.4c-.9-.6-.9-1.4 0-1.9z"/></svg>
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Deployment Guides</span>
+<span class='header__submenu-item-desc'>Step-by-step instructions</span>
+</div>
+</a></li>
+</ul>
+</div>
+<div class='header__submenu-column'>
+<ul class='header__submenu-items'>
+<li>
+<a class="header__submenu-item-link" rel="noopener" target="_blank" href="https://changelog.deployhq.com/changelog"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" height="50" viewBox="0 0 50 50" width="50" xmlns="http://www.w3.org/2000/svg"><path d="m1.71875 2.78125c-.464844.105469-.792969.523438-.78125 1v35.6875c0 4.246094 2.207031 6.640625 4.375 7.71875s4.3125 1.03125 4.3125 1.03125h30.75v-.09375c.480469.054688 1 .09375 1 .09375s1.921875.011719 3.84375-1.09375c1.875-1.078125 3.722656-3.359375 3.8125-7.3125.011719-.019531.023438-.042969.03125-.0625 0-.023437 0-.039062 0-.0625.003906-.050781.003906-.105469 0-.15625v-25.09375c0-.011719 0-.019531 0-.03125 0 0 .015625-1.171875-.59375-2.375s-2.027344-2.5-4.25-2.5v-.03125h-9.46875v2h5.5625c-.121094.171875-.222656.328125-.3125.5-.609375 1.191406-.625 2.375-.625 2.375v24.25c-.003906.359375.183594.695313.496094.878906.3125.179688.695312.179688 1.007812 0 .3125-.183593.5-.519531.496094-.878906v-24.25c0-.027344.039063-.75.40625-1.46875.375-.730469.902344-1.375 2.4375-1.375 1.53125 0 2.058594.660156 2.4375 1.40625.371094.734375.4375 1.472656.4375 1.5h-.03125v25.09375c0 3.558594-1.421875 5.058594-2.84375 5.875s-2.84375.8125-2.84375.8125-1.691406-.023437-3.375-.875c-1.683594-.851562-3.3125-2.347656-3.3125-5.875v-35.6875c0-.550781-.449219-1-1-1h-31.75c-.074219-.007812-.144531-.007812-.21875 0zm1.21875 2h29.75v34.6875c0 3.289063 1.394531 5.441406 3.03125 6.75h-26.09375c-.011719 0-.019531 0-.03125 0 0 0-.429687.003906-1.0625-.09375-.316406-.050781-.667969-.132812-1.0625-.25-.394531-.117187-.832031-.261719-1.25-.46875-.210937-.105469-.421875-.214844-.625-.34375-1.429687-.898437-2.65625-2.449219-2.65625-5.59375zm4 6.21875c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h19.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-19.71875c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm0 4c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h19.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-19.71875c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm.46875 8c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h6.78125c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-6.78125c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm11.53125 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7.71875c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-11.53125 4c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h6.78125c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-6.78125c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm11.53125 0c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7.71875c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm0 3.78125c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7.71875c-.0625-.007812-.125-.007812-.1875 0-.03125 0-.0625 0-.09375 0zm-11.53125.21875c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h6.78125c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-6.78125c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm11.53125 3.78125c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7.71875c-.0625-.007812-.125-.007812-.1875 0-.03125 0-.0625 0-.09375 0zm-11.53125.21875c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h6.78125c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-6.78125c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm11.53125 3.53125c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h7.71875c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-7.71875c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0zm-11.53125.46875c-.550781.078125-.9375.589844-.859375 1.140625s.589844.9375 1.140625.859375h6.78125c.359375.003906.695313-.183594.878906-.496094.179688-.3125.179688-.695312 0-1.007812-.183593-.3125-.519531-.5-.878906-.496094h-6.78125c-.03125 0-.0625 0-.09375 0s-.0625 0-.09375 0-.0625 0-.09375 0z"/></svg>
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Changelog & Updates</span>
+<span class='header__submenu-item-desc'>Latest product updates</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" rel="noopener" target="_blank" href="https://status.deployhq.com/"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" enable-background="new 0 0 100 100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="m71.611 14.981c-9.679 0-17.985 5.842-21.614 14.185-3.628-8.343-11.922-14.185-21.601-14.185-13.023 0-23.573 10.553-23.573 23.57 0 7.755 3.807 14.581 9.58 18.876l35.594 27.591 35.601-27.591c5.78-4.295 9.58-11.121 9.58-18.876 0-13.016-10.557-23.57-23.567-23.57zm.718 38.109h-12.448l-3.455-9.343-7.586 23.353-7.623-17.074-.762 2.175h-12.782v-3.558h10.258l2.886-8.241 7.499 16.795 7.892-24.296 6.152 16.631h9.97v3.558z"/></svg>
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Service Status</span>
+<span class='header__submenu-item-desc'>System health & uptime</span>
+</div>
+</a></li>
+<li>
+<a class="header__submenu-item-link" href="/contact"><svg class="header__submenu-item-icon" aria-hidden="true" role="presentation" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="m63.62 27.25a1.77 1.77 0 0 0 -.95-.95l-45.76-19.14a1.75 1.75 0 0 0 -2.29.94l-11.43 27.31a1.75 1.75 0 0 0 .94 2.29l45.77 19.14a1.79 1.79 0 0 0 .68.13 1.69 1.69 0 0 0 .66-.13 1.72 1.72 0 0 0 .95-.94l11.42-27.31a1.78 1.78 0 0 0 .01-1.34zm-38.91-1.25-16.66 6.86 8.13-19.42zm-5.27-14 38 15.9-24.19 4.47zm7.28 17 4.28 6.28a1.75 1.75 0 0 0 1.77.74l7.48-1.38 7.1 17.36-37.97-15.9zm17 5 15-2.76-8.13 19.41z"/><path d="m23.41 56.85h-21.41a1.75 1.75 0 0 1 0-3.5h21.41a1.75 1.75 0 1 1 0 3.5z"/><path d="m14.05 49.33h-12.05a1.75 1.75 0 0 1 0-3.5h12.05a1.75 1.75 0 0 1 0 3.5z"/></svg>
+<div class='header__submenu-item-content'>
+<span class='header__submenu-item-title'>Contact Us</span>
+<span class='header__submenu-item-desc'>Get in touch with us</span>
+</div>
+</a></li>
+</ul>
+</div>
+</div>
+</div>
+</li>
+<li class='header__nav-item header__nav-item--theme-toggle'>
+<button aria-label='Toggle dark mode' class='theme-toggle'>
+<img alt="Light mode" class="theme-toggle__icon theme-toggle__icon--sun" width="20" height="20" src="/assets/icons/sun-f944214d7a8b0785968beca13813c987e13e2b1dfd8232797600382587d3fb0c.svg" />
+<img alt="Dark mode" class="theme-toggle__icon theme-toggle__icon--moon" width="20" height="20" src="/assets/icons/moon-88e44224484d4887c8cbb27f7fd645227467e038a23f93721b84ff98168ea53e.svg" />
+</button>
+</li>
+<li class='header__nav-item header__nav-item--login'>
+<a class="header__nav-login js-login" href="https://identity.deployhq.com/login/deploy">Login</a>
+</li>
+<li class='header__nav-item header__nav-item--last'>
+<a class="header__nav-signup" href="/signup?cta=Start+deploying+free+%E2%86%92">Start deploying free →</a>
+</li>
+</ul>
+<button aria-controls='header__nav-menu' aria-expanded='false' aria-label='Toggle navigation menu' class='header__toggle header__toggle--dark js-header__toggle'>Toggle Menu</button>
+<button aria-label='Close navigation menu' class='header__close js-header__close'>Close Menu</button>
+</nav>
+</section>
+</div>
+</header>
+
+<main id='main-content' role='main'>
+<div class='lp-main'>
+<!-- Hero Section -->
+<section class='lp-hero'>
+<img class="lp-hero__bg-img lp-hero__bg-img--light" alt="" loading="eager" fetchpriority="high" src="/assets/backgrounds/hero-glow-c388ceafdadcdd788c3efb91760e346f0bb05383eeecb9b5b83684f2549cd192.png" />
+<img class="lp-hero__bg-img lp-hero__bg-img--dark" alt="" loading="eager" src="/assets/backgrounds/hero-glow-dark-5a16653c49cf4db58769de8fd6bfbd47ff729740e3fb2a6ddcf2f2a5e38604a8.png" />
+<div class='lp-hero__bg'></div>
+<div class='container lp-hero__wrap'>
+<div class='lp-hero__inner'>
+<div class='lp-hero__badge lp-badge'>
+<div class='lp-hero__avatars'>
+<div class='lp-hero__avatar'>
+<img alt="DeployHQ user" width="32" height="32" src="/assets/tweet_avatars/brendandawes-ddf07618ce397cf0d7cd92772be2802e78a5eb56a44d404cdc20db1d24dd457a.jpg" />
+</div>
+<div class='lp-hero__avatar'>
+<img alt="DeployHQ user" width="32" height="32" src="/assets/tweet_avatars/arjanjassal-d6cba518f9a207e1e2652a7fa1f78d34b75319ddabfc4897b2b4d52dd51ee029.jpg" />
+</div>
+<div class='lp-hero__avatar'>
+<img alt="DeployHQ user" width="32" height="32" src="/assets/tweet_avatars/fully_baked-5cbf62d5fa14320c55b745a45ab2cfefdcad888187226f062870f487791ec820.jpg" />
+</div>
+</div>
+<p class='lp-hero__badge-text lp-badge__text'>600K+ deployments/month • Trusted by thousands of teams</p>
+</div>
+<h1 class='lp-hero__title'>
+Push. Deploy. Done.
+<span class='lp-hero__rotator'>
+<span class='lp-hero__title--highlight lp-hero__rotator-item is-active'>with zero downtime.</span>
+<span class='lp-hero__title--highlight lp-hero__rotator-item'>with a click.</span>
+<span class='lp-hero__title--highlight lp-hero__rotator-item'>with a command.</span>
+<span class='lp-hero__title--highlight lp-hero__rotator-item'>with a prompt.</span>
+<span class='lp-hero__title--highlight lp-hero__rotator-item'>with instant rollbacks.</span>
+</span>
+</h1>
+<p class='lp-hero__subtitle'>Connect your repository, configure your servers, and deploy automatically on every push. Turbo deployments, build pipelines, and AI-powered workflows — all out of the box.</p>
+<div class='lp-hero__ctas'>
+<a class="lp-btn lp-btn--primary lp-btn--lg" href="/signup?cta=Start+deploying+free">Start deploying free</a>
+<a class="lp-btn lp-btn--secondary lp-btn--lg" href="/agents">Deploy with AI Agents</a>
+</div>
+<div class='lp-hero__visual'>
+<div class='lp-hero__img-wrap'>
+<div class='hero-deploy-tabs'>
+<div aria-label='Deployment method' class='hero-deploy-tabs__bar' role='tablist'>
+<button aria-controls='deploy-panel-ui' aria-selected='true' class='hero-deploy-tabs__tab hero-deploy-tabs__tab--active' data-deploy-tab id='deploy-tab-ui' role='tab' tabindex='0' type='button'>UI</button>
+<button aria-controls='deploy-panel-cli' aria-selected='false' class='hero-deploy-tabs__tab' data-deploy-tab id='deploy-tab-cli' role='tab' tabindex='-1' type='button'>CLI / Agents</button>
+</div>
+<div class='hero-deploy-tabs__panels'>
+<div aria-labelledby='deploy-tab-ui' class='hero-deploy-tabs__panel hero-deploy-tabs__panel--active' id='deploy-panel-ui' role='tabpanel'>
+<div class='browser'>
+<div class='browser__toolbar'>
+<div class='browser__buttons'>
+<div class='browser__button browser__button--red'></div>
+<div class='browser__button browser__button--yellow'></div>
+<div class='browser__button browser__button--green'></div>
+</div>
+<div class='browser__title'>Watch a deployment…</div>
+</div>
+<div class='browser__content'>
+<div class='ui'>
+<div class='ui__header'>
+<img alt='' class='ui__logo' height='24' role='presentation' src='/assets/illustrations/rocket-light-bdcbcca7ed8f4b836a0e4c0c9d641de4a93a687e54df4331eac54a67352592d6.svg' width='24'>
+<div class='ui__title'>
+<strong>Deploying</strong>
+Magic Bean
+<span>Emporium</span>
+Website…
+</div>
+<div class='ui__again js-start-again'>Start again?</div>
+</div>
+<div class='ui__content js-ui'>
+<div class='ui__container'>
+<div class='ui-stages'>
+<div class='ui-stages__border ui-stages__border--complete'></div>
+<div class='ui-stages__connector ui-stages__connector--complete'></div>
+<div class='ui-stages__circle ui-stages__circle--complete'>
+<img alt='' class='ui-stages__icon' height='16' role='presentation' src='/packs/media/icons/ui/preparing-b6492271034e103e281ada7efbdb485e.svg' width='16'>
+<div class='ui-stages__text'>Preparing</div>
+</div>
+<div class='ui-stages__connector ui-stages__connector--complete'></div>
+<div class='ui-stages__circle ui-stages__circle--complete'>
+<img alt='' class='ui-stages__icon' height='16' role='presentation' src='/packs/media/icons/ui/building-6db6c800aea564360219b16275ac0b52.svg' width='16'>
+<div class='ui-stages__text'>Building</div>
+</div>
+<div class='ui-stages__connector ui-stages__connector--complete'></div>
+<div class='ui-stages__circle ui-stages__circle--complete'>
+<img alt='' class='ui-stages__icon' height='16' role='presentation' src='/packs/media/icons/ui/transferring-299cae8c08e33e6049f835df0b253793.svg' width='16'>
+<div class='ui-stages__text'>Transferring</div>
+</div>
+<div class='ui-stages__connector ui-stages__connector--complete'></div>
+<div class='ui-stages__circle ui-stages__circle--complete ui-stages__circle--selected'>
+<img alt='' class='ui-stages__icon' height='16' role='presentation' src='/packs/media/icons/ui/finishing-4fcb9d8eee06d4c013bf5afb3c02205a.svg' width='16'>
+<div class='ui-stages__text'>Finishing</div>
+</div>
+<div class='ui-stages__connector ui-stages__connector--complete'></div>
+<div class='ui-stages__border ui-stages__border--complete'></div>
+</div>
+<div class='deployment-completed'>
+<div class='deployment-completed__circle'>
+<img alt='Deployment complete' class='deployment-completed__icon' height='24' src='/packs/media/icons/done-31ee9848d8a4b0f3b820ba8fd53f33b0.svg' width='24'>
+</div>
+<p class='deployment-completed__text deployment-completed__text--title'>Your deployment has completed successfully!</p>
+<p class='deployment-completed__text deployment-completed__text--paragraph'>Click on any of the stages above to view deployment logs</p>
+<button class='deployment-completed__button' type='button'>Run the deployment again</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='deploy-tab-cli' class='hero-deploy-tabs__panel' hidden id='deploy-panel-cli' role='tabpanel'>
+<div class='browser browser--terminal'>
+<div class='browser__toolbar browser__toolbar--dark'>
+<div class='browser__buttons'>
+<div class='browser__button browser__button--red'></div>
+<div class='browser__button browser__button--yellow'></div>
+<div class='browser__button browser__button--green'></div>
+</div>
+<div class='browser__title'>Terminal</div>
+</div>
+<div class='browser__content'>
+<div class='cli-deploy'>
+<div class='cli-deploy__line cli-deploy__line--prompt'>
+<span class='cli-deploy__prompt'>$</span>
+<span class='cli-deploy__command'>dhq deploy -p acme-sites --wait</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='0'>
+<span class='cli-deploy__text--muted'>Deploying to: acme-api, acme-web</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='1'>
+<span class='cli-deploy__text--muted'>Fetching latest revision...</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='2'>
+<span class='cli-deploy__text--white'>Deployment 45fc00b8 queued</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--blank' data-cli-step='3'></div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='4'>
+<strong class='cli-deploy__text--white'>Preparing:</strong>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='5'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Waiting for an available deployment slot</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='6'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Performing pre-deployment checks</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='7'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Preparing repository for deployment</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--blank' data-cli-step='8'></div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='9'>
+<strong class='cli-deploy__text--white'>Building:</strong>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='10'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Checking out repository for deployment</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='11'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Generating deployment manifest</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--blank' data-cli-step='12'></div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='13'>
+<strong class='cli-deploy__text--white'>Transferring:</strong>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub cli-deploy__line--spinner' data-cli-step='14' data-spinner-duration='2.5'>
+<span class='cli-deploy__spinner'>⠋</span>
+<span class='cli-deploy__check cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Transferring changed files</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--blank' data-cli-step='15'></div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='16'>
+<strong class='cli-deploy__text--white'>Finishing:</strong>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='17'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Delivering webhook notifications</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--step cli-deploy__line--sub' data-cli-step='18'>
+<span class='cli-deploy__text--green'>✓</span>
+<span class='cli-deploy__text--muted'>Saving build environment</span>
+</div>
+<div class='cli-deploy__line cli-deploy__line--blank' data-cli-step='19'></div>
+<div class='cli-deploy__line cli-deploy__line--step' data-cli-step='20'>
+<span class='cli-deploy__text--green'>✓ Deployment completed in 10.0s</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Logo Section -->
+<section class='lp-logos'>
+<div class='container'>
+<p class='lp-logos__heading'>Powering 600,000+ deployments per month at</p>
+<div class='lp-logos__marquee-container'>
+<div class='lp-logos__marquee'>
+<div class='lp-logos__divider'></div>
+<div class='thinkbdw-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='wordpress-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='disney-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='paystack-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='jdgroup-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='ponderosa-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='design-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='tokeet-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='yotpo-icon'></div>
+</div>
+<div class='lp-logos__marquee'>
+<div class='lp-logos__divider'></div>
+<div class='thinkbdw-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='wordpress-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='disney-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='paystack-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='jdgroup-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='ponderosa-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='design-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='tokeet-icon'></div>
+<div class='lp-logos__divider'></div>
+<div class='yotpo-icon'></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section - How it Works -->
+<section class='lp-features'>
+<div class='lp-features__glow'></div>
+<div class='container'>
+<div class='lp-section-hdr lp-section-hdr--center'>
+<h2 class='lp-section-hdr__title'>Deploy in 3 steps</h2>
+<p class='lp-section-hdr__lead'>No YAML files. No complex setup. Just connect, configure, and ship.</p>
+</div>
+<div class='lp-features__grid lp-features__grid--two-top'>
+<!-- Card 1: Connect Repository -->
+<div class='lp-card'>
+<div class='lp-card__icon lp-card__icon--numbered lp-card__icon--numbered-1'>
+<span>1</span>
+</div>
+<div class='lp-card__body'>
+<h3 class='lp-card__title'>Connect your repository</h3>
+<p class='lp-card__text'>Link your GitHub, Bitbucket, GitLab or self-hosted repositories directly to us.</p>
+<a class="lp-card__link" href="/features/integrations">Learn about connecting repositories</a>
+</div>
+<div class='lp-card__tech'>
+<div class='lp-card__tech-item'>
+<img alt="GitHub" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/github-d6aaf41d76bb844cc678164efafb122e1293696069bdc62f61d3dd48372087f0.svg" />
+<img alt="GitHub" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/github-2ff2f71c918d33da5cfad1dfdbdf0c428c0ab9c6c67baa98b137a5d8cc0c04ec.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="Bitbucket" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/bitbucket-fcfc6a2bad6aff709764422f98555a30015a8770b98ffeeee7494e581a0b84fe.svg" />
+<img alt="Bitbucket" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/bitbucket-f6dab590815c47edb0ff9a7adfbe19eff91d941c047c91c2853516a21cfd2d9c.svg" />
+<img alt="Bitbucket" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/bitbucket-dca46fe7d4166858fdb8a378f0b4dc8cad3320801c5e920deefdb1ee4c825f02.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="GitLab" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/gitlab-60036842e2b6646c074e8affd906fda08d085f6a8024552384282836648a9109.svg" />
+<img alt="GitLab" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/gitlab-30e03c64c5ec40b449f79d06dc09df5d5dacd9c85505a2502d0c3e7b19200076.svg" />
+<img alt="GitLab" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/gitlab-601fe0f83f60e64ebec7dfd175827151d5d7cb62425ede6685f8a1b5d36c7104.svg" />
+</div>
+
+</div>
+<div class='lp-card__note'>
+<p class='lp-card__note-text'>+ manual (Git, Mercurial or SVN)</p>
+</div>
+</div>
+<!-- Card 2: Configure Servers -->
+<div class='lp-card'>
+<div class='lp-card__icon lp-card__icon--numbered lp-card__icon--numbered-2'>
+<span>2</span>
+</div>
+<div class='lp-card__body'>
+<h3 class='lp-card__title'>Configure your servers</h3>
+<p class='lp-card__text'>Add your servers — VPS, shared hosting, or cloud — along with build commands and environment variables. All through a simple UI.</p>
+<a class="lp-card__link" href="/features/deployment-targets">Learn about server configuration</a>
+</div>
+<div class='lp-card__tech'>
+<div class='lp-card__tech-item'>
+<img alt="FTP" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/ftp-5b8de15888b4b105b12a0ff8cb02504fbd3b101f16f5ffa255af414de91b1593.svg" />
+<img alt="FTP" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/ftp-bad261ed24b88ddcc4f651304d939d83fef0c7f1d391a66a98fad3b31aed3cef.svg" />
+<img alt="FTP" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/ftp-6bb2ce09c32afb69f9da417bf0eca9e1484639540ab27166a9ea344801fb361a.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="SFTP" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/ssh-sftp-aadd37307db6645ab4632908ee31bfd607e23ed397db2aedc4981bb376827aac.svg" />
+<img alt="SFTP" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/ssh-sftp-07915fb58fa1907aa2e8f0bcadfbe26822fa99b07b0bfb1940cd935591d18215.svg" />
+<img alt="SFTP" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/ssh-sftp-e27952dca5d79e1ea838471de407910d5a295ffd97ef8e517af869de89d9bacc.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="Rackspace" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/rackspace-5ed73cccd84c189f487b5138f30594f2fa8a3de92e8ca4c2e0c07fc964faf04e.svg" />
+<img alt="Rackspace" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/rackspace-93fa0f013aacfc2804ad0a87626f2e566bf0baaa68884e52b172c712d463c091.svg" />
+<img alt="Rackspace" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/rackspace-2e50f8131b9c5f843082cccf4a8e631b89e748d68f77b6c1429d868e454280e1.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="AWS" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/aws-2e26d0344ab6dcea69601d140798bc474bbea4425cb47b21b7395c795323be41.svg" />
+<img alt="AWS" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/aws-360883ecb2ba5c665b4bac1942e67718cbf2931db5bce6ec08d79a54679f1b0f.svg" />
+<img alt="AWS" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/aws-43a21906a7815e49149fbb20ac757f1c79a3370e2eceec80d7b393f19ca6fefe.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="DigitalOcean" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/digitalocean-521dcdf4f73dc41595345fac5193cd2abd2d9c359069a4ac04c39dd055451c74.svg" />
+<img alt="DigitalOcean" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/digitalocean-fc126830ca3be652ab74b54ad24f5ef713fbb483b87187fbe5da4583d3d2c17c.svg" />
+<img alt="DigitalOcean" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/digitalocean-4c0a00f9d2768d4a5210f4237de02e1536e79208b6f4b9fc103cd674f116f124.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="Shopify" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/shopify-9dd19b50c36cff2c2f8ed4039c4432a267483ad417ed5db8fa9f1f87e991103c.svg" />
+<img alt="Shopify" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/shopify-c028b2ad12092c3c95f4ce6551dc2724fc5cf8fb4bb4a946ae8ee2100fa83d4e.svg" />
+<img alt="Shopify" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/shopify-0eaa60181a97f87f469febc41a3d5f5ab469ebb562ecfe41fe5b0cf51b98dcc6.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="Cloudflare" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/cloudflare-e68e0d9f65886557748b3501ef263c3441889cada98908f5b66ca42b9658dbf6.svg" />
+<img alt="Cloudflare" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/cloudflare-e857e282e3403ef612a9b2b6a9200a326e754d5539cb78570940e5735c9c05f5.svg" />
+<img alt="Cloudflare" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/cloudflare-c1b45a47116575841d9560fc882e99ec26c7f3c3279eac38be7aac27361092d1.svg" />
+</div>
+
+<div class='lp-card__tech-item'>
+<img alt="Heroku" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/heroku-2347d3ea2bccae4536e6476f3928209a24c97d9e78108dd5dac5a248094dd317.svg" />
+<img alt="Heroku" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/heroku-3f739ad2568cb6ccaef568109f2b0518466abd733c092f57381e2bac2d6fb42e.svg" />
+<img alt="Heroku" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/heroku-2f5e2136f020aee9b3bb97e6931b884ff53bdc4759e1fbd189b2e45cab9169e7.svg" />
+</div>
+
+</div>
+<div class='lp-card__note'>
+<p class='lp-card__note-text'>+ any VPS, shared hosting, cPanel, and more</p>
+</div>
+</div>
+</div>
+<div class='lp-features__grid lp-features__grid--bottom'>
+<!-- Card 3: Deploy -->
+<div class='lp-card lp-card--full-width'>
+<div class='lp-card__split'>
+<div class='lp-card__split-left'>
+<div class='lp-card__icon lp-card__icon--numbered lp-card__icon--numbered-3'>
+<span>3</span>
+</div>
+<div class='lp-card__body'>
+<h3 class='lp-card__title'>Deploy (and relax)</h3>
+<p class='lp-card__text'>Push your code and DeployHQ build, tests, and deploys automatically to all your servers.</p>
+<a class="lp-card__link" href="/features/automatic-deployments">Learn about deployments</a>
+</div>
+</div>
+<div class='lp-card__split-right'>
+<div class='lp-deploy'>
+<div class='lp-deploy__item lp-deploy__item--push'>
+<span class='lp-deploy__label'>Git Push</span>
+</div>
+<div class='lp-deploy__item lp-deploy__item--auto'>
+<span class='lp-deploy__label'>Automatic Deploy</span>
+<span class='lp-deploy__time'>1:20:50 PM</span>
+</div>
+<div class='lp-deploy__item lp-deploy__item--auto'>
+<span class='lp-deploy__label'>Automatic Deploy</span>
+<span class='lp-deploy__time'>1:20:47 PM</span>
+</div>
+<div class='lp-deploy__item lp-deploy__item--manual'>
+<span class='lp-deploy__label'>Manual Deploy</span>
+<span class='lp-deploy__time'>11:40:15 PM</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Build Pipeline Section -->
+<section class='lp-build'>
+<div class='container'>
+<div class='lp-section-hdr lp-section-hdr--center'>
+<h2 class='lp-section-hdr__title'>Powerful deployment features without the DevOps complexity</h2>
+<p class='lp-section-hdr__lead'>No config files. No complete setup. Just three simple steps.</p>
+</div>
+<div aria-label='DeployHQ Core Features' class='lp-build__tabs' role='tablist'>
+<button aria-controls='panel-auto' aria-selected='true' class='lp-tab lp-tab--active' data-core-panel='panel-auto' id='tab-auto' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/code-circle-5cc0df751f697a5486e7b6dc562263e91fb8e0fd99e4c96b21e88f9750821bb2.svg" />
+<span>Auto Deploy</span>
+</button>
+<button aria-controls='panel-atomic' aria-selected='false' class='lp-tab' data-core-panel='panel-atomic' id='tab-atomic' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/clock-f09994bd03c7bb5379bc6aca39cb5d03446a8518e6b342d3baf70c727bed9ee4.svg" />
+<span>Zero-Downtime</span>
+</button>
+<button aria-controls='panel-ai' aria-selected='false' class='lp-tab' data-core-panel='panel-ai' id='tab-ai' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/magic-star-9cf759aeffdf41306f0a9643ebf21a6d92433fe761f58ad4a8b561e59d2e7ba9.svg" />
+<span>DeployHQ AI</span>
+</button>
+<button aria-controls='panel-build' aria-selected='false' class='lp-tab' data-core-panel='panel-build' id='tab-build' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/hierarchy-25a69c10b0ea6f2188c33798737946f979bb70bffa917136d5a430a1f66f9744.svg" />
+<span>Build Pipelines</span>
+</button>
+<button aria-controls='panel-turbo' aria-selected='false' class='lp-tab' data-core-panel='panel-turbo' id='tab-turbo' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/star-2e20263f9d6fde1ccb8b370dded3825b0b8dfb2bf3d43c81b6b0de6506edffe7.svg" />
+<span>Turbo Deployments</span>
+</button>
+<button aria-controls='panel-agent' aria-selected='false' class='lp-tab' data-core-panel='panel-agent' id='tab-agent' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/sun-2a579c70c179929be465d8d7146d00fc47098ae94a66fd64d2a194f642cff065.svg" />
+<span>Deploy Behind Firewalls</span>
+</button>
+<button aria-controls='panel-templates' aria-selected='false' class='lp-tab' data-core-panel='panel-templates' id='tab-templates' role='tab' type='button'>
+<img class="lp-tab__icon" alt="" role="presentation" width="24" height="24" loading="lazy" src="/assets/icons/tabs/document-favorite-dd89d2b36fa6ea5b3ceac73db61e5a6036e0af4142a21b0fb9490ffebde79915.svg" />
+<span>Templates</span>
+</button>
+</div>
+<section class='o-core-features'>
+<div class='o-core-features__container'>
+<div class='o-core-features__panels'>
+<div aria-labelledby='tab-build' class='o-core-features__panel o-core-features__panel--active' id='panel-build' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/hierarchy-25a69c10b0ea6f2188c33798737946f979bb70bffa917136d5a430a1f66f9744.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Complex builds? No problem</h3>
+<p class='o-core-features__feature-description'>DeployHQ handles compilation, dependency installation, and testing in one location. Pre-configured setups for Composer, npm, Yarn, Gulp, Bundler, Gradle and custom bash commands. Deployments occur in sandboxed Ubuntu containers without requiring YAML configuration.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Build caching to speed up deployments</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Pin specific language versions (Node 18, PHP 8.0)</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Server-specific configs for staging vs production</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/build-pipelines">Learn more about build pipelines</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__build-mockup'>
+<div class='o-core-features__build-header'>
+<h4 class='o-core-features__build-title'>Build Pipeline Configuration</h4>
+</div>
+<div class='o-core-features__build-section'>
+<label class='o-core-features__build-label'>Template</label>
+<div class='o-core-features__build-templates'>
+<button aria-label='Custom template' class='o-core-features__build-template' data-build='custom' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo" width="24" height="24" loading="lazy" src="/assets/icons/bar-chart3-3c03dc6174e68b0c8d6bc26ced1ef8e847ac432ceef315bb118c4ae2739b3e4b.svg" />
+</button>
+<button aria-label='NPM template' class='o-core-features__build-template o-core-features__build-template--selected' data-build='npm' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo light-only" width="24" height="24" loading="lazy" src="/assets/icons/bw/npm-23da334d8f580f272a2aa621a0bd465625a382aedd92c94d3c44404f8d2857fe.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo dark-only" width="24" height="24" loading="lazy" src="/assets/icons/bw-dark/npm-7d6f123ba09150aa18bb9e84d1fabe216d86155851c6bf9e7614eb27378052d5.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo hover-only" width="24" height="24" loading="lazy" src="/assets/icons/tabs/npm-fa07bbf94a36f6af740cce8fef3cad7e2801862b0738d6680e11ca2c1c14246a.svg" />
+</button>
+<button aria-label='Yarn template' class='o-core-features__build-template' data-build='yarn' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo light-only" width="24" height="24" loading="lazy" src="/assets/icons/bw/yarn-470870edec057bd629f23c64f84f28dd5ada6106235392c974984ba112b9a537.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo dark-only" width="24" height="24" loading="lazy" src="/assets/icons/bw-dark/yarn-a0ddd3b57011aba1201f433bc9c5a19a9ee46a752be665edc562dd2dbe89477c.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo hover-only" width="24" height="24" loading="lazy" src="/assets/icons/tabs/yarn-50c036096d76785ffd9d54f0eb3f7b907bf69384b85a2560ca5968f47de68f20.svg" />
+</button>
+<button aria-label='Gulp template' class='o-core-features__build-template' data-build='gulp' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo" width="24" height="24" loading="lazy" src="/assets/icons/tabs/gulp-8c8febfd44279621f835094c421f3602a1be438c5d1acfef04d6b70f53b9608d.svg" />
+</button>
+<button aria-label='Grunt template' class='o-core-features__build-template' data-build='grunt' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo light-only" width="24" height="24" loading="lazy" src="/assets/icons/bw/grunt-54b6b22004d324b42e7f81ba1af79103ac055822ac4c5eb015c00795729e7cbc.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo dark-only" width="24" height="24" loading="lazy" src="/assets/icons/bw-dark/grunt-39351a9422b0f8f4271e0e182056bd6fc695a5a0ecc2b6c1fb03cca86b79640e.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo hover-only" width="24" height="24" loading="lazy" src="/assets/icons/tabs/grunt-454337da0b94d33138a8e6b5312eafd557b5d8e79635774eff782abda8a72b36.svg" />
+</button>
+<button aria-label='Composer template' class='o-core-features__build-template' data-build='composer' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo light-only" width="24" height="24" loading="lazy" src="/assets/icons/bw/composer-2fb693f0ec3179650f6aadf554504e7cf7a893b6bbe4c69b23187c9c85b8f892.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo dark-only" width="24" height="24" loading="lazy" src="/assets/icons/bw-dark/composer-e9fd1c99600fd71ee1fbf81326d0b0e3e387c97836d1f3c1ee8cf533da26e9f3.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo hover-only" width="24" height="24" loading="lazy" src="/assets/icons/tabs/composer-9d822de5f02968b0d14e516e69962cb206e76813034a5f38e618e10530414e65.svg" />
+</button>
+<button aria-label='Jekyll template' class='o-core-features__build-template' data-build='jekyll' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo light-only" width="24" height="24" loading="lazy" src="/assets/icons/bw/jekyll-d8a47865f86bb9af084d2085f9c884ebf57170b0fc756d88ff0f25abb708681c.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo dark-only" width="24" height="24" loading="lazy" src="/assets/icons/bw-dark/jekyll-2b97784ad414b60a062e99cfb3cd13231e62191b8ab4ef431712065d426d53cb.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo hover-only" width="24" height="24" loading="lazy" src="/assets/icons/tabs/jekyll-2668f86d0e3c47291df4fe81d182b32e3f500056d5d2e0ca1cff972afc69b85e.svg" />
+</button>
+<button aria-label='Rails template' class='o-core-features__build-template' data-build='rails' type='button'>
+<img alt="" role="presentation" class="o-core-features__build-logo light-only" width="24" height="24" loading="lazy" src="/assets/icons/bw/rails-2f754ebddd3a6b7389880772d39a215644a021c6ec0076dcfe23c3a2b6e516dd.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo dark-only" width="24" height="24" loading="lazy" src="/assets/icons/bw-dark/rails-46f7a30bfd9929a36cd860008d0a448f7884753bb29cc4820a62f7df99522494.svg" />
+<img alt="" role="presentation" class="o-core-features__build-logo hover-only" width="24" height="24" loading="lazy" src="/assets/icons/tabs/rails-cda21f246bb90d43cecde7c3d68901cc960db77f773057f8d40c5b88a224c696.svg" />
+</button>
+</div>
+</div>
+<div class='o-core-features__build-section'>
+<label class='o-core-features__build-label'>Command</label>
+<div class='o-core-features__build-command'>
+<pre><code data-build-preview>npm install&#x000A;npm run build</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='tab-atomic' class='o-core-features__panel' hidden id='panel-atomic' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/clock-f09994bd03c7bb5379bc6aca39cb5d03446a8518e6b342d3baf70c727bed9ee4.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Deploy without taking your site offline</h3>
+<p class='o-core-features__feature-description'>Atomic deployments upload new code to a fresh release folder, then switch a symlink when ready. Site keeps running from previous release until new one is live.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Instant rollback with zero downtime</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Shared directory for persistent files</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Parallel deployment across server groups</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/zero-downtime-deployments">Learn more about zero-downtime deployments</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__config-mockup'>
+<div class='o-core-features__config-header'>
+<h4 class='o-core-features__config-title'>Release History</h4>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Active Release</label>
+<div class='o-core-features__config-release o-core-features__config-release--active'>
+<div class='o-core-features__config-release-info'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/folder-5a1d3bb6e916338b24a45559a43b4bcb9317612584e508032c4648d970e77511.svg" />
+<span>releases/20250102-143022</span>
+</div>
+<div class='o-core-features__config-badge o-core-features__config-badge--success'>Current</div>
+</div>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Previous Releases</label>
+<div class='o-core-features__config-list'>
+<div class='o-core-features__config-release'>
+<div class='o-core-features__config-release-info'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/folder-5a1d3bb6e916338b24a45559a43b4bcb9317612584e508032c4648d970e77511.svg" />
+<span>releases/20250102-121508</span>
+</div>
+<div class='o-core-features__config-badge'>Rollback</div>
+</div>
+<div class='o-core-features__config-release'>
+<div class='o-core-features__config-release-info'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/folder-5a1d3bb6e916338b24a45559a43b4bcb9317612584e508032c4648d970e77511.svg" />
+<span>releases/20250101-183445</span>
+</div>
+<div class='o-core-features__config-badge'>Rollback</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='tab-templates' class='o-core-features__panel' hidden id='panel-templates' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/document-favorite-dd89d2b36fa6ea5b3ceac73db61e5a6036e0af4142a21b0fb9490ffebde79915.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Stop repeating yourself with templates</h3>
+<p class='o-core-features__feature-description'>Copy entire project configurations across projects in 2 clicks or use DeployHQ's public framework templates with best practices baked in.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Clone project settings instantly</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>30+ pre-built framework templates</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Standardize deployments across your team</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/deployment-templates">Learn more about deployment templates</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__config-mockup'>
+<div class='o-core-features__config-header'>
+<h4 class='o-core-features__config-title'>Framework Templates</h4>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Popular Templates</label>
+<div class='o-core-features__template-grid'>
+<button class='o-core-features__template-card o-core-features__template-card--selected' data-template='nextjs' type='button'>
+<img alt="" role="presentation" class="o-core-features__template-icon" width="16" height="16" loading="lazy" src="/assets/icons/tabs/nextjs-320f14c153a2e54fc3896ce615ca9fb079411bc2b274096b97740aa8ce13a31b.svg" />
+<span class='o-core-features__template-name'>Next.js</span>
+</button>
+<button class='o-core-features__template-card' data-template='laravel' type='button'>
+<img alt="" role="presentation" class="o-core-features__template-icon" width="16" height="16" loading="lazy" src="/assets/icons/tabs/laravel-099b694c64a83c4009eb27859da8a0a0e6aedf729dfe6fa5595f5f958c246c84.svg" />
+<span class='o-core-features__template-name'>Laravel</span>
+</button>
+<button class='o-core-features__template-card' data-template='django' type='button'>
+<img alt="" role="presentation" class="o-core-features__template-icon" width="16" height="16" loading="lazy" src="/assets/icons/tabs/django-f22b021fa5284430db2aa2fc043ec3e3591c2eba50cdb6c2bd0f3dd1b57ea9d7.svg" />
+<span class='o-core-features__template-name'>Django</span>
+</button>
+<button class='o-core-features__template-card' data-template='wordpress' type='button'>
+<img alt="" role="presentation" class="o-core-features__template-icon" width="16" height="16" loading="lazy" src="/assets/icons/tabs/wordpress-e9171e4b1f694073035dac2395cd900b05a7fe8d0b171fb8899bfbd9adfa101e.svg" />
+<span class='o-core-features__template-name'>WordPress</span>
+</button>
+</div>
+</div>
+<div class='o-core-features__config-section'>
+<div class='o-core-features__config-preview'>
+<pre><code data-template-preview>npm install&#x000A;npm run build&#x000A;npm start</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='tab-agent' class='o-core-features__panel' hidden id='panel-agent' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/sun-2a579c70c179929be465d8d7146d00fc47098ae94a66fd64d2a194f642cff065.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Deploy behind firewalls with DeployHQ Agent</h3>
+<p class='o-core-features__feature-description'>Install the agent on one server inside your private network—it connects to DeployHQ via a secure TLS tunnel. No network configuration needed.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>No VPN setup or firewall changes required</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>One agent, entire private network</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Secure, persistent connection</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/deploy-behind-firewalls">Learn more about deploying behind firewalls</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__config-mockup'>
+<div class='o-core-features__config-header'>
+<h4 class='o-core-features__config-title'>Agent Configuration</h4>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Agent Key</label>
+<div class='o-core-features__config-input'>
+<code>agent_3k8d9f2h1m5n7p4q</code>
+</div>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Status</label>
+<div class='o-core-features__config-status'>
+<div class='o-core-features__config-indicator o-core-features__config-indicator--active'></div>
+<span class='o-core-features__config-status-text'>Connected</span>
+</div>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Servers</label>
+<div class='o-core-features__config-list'>
+<div class='o-core-features__config-item'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/server-3dea9382c13b5eb86283b34dac5391d37d7daab491d2ab3b3f48fb6c03df33de.svg" />
+<span>web-01.internal</span>
+</div>
+<div class='o-core-features__config-item'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/server-3dea9382c13b5eb86283b34dac5391d37d7daab491d2ab3b3f48fb6c03df33de.svg" />
+<span>web-02.internal</span>
+</div>
+<div class='o-core-features__config-item'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/server-3dea9382c13b5eb86283b34dac5391d37d7daab491d2ab3b3f48fb6c03df33de.svg" />
+<span>api.internal</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='tab-auto' class='o-core-features__panel' hidden id='panel-auto' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/code-circle-5cc0df751f697a5486e7b6dc562263e91fb8e0fd99e4c96b21e88f9750821bb2.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Deploy automatically when you push</h3>
+<p class='o-core-features__feature-description'>Add DeployHQ's webhook URL to your repository. Push to your branch, and deployments start automatically—no logging in required.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Branch-based routing to different servers</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>One webhook for entire project</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Instant deployment on push</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/automatic-deployments">Learn more about automatic deployments</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__config-mockup'>
+<div class='o-core-features__config-header'>
+<h4 class='o-core-features__config-title'>Webhook Configuration</h4>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Webhook URL</label>
+<div class='o-core-features__config-input'>
+<code>https://deployhq.com/webhook/p123</code>
+</div>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Branch Rules</label>
+<div class='o-core-features__config-list'>
+<div class='o-core-features__config-rule'>
+<div class='o-core-features__config-rule-branch'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/tree-34d8a2bd70e22972e6fdba17597757edd74b9472bac747ef63d598021819a900.svg" />
+<span>main</span>
+</div>
+<span class='o-core-features__config-rule-arrow'>→</span>
+<span class='o-core-features__config-rule-server'>Production</span>
+</div>
+<div class='o-core-features__config-rule'>
+<div class='o-core-features__config-rule-branch'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/tree-34d8a2bd70e22972e6fdba17597757edd74b9472bac747ef63d598021819a900.svg" />
+<span>staging</span>
+</div>
+<span class='o-core-features__config-rule-arrow'>→</span>
+<span class='o-core-features__config-rule-server'>Staging</span>
+</div>
+<div class='o-core-features__config-rule'>
+<div class='o-core-features__config-rule-branch'>
+<img alt="" class="o-core-features__config-icon" width="16" height="16" loading="lazy" src="/assets/icons/tree-34d8a2bd70e22972e6fdba17597757edd74b9472bac747ef63d598021819a900.svg" />
+<span>develop</span>
+</div>
+<span class='o-core-features__config-rule-arrow'>→</span>
+<span class='o-core-features__config-rule-server'>Development</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='tab-turbo' class='o-core-features__panel' hidden id='panel-turbo' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/star-2e20263f9d6fde1ccb8b370dded3825b0b8dfb2bf3d43c81b6b0de6506edffe7.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Deploy up to 90% faster</h3>
+<p class='o-core-features__feature-description'>Deploy up to 90% faster with compressed archive transfers. Bundle thousands of files into a single compressed archive before transfer.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Single compressed archive instead of thousands of files</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Automatic fallback to individual file deployment</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Gzip compression reduces transfer size</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/turbo-deployments">Learn more about turbo deployments</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__config-mockup'>
+<div class='o-core-features__config-header'>
+<h4 class='o-core-features__config-title'>Deployment Speed Comparison</h4>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Standard Deployment</label>
+<div class='o-core-features__speed-bar'>
+<div class='o-core-features__speed-fill o-core-features__speed-fill--slow' style='width: 100%'></div>
+<span class='o-core-features__speed-text'>47 seconds</span>
+</div>
+<p class='o-core-features__speed-detail'>2,847 files transferred individually</p>
+</div>
+<div class='o-core-features__config-section'>
+<label class='o-core-features__config-label'>Turbo Deployment</label>
+<div class='o-core-features__speed-bar'>
+<div class='o-core-features__speed-fill o-core-features__speed-fill--fast' style='width: 11%'></div>
+<span class='o-core-features__speed-text'>5 seconds</span>
+</div>
+<p class='o-core-features__speed-detail'>1 compressed archive</p>
+</div>
+<div class='o-core-features__config-section'>
+<div class='o-core-features__speed-result'>
+<span class='o-core-features__speed-result-text'>89% faster • 42 seconds saved</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby='tab-ai' class='o-core-features__panel' hidden id='panel-ai' role='tabpanel'>
+<div class='o-core-features__content'>
+<div class='o-core-features__icon-wrapper'>
+<div class='o-core-features__icon-bg'></div>
+<div class='o-core-features__icon-inner'></div>
+<img alt="" class="o-core-features__icon-svg" role="presentation" src="/assets/icons/tabs/magic-star-9cf759aeffdf41306f0a9643ebf21a6d92433fe761f58ad4a8b561e59d2e7ba9.svg" />
+</div>
+
+<div class='o-core-features__text'>
+<h3 class='o-core-features__feature-title'>Let AI explain your deployments and fix errors</h3>
+<p class='o-core-features__feature-description'>AI reads commit messages for deployment summaries. When builds fail, AI analyzes error logs and suggests fixes without manual troubleshooting.</p>
+</div>
+<ul class='o-core-features__benefits'>
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Automatically generates deployment summaries from commits</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Diagnoses errors and suggests fixes instantly</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+<li class='o-core-features__benefit'>
+<div class='o-core-features__check'></div>
+<span>Privacy-focused and editable</span>
+<img alt="" class="o-core-features__benefit-plus" role="presentation" src="/assets/icons/plus-b004632649c6339f020204fc11fdcc8b0418cf980fef11bfbad3000f7560302f.svg" />
+</li>
+
+</ul>
+<a class="o-core-features__link" href="/features/ai">Learn more about DeployHQ AI</a>
+</div>
+<div class='o-core-features__visual'>
+<div class='o-core-features__config-mockup'>
+<div class='o-core-features__config-header'>
+<h4 class='o-core-features__config-title'>AI Deployment Summary</h4>
+</div>
+<div class='o-core-features__config-section'>
+<div class='o-core-features__ai-mockup'>
+<div class='o-core-features__ai-label-row'>
+<span class='o-core-features__ai-label'>Deployment Log</span>
+<span class='o-core-features__ai-status o-core-features__ai-status--failed'>Failed</span>
+</div>
+<div class='o-core-features__ai-log'>
+<div class='o-core-features__ai-log-line'>
+<span class='o-core-features__ai-log-prefix'>[14:32:18]</span>
+<span class='o-core-features__ai-log-message'>Running build command: npm run build</span>
+</div>
+<div class='o-core-features__ai-log-line o-core-features__ai-log-line--error'>
+<span class='o-core-features__ai-log-prefix o-core-features__ai-log-prefix--error'>ERROR</span>
+<span class='o-core-features__ai-log-message o-core-features__ai-log-message--error'>Module not found: Can&#39;t resolve &#39;@/components/Dashboard&#39;</span>
+</div>
+<div class='o-core-features__ai-log-line o-core-features__ai-log-line--error'>
+<span class='o-core-features__ai-log-prefix o-core-features__ai-log-prefix--error'>ERROR</span>
+<span class='o-core-features__ai-log-message o-core-features__ai-log-message--error'>Build failed with 1 error</span>
+</div>
+</div>
+<div class='o-core-features__ai-analysis'>
+<div class='o-core-features__ai-analysis-header'>
+<div class='o-core-features__ai-analysis-title-wrap'>
+<svg class='o-core-features__ai-banner-icon' fill='none' height='18' role='presentation' viewBox='0 0 18 18' width='18' xmlns='http://www.w3.org/2000/svg'>
+<path d='M13 2L11.5 6L7 7.5L11.5 9L13 13L14.5 9L19 7.5L14.5 6L13 2Z' fill='currentColor'></path>
+<path d='M5 6L4.5 7.5L3 8L4.5 8.5L5 10L5.5 8.5L7 8L5.5 7.5L5 6Z' fill='currentColor'></path>
+</svg>
+<span class='o-core-features__ai-analysis-title'>AI Summary</span>
+</div>
+<span class='o-core-features__ai-analysis-pill'>Potential issue detected</span>
+</div>
+<p class='o-core-features__ai-analysis-text'>Missing module import path. The "@/components/Dashboard" alias may not be configured in your build system.</p>
+<ul class='o-core-features__ai-suggestions'>
+<li>Review tsconfig/jsconfig path aliases</li>
+<li>Confirm src/components/Dashboard.tsx exists</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</section>
+<!-- CTA Banner -->
+<section class='cta-section'>
+<img class="cta-icon cta-icon--left" alt="" width="24" height="24" loading="lazy" src="/assets/icons/cta-hierarchy-8973c5215fc26014c10da59e0d9045d727e665c20050f02b15ccca6cc96d22bb.svg" />
+<img class="cta-icon cta-icon--right" alt="" width="24" height="24" loading="lazy" src="/assets/icons/cta-document-code-a8632abc8a85ec7499974e554f973f4503294b969140dcb6167a89887ddcd2b3.svg" />
+<div class='cta-container'>
+<div class='cta-content'>
+<h2 class='cta-title'>Unlimited deployments from $9/month</h2>
+<a class="cta-button" href="/pricing">See plans &amp; pricing</a>
+</div>
+</div>
+</section>
+<!-- Integration Section -->
+<section class='lp-integrations'>
+<div class='lp-integrations__glow'></div>
+<div class='container'>
+<div class='lp-section-hdr lp-section-hdr--center'>
+<h2 class='lp-section-hdr__title'>Works with your Stack</h2>
+<p class='lp-section-hdr__lead'>Connect your tools. Deploy anywhere. Build with confidence.</p>
+</div>
+<div class='lp-integrations__grid'>
+<div class='lp-int-card'>
+<div class='lp-int-card__icon lp-int-card__icon--purple'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M22 8.27V4.23C22 2.64 21.36 2 19.77 2H15.73C14.14 2 13.5 2.64 13.5 4.23V8.27C13.5 9.86 14.14 10.5 15.73 10.5H19.77C21.36 10.5 22 9.86 22 8.27Z' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+<path d='M22 19.77V15.73C22 14.14 21.36 13.5 19.77 13.5H15.73C14.14 13.5 13.5 14.14 13.5 15.73V19.77C13.5 21.36 14.14 22 15.73 22H19.77C21.36 22 22 21.36 22 19.77Z' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+<path d='M10.5 8.27V4.23C10.5 2.64 9.86 2 8.27 2H4.23C2.64 2 2 2.64 2 4.23V8.27C2 9.86 2.64 10.5 4.23 10.5H8.27C9.86 10.5 10.5 9.86 10.5 8.27Z' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+<path d='M10.5 19.77V15.73C10.5 14.14 9.86 13.5 8.27 13.5H4.23C2.64 13.5 2 14.14 2 15.73V19.77C2 21.36 2.64 22 4.23 22H8.27C9.86 22 10.5 21.36 10.5 19.77Z' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+</svg>
+</div>
+<h3 class='lp-int-card__title'>Deploy from any repository</h3>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy from GitHub with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/github-d6aaf41d76bb844cc678164efafb122e1293696069bdc62f61d3dd48372087f0.svg" />
+<img alt="Deploy from GitHub with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/github-2ff2f71c918d33da5cfad1dfdbdf0c428c0ab9c6c67baa98b137a5d8cc0c04ec.svg" />
+<img alt="Deploy from GitHub with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/github-17781d8ffd26b0ad72924962436c7d9a745ac2a98e8f450cfe1f65d218736f97.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy from Bitbucket with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/bitbucket-fcfc6a2bad6aff709764422f98555a30015a8770b98ffeeee7494e581a0b84fe.svg" />
+<img alt="Deploy from Bitbucket with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/bitbucket-f6dab590815c47edb0ff9a7adfbe19eff91d941c047c91c2853516a21cfd2d9c.svg" />
+<img alt="Deploy from Bitbucket with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/bitbucket-dca46fe7d4166858fdb8a378f0b4dc8cad3320801c5e920deefdb1ee4c825f02.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy from GitLab with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/gitlab-60036842e2b6646c074e8affd906fda08d085f6a8024552384282836648a9109.svg" />
+<img alt="Deploy from GitLab with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/gitlab-30e03c64c5ec40b449f79d06dc09df5d5dacd9c85505a2502d0c3e7b19200076.svg" />
+<img alt="Deploy from GitLab with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/gitlab-601fe0f83f60e64ebec7dfd175827151d5d7cb62425ede6685f8a1b5d36c7104.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy from any Git repository with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/git-5f1027825ccf0156e0fa95341f72ec44f7e1dea294d3e8d8c75dd57851262902.svg" />
+<img alt="Deploy from any Git repository with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/git-a9af477a4761f6a4a7e769152142e3fbc86def163e0640a3d481db9e37d67c0d.svg" />
+<img alt="Deploy from any Git repository with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/git-2532d0ef4ca5f9adc7ff942076ac666fc1bc31c56358083ec9269a0cddc2d994.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy from SVN repositories with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/svn-f0cef651397bdde43dc9f4db5e35c47d86f0cfe5df53682e9464014e354a2e79.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy from Mercurial repositories with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/mercurial-674b1561fadfd5e71edb9e7b13e661ff79275e17fb7f7a8854a4cbbd74057884.svg" />
+</div>
+</div>
+</div>
+<div class='lp-int-card'>
+<div class='lp-int-card__icon lp-int-card__icon--purple-light'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M15.5 12C15.5 13.933 13.933 15.5 12 15.5C10.067 15.5 8.5 13.933 8.5 12C8.5 10.067 10.067 8.5 12 8.5C13.933 8.5 15.5 10.067 15.5 12Z' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M12 20.5C16.6944 20.5 20.5 16.6944 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 16.6944 7.30558 20.5 12 20.5Z' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M19.79 8.23L16 12' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+<path d='M19.79 15.77L16 12' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+<path d='M4.21004 8.23L8.00004 12' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+<path d='M4.21004 15.77L8.00004 12' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' stroke='white'></path>
+</svg>
+</div>
+<h3 class='lp-int-card__title'>Build with any language</h3>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Build Python projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/python-9bf36121b4305e2534d3386bcefb13fef073620e7396bb263f8bdb5c4b7d20ac.svg" />
+<img alt="Build Python projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/python-c4908a987e88112312efb2ec792690165ec4869adb097d14fe812f502a6a7ec1.svg" />
+<img alt="Build Python projects with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/python-e02211b979286430f13b2b8c836557b9c7a8073d76d9368487bb68e328624ef6.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Build Java projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/java-7f108525c06547c2b9ef41352e03be2ec37f68615fe201a988ba91089009b2e5.svg" />
+<img alt="Build Java projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/java-4f943748df0050cf7e60f280e5981b51ef9f76c2fb7e931b75fbbde8f664ca37.svg" />
+<img alt="Build Java projects with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/java-9ab9d5d27079e9b389f3bba494b5432465fffd7fc52599801459d7a41fa97e62.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Build JavaScript projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/javascript-834fb1e03779d5696cfabf512745bb979e150989146fdbe0c6904e68047a275c.svg" />
+<img alt="Build JavaScript projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/javascript-f097efdc73bf593546d0e70fd91b0be71515f0a29dd426677c884519ce2a4de2.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Build Ruby projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/ruby-a3ec4061dac6df309ed3661dbcfa0b828c38b85ed1b50a8aebcb2189bd2d5b9d.svg" />
+<img alt="Build Ruby projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/ruby-dd29a8f5a7190190d5afd9d17901462a91a6c69ce7a235c60d04889fab23e353.svg" />
+<img alt="Build Ruby projects with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/ruby-61d57b77c9af31116ae40ef4f50d1cc1db3a95ef220b833714e19f1af76c6ae2.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Build Go projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/go-7436127827417b7fac6c025d90a1358bc035233a4af03187219373e4ccb25f92.svg" />
+<img alt="Build Go projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/go-e5613fc40439539d5ca537aa5b19e860d86c6b7546f52020c81142d85e068762.svg" />
+<img alt="Build Go projects with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/go-2a811f1289289d830baafadf8083f3432ea8fa0f9b652a3f9bba7dbc9da4cf72.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Build PHP projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/php-c3a35661442d65a32d785b7a0aff2d7ef5573876ddfb95a49db764c29f6171b9.svg" />
+<img alt="Build PHP projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/php-d9abbe1f2f8ef13714700c271623a3503686db9f63344635495c57d8904f9281.svg" />
+<img alt="Build PHP projects with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/php-4351a3c92ec531764f8a76370553c430148f242c0937f4c94b305d8a608985c5.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Build Node.js projects with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/nodejs-05ce0c26919e2cc78c6adcadb8eea62f9da796f3c3a622566e4f3c00faf718d2.svg" />
+<img alt="Build Node.js projects with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/nodejs-7b0da324bc914906d572a98cd1b4f375e25ed7853a5a6965da6db689f991e9d1.svg" />
+<img alt="Build Node.js projects with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/nodejs-1876c56153ca1b2c4a7d65558c940c49c15284de590e52d62159d89b5995c12e.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Build .NET projects with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/dotnet-9062439267fb5c9323223113a62beda536db5cf2bd9407970fd688ae0e779c25.svg" />
+</div>
+</div>
+</div>
+<div class='lp-int-card'>
+<div class='lp-int-card__icon lp-int-card__icon--pink'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M21 7V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V7C3 4 4.5 2 8 2H16C19.5 2 21 4 21 7Z' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M14.5 4.5V6.5C14.5 7.6 15.4 8.5 16.5 8.5H18.5' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M8 13H12' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M8 17H16' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+</svg>
+</div>
+<h3 class='lp-int-card__title'>Ship to any platform</h3>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to Shopify with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/shopify-9dd19b50c36cff2c2f8ed4039c4432a267483ad417ed5db8fa9f1f87e991103c.svg" />
+<img alt="Deploy to Shopify with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/shopify-c028b2ad12092c3c95f4ce6551dc2724fc5cf8fb4bb4a946ae8ee2100fa83d4e.svg" />
+<img alt="Deploy to Shopify with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/shopify-0eaa60181a97f87f469febc41a3d5f5ab469ebb562ecfe41fe5b0cf51b98dcc6.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to Cloudflare with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/cloudflare-e68e0d9f65886557748b3501ef263c3441889cada98908f5b66ca42b9658dbf6.svg" />
+<img alt="Deploy to Cloudflare with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/cloudflare-e857e282e3403ef612a9b2b6a9200a326e754d5539cb78570940e5735c9c05f5.svg" />
+<img alt="Deploy to Cloudflare with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/cloudflare-c1b45a47116575841d9560fc882e99ec26c7f3c3279eac38be7aac27361092d1.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to DigitalOcean with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/digitalocean-521dcdf4f73dc41595345fac5193cd2abd2d9c359069a4ac04c39dd055451c74.svg" />
+<img alt="Deploy to DigitalOcean with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/digitalocean-fc126830ca3be652ab74b54ad24f5ef713fbb483b87187fbe5da4583d3d2c17c.svg" />
+<img alt="Deploy to DigitalOcean with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/digitalocean-4c0a00f9d2768d4a5210f4237de02e1536e79208b6f4b9fc103cd674f116f124.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to Heroku with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/heroku-2347d3ea2bccae4536e6476f3928209a24c97d9e78108dd5dac5a248094dd317.svg" />
+<img alt="Deploy to Heroku with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/heroku-3f739ad2568cb6ccaef568109f2b0518466abd733c092f57381e2bac2d6fb42e.svg" />
+<img alt="Deploy to Heroku with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/heroku-2f5e2136f020aee9b3bb97e6931b884ff53bdc4759e1fbd189b2e45cab9169e7.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy via SFTP with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/ssh-sftp-aadd37307db6645ab4632908ee31bfd607e23ed397db2aedc4981bb376827aac.svg" />
+<img alt="Deploy via SFTP with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/ssh-sftp-07915fb58fa1907aa2e8f0bcadfbe26822fa99b07b0bfb1940cd935591d18215.svg" />
+<img alt="Deploy via SFTP with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/ssh-sftp-e27952dca5d79e1ea838471de407910d5a295ffd97ef8e517af869de89d9bacc.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy via FTP with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/ftp-5b8de15888b4b105b12a0ff8cb02504fbd3b101f16f5ffa255af414de91b1593.svg" />
+<img alt="Deploy via FTP with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/ftp-bad261ed24b88ddcc4f651304d939d83fef0c7f1d391a66a98fad3b31aed3cef.svg" />
+<img alt="Deploy via FTP with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/ftp-6bb2ce09c32afb69f9da417bf0eca9e1484639540ab27166a9ea344801fb361a.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to AWS with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/aws-2e26d0344ab6dcea69601d140798bc474bbea4425cb47b21b7395c795323be41.svg" />
+<img alt="Deploy to AWS with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/aws-360883ecb2ba5c665b4bac1942e67718cbf2931db5bce6ec08d79a54679f1b0f.svg" />
+<img alt="Deploy to AWS with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/aws-43a21906a7815e49149fbb20ac757f1c79a3370e2eceec80d7b393f19ca6fefe.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to Netlify with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/netlify-8c289abb95855bfbebb152adf1e8e49ac74fbb11bc8e47fe5a49a0b98a276f53.svg" />
+<img alt="Deploy to Netlify with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/netlify-65925cc662e534dfc0e126857dc200fdd5c88f6526fced3dba27ecac81cde176.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Deploy to Hetzner with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/hetzner-36ff17c0272027272b264798d5f3857d4b0ce2c5d43638a96b3ac7fd42e7cd9b.svg" />
+<img alt="Deploy to Hetzner with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/hetzner-61d82c095fc347a707a9cbd8291b96d6c4e4a735740bda7dd5eb211e54a321fe.svg" />
+<img alt="Deploy to Hetzner with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/hetzner-c248f130d01e76a938ea8739e5f0eedd1dc6de6f83422fc047c7c437b73bc45b.svg" />
+</div>
+</div>
+</div>
+<div class='lp-int-card'>
+<div class='lp-int-card__icon lp-int-card__icon--green'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M21 7V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V7C3 4 4.5 2 8 2H16C19.5 2 21 4 21 7Z' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M14.5 4.5V6.5C14.5 7.6 15.4 8.5 16.5 8.5H18.5' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M11 15C11 16.66 9.66 18 8 18C6.34 18 5 16.66 5 15C5 13.34 6.34 12 8 12C9.66 12 11 13.34 11 15Z' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+<path d='M19 15C19 16.66 17.66 18 16 18C14.34 18 13 16.66 13 15C13 13.34 14.34 12 16 12C17.66 12 19 13.34 19 15Z' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='10' stroke-width='1.5' stroke='white'></path>
+</svg>
+</div>
+<h3 class='lp-int-card__title'>Work with your tools</h3>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Slack notifications with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/slack-04d8f73cb4ae50853ed5882b57d99cd5901f9cbb8adab560033b726423cc02ab.svg" />
+<img alt="Slack notifications with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/slack-9d4f99087241a55890c1b3c073b0a3ca36feb88290bfa5c7914fa02524c35912.svg" />
+<img alt="Slack notifications with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/slack-b0eac5cf6e93c2035fcb4b10c4aabb34abd50149a0e7a89f9f2b785ac9c2359f.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Discord notifications with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/discord-0b79d2e3e4573e07d14b9890b452928d043a223f1dfc9c614b7af1d69293233f.svg" />
+<img alt="Discord notifications with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/discord-121ce93e50b12ccc268f61e8638a4a4717647e205e4a8dc412bbfc7ccac94d7a.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Rollbar integration with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/rollbar-bfcfd75d6883fbcde9dc086e3057bcebbbda295e1ad1f5f2564c8131a3293e51.svg" />
+<img alt="Rollbar integration with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/rollbar-78c116714aef9d60465798c20fd364ae6c8f15387264eaf34ef078e92e20c692.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Sentry integration with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/sentry-2f451c8271e60a4dfd7050ebcac747d54c8377d979f518b87c29085576916318.svg" />
+<img alt="Sentry integration with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/sentry-f6026bfaf96fd89d63ba8c5aae297839f793bc0646905f21a25c691d2c91d116.svg" />
+<img alt="Sentry integration with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/sentry-a5bf68892d6c0385573f4e5bbdad57daaa71be107076ea89683fcea68a4b28f5.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Microsoft Teams notifications with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/teams-bb2604c1b472695115721357a66d993d8bf6b2ca18de950d2c8e2336b6435db6.svg" />
+<img alt="Microsoft Teams notifications with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/teams-a7a38b0d8e791f88db556efa210bbe705d265844b91f97b069ea27a458f85763.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Bugsnag integration with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/bugsnag-34e2326faa9a3255d91f2cd59e3a16c677ef4a6378ebe29bff0fdbcfbe7b2e53.svg" />
+</div>
+</div>
+<div class='lp-int-card__icons'>
+<div class='lp-int-card__icon-item'>
+<img alt="Honeybadger integration with DeployHQ" width="27" height="27" loading="lazy" src="/assets/icons/bw/honeybadger-82c13e4944968c642d2a49050dc925722d1408226403172b930c10ad6611a598.svg" />
+<img alt="Honeybadger integration with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/honeybadger-e0e9f1b358ee2f83cbd6298da628a9b5291cfb01161a29e8a2e6debc29badbeb.svg" />
+</div>
+<div class='lp-int-card__icon-item'>
+<img alt="Docker builds with DeployHQ" class="light-only" width="27" height="27" loading="lazy" src="/assets/icons/bw/docker-da529d297cd7b795559e9affa66247724d824d89607d3604553d37be545c66e3.svg" />
+<img alt="Docker builds with DeployHQ" class="dark-only" width="27" height="27" loading="lazy" src="/assets/icons/bw-dark/docker-9a8714ef1c802404766d4a683b7b58ac163d668282bbdf126a730d407f46dd0a.svg" />
+<img alt="Docker builds with DeployHQ" class="hover-only" width="27" height="27" loading="lazy" src="/assets/icons/tabs/docker-f15b0e2f9fa9e92554eaf3e59dd1c299e4a87b0cbe9659e8feb4cd06ac6d39e9.svg" />
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials Section -->
+<section class='lp-testimonials'>
+<div class='lp-testimonials__glow'>
+<img class="lp-testimonials__glow-img lp-testimonials__glow-img--light" alt="" role="presentation" loading="lazy" src="/assets/backgrounds/testimonials-glow-124939e97f5bc96f1856d908a76e73512eafe420edd6dde21e882825d1ab5c45.svg" />
+<img class="lp-testimonials__glow-img lp-testimonials__glow-img--dark" alt="" role="presentation" loading="lazy" src="/assets/backgrounds/testimonials-glow-dark-c60a578e22fb87cb25958d50bebbcbb4b7ac46d4f5fd7358afddf310cc3ec810.svg" />
+</div>
+<div class='container'>
+<div class='lp-section-hdr lp-section-hdr--center'>
+<h2 class='lp-section-hdr__title'>Don't just take our word for it!</h2>
+<p class='lp-section-hdr__lead'>Our customers are some of the loveliest around. Here's what they say about us</p>
+<div class='lp-testimonials__g2'>
+<a class="lp-g2-inline" target="_blank" rel="noopener" href="https://www.g2.com/products/deployhq/reviews"><div class='lp-g2-inline__logo'>
+<img alt="G2" width="24" height="24" loading="lazy" src="/assets/icons/logos/g2-red-721eda0d3887440763022a238b9d9e4ebb626c471ac2761651ca2cb593f7064a.svg" />
+</div>
+<div class='lp-g2-inline__content'>
+<p class='lp-g2-inline__text'>Excellent on G2</p>
+<div class='lp-g2-inline__rating'>
+<span class='lp-g2-inline__score'>4.5 (63 reviews)</span>
+<div class='lp-g2-inline__stars'>
+<svg fill='none' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF492C'></path>
+</svg>
+<svg fill='none' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF492C'></path>
+</svg>
+<svg fill='none' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF492C'></path>
+</svg>
+<svg fill='none' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF492C'></path>
+</svg>
+<svg fill='none' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'>
+<defs>
+<linearGradient id='half-star'>
+<stop offset='50%' stop-color='#FF492C'></stop>
+<stop offset='50%' stop-color='#FFB3BE'></stop>
+</linearGradient>
+</defs>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='url(#half-star)'></path>
+</svg>
+</div>
+</div>
+</div>
+</a></div>
+</div>
+<div class='lp-testimonials__badge lp-badge'>
+<div class='lp-testimonials__avatars'>
+<img alt="Customer" width="40" height="40" loading="lazy" src="/assets/testimonials/davepullig-880585cb17d05b8d061ed0aab685c5e8ab226383a954521af3aa0b122f43bbeb.jpg" />
+<img alt="Customer" width="40" height="40" loading="lazy" src="/assets/testimonials/mbarker_84-37c153472f41b65474582c5e519f69de4698733b558f006bce261e9e83e9cc7d.jpg" />
+<img alt="Customer" width="40" height="40" loading="lazy" src="/assets/testimonials/tempertemper-ad8fa1acc0a902d39386331aefe1965eacb37e326ae2fe73834901bd7aa0fe54.jpg" />
+</div>
+<p class='lp-badge__text'>Trusted by thousands of teams</p>
+</div>
+<div class='lp-testimonials__slider' data-testimonials='[{&quot;avatar&quot;:&quot;/assets/testimonials/lester-23c5c26e4804cd4151e474ea218178a32a8492d77af28d6823ca9aebf20b42a7.jpg&quot;,&quot;quote&quot;:&quot;I can say without a doubt DeployHQ is the most intuitive, easy to configure \u0026 troubleshoot deployment tool.&quot;,&quot;body&quot;:&quot;We have used a few deployment products over the years. We even tried products like Jenkins \u0026 Bitbucket pipelines, we spent days on these and made little progress. For around $1 per month per project, an absolute no brainer.&quot;,&quot;reviewer&quot;:&quot;Lester M.&quot;,&quot;company&quot;:&quot;Social Blend&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/noah-37a4538a6f6d122f58bd769638131e64a25dbeb09966204c2ca0b3cad183ab38.jpg&quot;,&quot;quote&quot;:&quot;This is the greatest, easiest to use, most robust deployment tool we have ever seen.&quot;,&quot;body&quot;:&quot;We struggled for nearly a week trying to configure Gulp tasks and scripts, Bitbucket pipelines, and who knows what else. We visited DeployHQ, gave it a go, and the site was deployed in T minus 45 seconds. Everything worked.&quot;,&quot;reviewer&quot;:&quot;Noah K.&quot;,&quot;company&quot;:&quot;Dreamsicle&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/jonnyauk-9a3ccec8eb149e3753624d67d1e38eff92ac1e51f0e46356cf8c13d943f95ddb.jpg&quot;,&quot;quote&quot;:&quot;Takes the pain out of syncing version control/git deployment straight to testing and/or production servers.&quot;,&quot;body&quot;:&quot;Super happy with DeployHQ - it makes deployment so much easier. The integration with our Git workflow is seamless and saves us hours every week.&quot;,&quot;reviewer&quot;:&quot;Jonny A.&quot;,&quot;company&quot;:&quot;Development Agency&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/davepullig-880585cb17d05b8d061ed0aab685c5e8ab226383a954521af3aa0b122f43bbeb.jpg&quot;,&quot;quote&quot;:&quot;It saves us a huge amount of time. Great support too.&quot;,&quot;body&quot;:&quot;DeployHQ has become an essential part of our deployment workflow. The support team is incredibly responsive and helpful whenever we need assistance.&quot;,&quot;reviewer&quot;:&quot;Dave P.&quot;,&quot;company&quot;:&quot;Tech Startup&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/mbarker_84-37c153472f41b65474582c5e519f69de4698733b558f006bce261e9e83e9cc7d.jpg&quot;,&quot;quote&quot;:&quot;I basically have the support team to thank for the fact that I&#39;m not getting fired today.&quot;,&quot;body&quot;:&quot;DeployHQ&#39;s support team is incredibly responsive and knowledgeable. They helped me resolve a critical deployment issue in minutes. Absolutely lifesaving service!&quot;,&quot;reviewer&quot;:&quot;Michelle B.&quot;,&quot;company&quot;:&quot;Digital Agency&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/tempertemper-ad8fa1acc0a902d39386331aefe1965eacb37e326ae2fe73834901bd7aa0fe54.jpg&quot;,&quot;quote&quot;:&quot;Their redesigned interface is superb.&quot;,&quot;body&quot;:&quot;Having used DeployHQ for a while, I have to say their redesigned interface is fantastic. Everything is intuitive and easy to find. The user experience is top-notch.&quot;,&quot;reviewer&quot;:&quot;Martin U.&quot;,&quot;company&quot;:&quot;Web Development&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/jimpannell-05954c987dbd17309a28b7e70700ebf7eb83319884afe3f9d94bd255ea713a71.jpg&quot;,&quot;quote&quot;:&quot;Bit late to the party, but I can highly recommend DeployHQ.&quot;,&quot;body&quot;:&quot;After trying various deployment solutions, DeployHQ stands out for its simplicity and reliability. The setup was straightforward and it just works every time.&quot;,&quot;reviewer&quot;:&quot;Jim P.&quot;,&quot;company&quot;:&quot;Software Development&quot;},{&quot;avatar&quot;:&quot;/assets/testimonials/tylerlwsmith-0793a788cf355ec370bdeb631b8f7a40711f4ec0a887904205f176264ab47d3a.jpg&quot;,&quot;quote&quot;:&quot;Small touches make a huge difference in user experience.&quot;,&quot;body&quot;:&quot;DeployHQ pays attention to the details that matter. From thoughtful email confirmations to intuitive workflows, it&#39;s clear they care about user experience.&quot;,&quot;reviewer&quot;:&quot;Tyler S.&quot;,&quot;company&quot;:&quot;Full Stack Developer&quot;}]'>
+<div class='lp-test-card'>
+<blockquote class='lp-test-card__quote'>
+<span class='lp-test-card__quote-text'>&quot;I can say without a doubt DeployHQ is the most intuitive, easy to configure &amp; troubleshoot deployment tool.&quot;</span>
+<p>We have used a few deployment products over the years. We even tried products like Jenkins &amp; Bitbucket pipelines, we spent days on these and made l...</p>
+<a class="lp-test-card__more" target="_blank" rel="noopener" href="https://www.g2.com/products/deployhq/reviews">Read full review on G2</a>
+</blockquote>
+<div class='lp-test-card__author'>
+<img alt="Lester M." class="lp-test-card__avatar" width="48" height="48" loading="lazy" src="/assets/testimonials/lester-23c5c26e4804cd4151e474ea218178a32a8492d77af28d6823ca9aebf20b42a7.jpg" />
+<div class='lp-test-card__info'>
+<p class='lp-test-card__name'>Lester M.</p>
+<p class='lp-test-card__company'>Social Blend</p>
+</div>
+</div>
+</div>
+<div class='lp-testimonials__divider'></div>
+<div class='lp-test-card'>
+<blockquote class='lp-test-card__quote'>
+<span class='lp-test-card__quote-text'>&quot;This is the greatest, easiest to use, most robust deployment tool we have ever seen.&quot;</span>
+<p>We struggled for nearly a week trying to configure Gulp tasks and scripts, Bitbucket pipelines, and who knows what else. We visited DeployHQ, gave ...</p>
+<a class="lp-test-card__more" target="_blank" rel="noopener" href="https://www.g2.com/products/deployhq/reviews">Read full review on G2</a>
+</blockquote>
+<div class='lp-test-card__author'>
+<img alt="Noah K." class="lp-test-card__avatar" width="48" height="48" loading="lazy" src="/assets/testimonials/noah-37a4538a6f6d122f58bd769638131e64a25dbeb09966204c2ca0b3cad183ab38.jpg" />
+<div class='lp-test-card__info'>
+<p class='lp-test-card__name'>Noah K.</p>
+<p class='lp-test-card__company'>Dreamsicle</p>
+</div>
+</div>
+</div>
+</div>
+<div class='lp-testimonials__arrows'>
+<button aria-label='Previous testimonials' class='lp-arrow lp-arrow--prev' type='button'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M15 18L9 12L15 6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' stroke='currentColor'></path>
+</svg>
+</button>
+<button aria-label='Next testimonials' class='lp-arrow lp-arrow--next' type='button'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M9 18L15 12L9 6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' stroke='currentColor'></path>
+</svg>
+</button>
+</div>
+</div>
+</section>
+<!-- Community Banner -->
+<section class='lp-community'>
+<div class='lp-community__container'>
+<div class='lp-community__content'>
+<p class='lp-community__text'>
+<span class='lp-community__text--white'>Built with our community • 101 feature requests • 45 shipped</span>
+<span class='lp-community__dot'>•</span>
+<a class="lp-community__text--purple lp-community__link" target="_blank" rel="noopener" href="https://changelog.deployhq.com/">Vote on what&#39;s next</a>
+</p>
+</div>
+</div>
+</section>
+<!-- Case Study Section -->
+<section class='lp-case-study'>
+<div class='lp-case-study__glow'></div>
+<div class='lp-case-study__header'>
+<h2 class='lp-section-hdr__title'>Case Studies</h2>
+<p class='lp-section-hdr__lead'>See how teams use DeployHQ to ship faster and simplify their workflows.</p>
+</div>
+<div class='lp-case-study__container' data-case-studies='[{&quot;title&quot;:&quot;Case Study: Digital Agency Achieves Zero Downtime Deployments on WP Engine with DeployHQ&quot;,&quot;published_at&quot;:&quot;23 October 2025&quot;,&quot;link&quot;:&quot;https://www.deployhq.com/blog/case-study-digital-agency-achieves-zero-downtime-deployments-on-wp-engine-with-deployhq&quot;,&quot;link_label&quot;:&quot;Read more&quot;,&quot;excerpt&quot;:&quot;Discover how DeployHQ helped a leading agency achieve zero downtime WordPress deployments on WP Engine with rsync, SFTP, and accelerated tar options.&quot;,&quot;image&quot;:&quot;/case-study-images/case-study-digital-agency-achieves-zero-downtime-deployments.jpg&quot;,&quot;image_alt&quot;:&quot;Case Study: Digital Agency Achieves Zero Downtime Deployments on WP Engine with DeployHQ&quot;},{&quot;title&quot;:&quot;Case Study: Circle.so Boosts Performance with DeployHQ, Achieving 60% Page Speed Improvement&quot;,&quot;published_at&quot;:&quot;30 July 2025&quot;,&quot;link&quot;:&quot;https://www.deployhq.com/blog/case-study-circle-so-boosts-performance-with-deployhq-achieving-60-page-speed-improvement&quot;,&quot;link_label&quot;:&quot;Read more&quot;,&quot;excerpt&quot;:&quot;Learn how community platform Circle.so used DeployHQ and a custom development strategy to migrate their website and achieve a remarkable 60% page speed improvement.&quot;,&quot;image&quot;:&quot;/case-study-images/case-study-circle-so-boosts-performance-with-deployhq-achiev.jpg&quot;,&quot;image_alt&quot;:&quot;Case Study: Circle.so Boosts Performance with DeployHQ, Achieving 60% Page Speed Improvement&quot;},{&quot;title&quot;:&quot;Case Study: Inspector.dev’s Journey to Seamless Deployments and Zero Downtime with DeployHQ&quot;,&quot;published_at&quot;:&quot;30 June 2025&quot;,&quot;link&quot;:&quot;https://www.deployhq.com/blog/case-study-inspector-dev-s-journey-to-seamless-deployments-and-zero-downtime-with-deployhq&quot;,&quot;link_label&quot;:&quot;Read more&quot;,&quot;excerpt&quot;:&quot;Learn how APM platform Inspector.dev uses DeployHQ for zero-downtime deployments to AWS, automating builds \u0026 streamlining workflows. Reduced errors \u0026 saved time. Case study.&quot;,&quot;image&quot;:&quot;/case-study-images/case-study-inspector-dev-s-journey-to-seamless-deployments-a.jpg&quot;,&quot;image_alt&quot;:&quot;Case Study: Inspector.dev’s Journey to Seamless Deployments and Zero Downtime with DeployHQ&quot;},{&quot;title&quot;:&quot;Case Study: A Smooth Switch from DeployBot to DeployHQ&quot;,&quot;published_at&quot;:&quot;5 June 2025&quot;,&quot;link&quot;:&quot;https://www.deployhq.com/blog/case-study-a-smooth-switch-from-deploybot-to-deployhq&quot;,&quot;link_label&quot;:&quot;Read more&quot;,&quot;excerpt&quot;:&quot;Case Study: Learn how Leeds-based agency Ponderosa successfully migrated from DeployBot to DeployHQ, achieving faster, more reliable deployments and an improved UI with a refreshingly straightforward transition.&quot;,&quot;image&quot;:&quot;/case-study-images/case-study-a-smooth-switch-from-deploybot-to-deployhq.jpg&quot;,&quot;image_alt&quot;:&quot;Case Study: A Smooth Switch from DeployBot to DeployHQ&quot;},{&quot;title&quot;:&quot;Case Study: Cutting Deployment Costs and Complexity with DeployHQ&quot;,&quot;published_at&quot;:&quot;29 May 2025&quot;,&quot;link&quot;:&quot;https://www.deployhq.com/blog/case-study-cutting-deployment-costs-and-complexity-with-deployhq&quot;,&quot;link_label&quot;:&quot;Read more&quot;,&quot;excerpt&quot;:&quot;Discover how a company cut .NET deployment costs from $23k to $3k annually by replacing Octopus Cloud with DeployHQ for 100+ .NET Core projects on Windows Server, leveraging OpenSSH and PowerShell.&quot;,&quot;image&quot;:&quot;/case-study-images/case-study-cutting-deployment-costs-and-complexity-with-depl.jpg&quot;,&quot;image_alt&quot;:&quot;Case Study: Cutting Deployment Costs and Complexity with DeployHQ&quot;},{&quot;title&quot;:&quot;Case Study: Accelerating Windows Server Deployments with DeployHQ&quot;,&quot;published_at&quot;:&quot;21 April 2025&quot;,&quot;link&quot;:&quot;https://www.deployhq.com/blog/case-study-accelerating-windows-server-deployments-with-deployhq&quot;,&quot;link_label&quot;:&quot;Read more&quot;,&quot;excerpt&quot;:&quot;Automate Windows Server 2022 deployments on AWS LightSail! See how Innovate Solutions used DeployHQ to streamline their workflow, reduce errors, and accelerate releases. Learn how to configure OpenSSH and automate IIS deployments.&quot;,&quot;image&quot;:&quot;/case-study-images/case-study-accelerating-windows-server-deployments-with-depl.jpg&quot;,&quot;image_alt&quot;:&quot;Case Study: Accelerating Windows Server Deployments with DeployHQ&quot;}]' data-case-study-slider>
+<div class='lp-case-study__card lp-case-study__card--active' data-case-study-card>
+<div class='lp-case-study__content'>
+<div class='lp-case-study__icon'>
+<img alt="Case study" class="lp-case-study__icon-svg" width="24" height="24" loading="lazy" src="/assets/icons/graduation-cap-8876642e07a3743ef038f8bf549dc53dd1e5a5745744f9c055d78a6bb8884824.svg" />
+</div>
+<div class='lp-case-study__text'>
+<h3 class='lp-case-study__title' data-case-study-title>Case Study: Digital Agency Achieves Zero Downtime Deployments on WP Engine with DeployHQ</h3>
+<div class='lp-case-study__meta' data-case-study-meta>
+<p class='lp-case-study__date' data-case-study-date>
+Posted on 23 October 2025
+</p>
+</div>
+<p class='lp-case-study__excerpt' data-case-study-excerpt>Discover how DeployHQ helped a leading agency achieve zero downtime WordPress deployments on WP Engine with rsync, SFTP, and accelerated tar options.</p>
+<div class='lp-case-study__actions'>
+<a class="lp-case-study__link" target="_blank" rel="noopener" data-case-study-link="true" href="https://www.deployhq.com/blog/case-study-digital-agency-achieves-zero-downtime-deployments-on-wp-engine-with-deployhq">Read more</a>
+</div>
+</div>
+</div>
+<div class='lp-case-study__image'>
+<div class='lp-case-study__image-wrapper'>
+<div class='lp-case-study__skeleton' data-case-study-skeleton></div>
+<img alt="Case Study: Digital Agency Achieves Zero Downtime Deployments on WP Engine with DeployHQ" class="lp-case-study__img" width="412" height="252" loading="lazy" data-case-study-image="true" src="/case-study-images/case-study-digital-agency-achieves-zero-downtime-deployments.jpg" />
+</div>
+</div>
+</div>
+</div>
+<div class='lp-case-study__arrows lp-testimonials__arrows' data-case-study-arrows>
+<button aria-label='Previous case study' class='lp-arrow lp-arrow--prev' data-case-study-prev type='button'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M15 18L9 12L15 6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' stroke='currentColor'></path>
+</svg>
+</button>
+<button aria-label='Next case study' class='lp-arrow lp-arrow--next' data-case-study-next type='button'>
+<svg fill='none' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'>
+<path d='M9 18L15 12L9 6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' stroke='currentColor'></path>
+</svg>
+</button>
+</div>
+</section>
+<!-- Stats Section -->
+<section class='lp-stats'>
+<div class='lp-stats__container'>
+<div class='lp-stats__grid'>
+<div class='lp-stat'>
+<p class='lp-stat__num'>50,000+</p>
+<p class='lp-stat__label'>Active Users</p>
+</div>
+<div class='lp-stats__divider'></div>
+<div class='lp-stat'>
+<p class='lp-stat__num'>15+</p>
+<p class='lp-stat__label'>Integrations</p>
+</div>
+<div class='lp-stats__divider'></div>
+<div class='lp-stat'>
+<p class='lp-stat__num'>20,000+</p>
+<p class='lp-stat__label'>Daily Deployments</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Trust Section -->
+<section class='lp-trust'>
+<div class='lp-trust__bg'></div>
+<div class='container'>
+<div class='lp-trust__layout'>
+<div class='lp-trust__content'>
+<h2 class='lp-trust__title'>Trusted by teams that ship at scale</h2>
+<p class='lp-section-hdr__lead'>Rated excellent across every major review platform</p>
+<div class='lp-trust__ctas'>
+<a class="lp-btn lp-btn--primary lp-btn--lg" href="/signup?cta=Start+deploying+free">Start deploying free</a>
+<a class="lp-btn lp-btn--secondary lp-btn--lg" href="/contact">Talk to us</a>
+</div>
+</div>
+<div class='lp-trust__badges'>
+<a target="_blank" rel="noopener" class="lp-trust-badge" href="https://www.g2.com/products/deployhq/reviews"><div class='lp-trust-badge__logo'>
+<img alt="G2" class="lp-trust-badge__logo-img" width="80" height="24" loading="lazy" src="/assets/icons/logos/g2-73dd04ffd56d6db7e41fa95214c179b22abd61920405808c99004068550e0f4a.svg" />
+</div>
+<div class='lp-trust-badge__content'>
+<div class='lp-trust-badge__stars'>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<defs>
+<linearGradient id='g2-partial'>
+<stop offset='50%' stop-color='#FF9D28'></stop>
+<stop offset='50%' stop-color='#E0E0E0'></stop>
+</linearGradient>
+</defs>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='url(#g2-partial)'></path>
+</svg>
+</div>
+<p class='lp-trust-badge__rating'>4.5 out of 5</p>
+</div>
+</a><a target="_blank" rel="noopener" class="lp-trust-badge" href="https://www.capterra.com/p/10020225/DeployHQ/"><div class='lp-trust-badge__logo'>
+<img alt="Capterra" class="lp-trust-badge__logo-img" width="80" height="24" loading="lazy" src="/assets/icons/logos/capterra-2da66a49659ccf77eede60171740feacf93ead9c57098ef858d67f7c55d73a2e.svg" />
+</div>
+<div class='lp-trust-badge__content'>
+<div class='lp-trust-badge__stars'>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+</div>
+<p class='lp-trust-badge__rating'>5 out of 5</p>
+</div>
+</a><a target="_blank" rel="noopener" class="lp-trust-badge" href="https://crozdesk.com/software/deployhq"><div class='lp-trust-badge__logo'>
+<img alt="Crozdesk" class="lp-trust-badge__logo-img" width="80" height="24" loading="lazy" src="/assets/icons/logos/crozdesk-b9c73e499f8bfb9bb3343dd1fd05adce1c9a0122a7b82145389b3a38105e2d47.svg" />
+</div>
+<div class='lp-trust-badge__content'>
+<div class='lp-trust-badge__stars'>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='#FF9D28'></path>
+</svg>
+<svg class='lp-trust-badge__star' fill='none' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'>
+<defs>
+<linearGradient id='crozdesk-partial'>
+<stop offset='30%' stop-color='#FF9D28'></stop>
+<stop offset='30%' stop-color='#E0E0E0'></stop>
+</linearGradient>
+</defs>
+<path d='M10 1L12.5 7.5H19L14 11.5L16.5 18L10 14L3.5 18L6 11.5L1 7.5H7.5L10 1Z' fill='url(#crozdesk-partial)'></path>
+</svg>
+</div>
+<p class='lp-trust-badge__rating'>4.3 out of 5</p>
+</div>
+</a></div>
+</div>
+</div>
+</section>
+<!-- Final CTA Section -->
+<section class='lp-final'>
+<div class='lp-final__container'>
+<div class='lp-final__content'>
+<div class='lp-final__pill'>
+<p class='lp-final__pill-text'>Trusted by thousands of teams</p>
+</div>
+<h2 class='lp-final__title'>Ready to deploy without the headache?</h2>
+<p class='lp-final__subtitle'>Start free with 3 projects and unlimited deployments. Automatic or manual.</p>
+<a class="lp-final__button" href="/signup">Start deploying free</a>
+<div class='lp-final__live-deployments'>
+<div class='lp-final__live-card'>
+<div class='lp-final__live-content'>
+<div class='lp-final__live-icon'></div>
+<p class='lp-final__live-text'>20,000 deployments happening every day</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- WebMCP Agent Interactivity (hidden from visual users, discoverable by AI agents) -->
+<div aria-label='AI agent tools' class='u-visually-hidden' role='complementary'>
+<form action='/support/search' method='get' tooldescription='Search DeployHQ documentation, guides, and support articles' toolname='siteSearch'>
+<label class='u-visually-hidden' for='agent-search-q'>Search documentation</label>
+<input aria-label='Search query for DeployHQ docs and support' id='agent-search-q' name='q' toolparamdescription='Search query for DeployHQ docs and support' type='text'>
+<button type='submit'>Search</button>
+</form>
+<form action='/' method='get' onsubmit='window.location.href=this.section.value;return false;' tooldescription='Navigate to a section of the DeployHQ website: features, pricing, blog, support, signup, about, contact' toolname='navigateToSection'>
+<label class='u-visually-hidden' for='agent-nav-section'>Navigate to site section</label>
+<select aria-label='Section to navigate to' id='agent-nav-section' name='section' toolparamdescription='Section to navigate to: features, pricing, blog, support, signup, about, contact'>
+<option value='/features'>Features</option>
+<option value='/pricing'>Pricing</option>
+<option value='/blog'>Blog</option>
+<option value='/support'>Support</option>
+<option value='/signup'>Sign Up</option>
+<option value='/about'>About</option>
+<option value='/contact'>Contact</option>
+</select>
+<button type='submit'>Go</button>
+</form>
+</div>
+</div>
+
+</main>
+<footer class='footer'>
+<div class='footer__container'>
+<div class='footer__top'>
+<!-- / Back to Top -->
+<a class="footer__back-to-top" onclick="window.scrollTo({top: 0, behavior: &#39;smooth&#39;}); return false;" href="#"><span>Back to top</span>
+<svg class='footer__back-to-top-icon' fill='none' stroke='currentColor' viewBox='0 0 16 16'>
+<path d='m4 10 4-4 4 4' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'></path>
+</svg>
+</a><!-- / Brand & Company Section -->
+<div class='footer__brand'>
+<div class='footer__brand-logo'>
+<a class="footer__logo-link" href="/"><img class="footer__logo footer__logo--dark" alt="DeployHQ" width="158" height="40" loading="lazy" src="/assets/logos/deployhq-logo-dark-5d651de1840ee1ca1ebd14015d57f72b07185615e919747b65852154aeec77d8.svg" />
+<img class="footer__logo footer__logo--light" alt="DeployHQ" width="158" height="40" loading="lazy" src="/assets/logos/deployhq-logo-9586cdf9994a2286049465b3f9fa9df456051a862066c61031f2a1ed72518f4f.svg" />
+</a></div>
+<!-- / Status Widget -->
+<a class="footer__status" target="_blank" rel="noopener noreferrer" href="https://status.deployhq.com/"><div class='footer__status-indicator footer__status-indicator--operational'></div>
+<span class='footer__status-text'>All systems operational</span>
+</a><!-- / Social Links -->
+<div class='footer__social'>
+<a class="footer__social-link footer__social-link--github" aria-label="GitHub" target="_blank" rel="noopener noreferrer" href="https://github.com/deployhq"><img class="footer__social-icon light-only" alt="GitHub" width="20" height="20" loading="lazy" src="/assets/qlog/social/github-0f5bf5f3802343116d1758b6b70d2cec4f288c6f0feb30a1f65682d8b5f43686.svg" />
+<img class="footer__social-icon dark-only" alt="GitHub" width="20" height="20" loading="lazy" src="/assets/qlog/social-dark/github-eedd97c55b52b5ba4f3795227052b78cffa89c26c799a736b7e792a51b703f82.svg" />
+</a><a class="footer__social-link footer__social-link--x" aria-label="X" target="_blank" rel="noopener noreferrer" href="https://x.com/deployhq"><img class="footer__social-icon light-only" alt="X" width="20" height="20" loading="lazy" src="/assets/qlog/social/x-f604e995965973cac098ae651469f376dbe477b7ab5dff4b4d67f9fd368f2c29.svg" />
+<img class="footer__social-icon dark-only" alt="X" width="20" height="20" loading="lazy" src="/assets/qlog/social-dark/x-95e68199a75e0e936c11c486f8c5d69f5992534fea1c9eaa77cf2044296311c8.svg" />
+</a><a class="footer__social-link footer__social-link--linkedin" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" href="https://linkedin.com/company/deployhq/"><img class="footer__social-icon light-only" alt="LinkedIn" width="20" height="20" loading="lazy" src="/assets/qlog/social/linkedin-0edfc613235061d2978926b0934d654022890ce797c369030a2c44ec7e3cc296.svg" />
+<img class="footer__social-icon dark-only" alt="LinkedIn" width="20" height="20" loading="lazy" src="/assets/qlog/social-dark/linkedin-ff5c0fbd22d4cb5c643c9c58e1a60a151fb5d5db51bca5ac7510b3281ca7f49b.svg" />
+<img class="footer__social-icon hover-only" alt="LinkedIn" width="20" height="20" loading="lazy" src="/assets/qlog/social/linkedin-color-62f4f4b58767e1c2b10b30efeae4c46b902dc412635877716a1a822618f7c67d.svg" />
+</a><a class="footer__social-link footer__social-link--bluesky" aria-label="Bluesky" target="_blank" rel="noopener noreferrer" href="https://bsky.app/profile/deployhq.com"><img class="footer__social-icon light-only" alt="Bluesky" width="20" height="20" loading="lazy" src="/assets/qlog/social/bluesky-967ef5ac0ccfe6ca1d05ce665ca0a9ca530f9ce92deccb8f9bb5d73b76cbbcfa.svg" />
+<img class="footer__social-icon dark-only" alt="Bluesky" width="20" height="20" loading="lazy" src="/assets/qlog/social-dark/bluesky-527a11f627215fcbf32386a396012a076f6134b12d75de9a0e8b54a167ddcd68.svg" />
+<img class="footer__social-icon hover-only" alt="Bluesky" width="20" height="20" loading="lazy" src="/assets/qlog/social/bluesky-color-ec88bfbdcb899f18cc807c7bf46089ec006cde2109ad39fde9b49caa2926cbb1.svg" />
+</a></div>
+</div>
+<!-- / Tagline -->
+<div class='footer__tagline'>
+<p>Deploy faster with confidence.</p>
+<p>From idea to production in minutes.</p>
+</div>
+</div>
+<div class='footer__links'>
+<!-- / Product Column -->
+<div class='footer__column'>
+<h3 class='footer__column-title'>Product</h3>
+<nav class='footer__nav'>
+<a class="footer__nav-link" href="/features">Features</a>
+<a class="footer__nav-link" href="/pricing">Pricing</a>
+<a class="footer__nav-link" href="/customers">Testimonials</a>
+<a class="footer__nav-link" href="/support">Documentation</a>
+<a class="footer__nav-link" target="_blank" rel="noopener noreferrer" href="https://api.deployhq.com/docs">API Reference</a>
+<a class="footer__nav-link" href="/features/integrations">Integrations</a>
+<a class="footer__nav-link" href="/for-developers">For Developers</a>
+<a class="footer__nav-link" href="/for-agencies">For Agencies</a>
+<a class="footer__nav-link" href="/for-engineering-teams">For Engineering Teams</a>
+</nav>
+</div>
+<!-- / Resources Column -->
+<div class='footer__column'>
+<h3 class='footer__column-title'>Resources</h3>
+<nav class='footer__nav'>
+<a class="footer__nav-link" href="/blog">Blog</a>
+<a class="footer__nav-link" href="/support">Support Center</a>
+<a class="footer__nav-link" href="/guides">Guides and tutorials</a>
+<a class="footer__nav-link" target="_blank" rel="noopener noreferrer" href="https://status.deployhq.com/">Status Page</a>
+<a class="footer__nav-link" target="_blank" rel="noopener noreferrer" href="https://changelog.deployhq.com/">Changelog</a>
+<a class="footer__nav-link" href="/git">Learn Git</a>
+<a class="footer__nav-link" target="_blank" rel="noopener noreferrer" href="https://pagespeed.deployhq.com/">AI PageSpeed</a>
+<a class="footer__nav-link" href="/features/ai">DeployHQ AI</a>
+<a class="footer__nav-link" href="/features/deployhq-mcp">DeployHQ MCP Server</a>
+<a class="footer__nav-link" href="/agents">CLI &amp; Agents</a>
+<a class="footer__nav-link" href="/support#ask-ai">Ask AI</a>
+</nav>
+</div>
+<!-- / Solutions Column -->
+<div class='footer__column'>
+<h3 class='footer__column-title'>Solutions</h3>
+<nav class='footer__nav'>
+<a class="footer__nav-link" href="/deploy-from-github">Deploy from GitHub</a>
+<a class="footer__nav-link" href="/deploy-from-gitlab">Deploy from GitLab</a>
+<a class="footer__nav-link" href="/deploy-from-bitbucket">Deploy from Bitbucket</a>
+<a class="footer__nav-link" href="https://www.deployhq.com/features/integrations/slack">Deploy from Slack</a>
+<a class="footer__nav-link" href="/shared-hosting">Shared Hosting Deployments</a>
+<a class="footer__nav-link" href="/vps">VPS Deployments</a>
+<a class="footer__nav-link" href="/wordpress">WordPress Deployments</a>
+<a class="footer__nav-link" href="/features/zero-downtime-deployments">Zero Downtime</a>
+<a class="footer__nav-link" href="/features/turbo-deployments">Turbo Deployments</a>
+<a class="footer__nav-link" href="/deploy-to-game-servers">Game Server Deployments</a>
+</nav>
+</div>
+<!-- / Company Column -->
+<div class='footer__column'>
+<h3 class='footer__column-title'>Company</h3>
+<nav class='footer__nav'>
+<a class="footer__nav-link" href="/about">About</a>
+<a class="footer__nav-link" target="_blank" rel="noopener noreferrer" href="https://saas.group/careers/">Careers</a>
+<a class="footer__nav-link" href="/contact">Contact</a>
+<a class="footer__nav-link" href="/terms">Terms of Service</a>
+<a class="footer__nav-link" href="/privacy">Privacy Policy</a>
+<a class="footer__nav-link" onclick="if (typeof UC_UI !== &#39;undefined&#39;) { UC_UI.showSecondLayer(); } return false;" href="#">Cookie Policy</a>
+</nav>
+</div>
+<!-- / Compare Column -->
+<div class='footer__column'>
+<h3 class='footer__column-title'>Compare</h3>
+<nav class='footer__nav'>
+<a class="footer__nav-link" href="/compare/deployhq-vs-buddy">DeployHQ vs Buddy</a>
+<a class="footer__nav-link" href="/compare/deployhq-vs-jenkins">DeployHQ vs Jenkins</a>
+<a class="footer__nav-link" href="/compare/deployhq-vs-github-actions">DeployHQ vs GitHub Actions</a>
+<a class="footer__nav-link" href="/compare/deployhq-vs-circleci">DeployHQ vs CircleCI</a>
+<a class="footer__nav-link" href="/compare/deployhq-vs-laravel-forge">DeployHQ vs Laravel Forge</a>
+<a class="footer__nav-link" href="/compare">All comparisons</a>
+</nav>
+</div>
+</div>
+<div class='footer__separator'></div>
+<div class='footer__bottom'>
+<p class='footer__copyright'>
+2026 DeployHQ (saas.group LLC). All rights reserved.
+<a class="footer__powered-link" href="/green">Running on 100% renewable energy</a>
+</p>
+</div>
+</div>
+</footer>
+
+<div class='js-outlet'>
+<div class='overlay js-overlay'></div>
+</div>
+<script src="/assets/critical-f0114b6141191df3b776910b20515f239b038c9ccec402d1ee352be25205592b.js" defer="defer"></script>
+<script src="/assets/deferred-05744115bd9084a44be805cef003c06302f1e9f65d7d26b9bb4a9df2f474caf3.js" defer="defer" async="async"></script>
+<script type='module'>
+// Only load Mermaid if there are diagrams on the page
+if (document.querySelector('pre.mermaid')) {
+  try {
+    const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+    mermaid.default.initialize({
+      startOnLoad: true,
+      securityLevel: 'strict',
+      htmlLabels: false,
+      theme: 'default'
+    });
+  } catch (error) {
+    console.error('Failed to load Mermaid.js:', error);
+    // Show error message in diagram blocks
+    document.querySelectorAll('pre.mermaid').forEach(el => {
+      el.textContent = '⚠️ Failed to load diagram renderer. Please refresh the page.';
+      el.style.color = '#dc6b6b';
+    });
+  }
+}
+</script>
+<script src="/assets/third-party-loader-c0e2a27ab17d5acd3867857014c72ee6ab77e5b8a980b17ed8563ab94feabedf.js" defer="defer"></script>
+
+</body>
+</html>

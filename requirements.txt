@@ -6,3 +6,6 @@ dnspython
 checkdmarc
 psutil
 ijson
+scikit-learn
+pandas
+joblib

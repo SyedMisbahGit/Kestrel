@@ -185,3 +185,6 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
 
 if __name__ == "__main__":
     app()
+
+import subprocess
+subprocess.run(['python3', 'modules/reporter.py'])

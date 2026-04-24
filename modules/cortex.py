@@ -1,5 +1,6 @@
 import joblib
 from modules.blacksmith import WasmExtractor
+from modules.chimera import JWTSniper
 from core.filters import is_whitelisted
 import asyncio
 import aiohttp
@@ -176,6 +177,11 @@ async def extract_target(client, js_url, session_state):
                                             "name": f"High Entropy Anomaly (H={entropy})",
                         "matched-at": js_url,
                         "info": {"severity": "HIGH"}})
+                if secret.startswith('eyJh') and len(secret) > 40:
+                    jwt_vulns = self.chimera.analyze_token(js_url, secret)
+                    if jwt_vulns:
+                        vulnerabilities.extend(jwt_vulns)
+
     except Exception:
         pass
     return vulnerabilities

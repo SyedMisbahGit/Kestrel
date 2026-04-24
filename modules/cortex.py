@@ -130,8 +130,7 @@ async def extract_target(client, js_url, session_state):
         'sourcesContent.item'))
                 if sources and contents:
                     console.print(
-                        f"[bold magenta]  [*] PROJECT GHOST: Extracted {
-        len(sources)} dev files from {js_url}[/bold magenta]")
+                        f"[bold magenta]  [*] PROJECT GHOST: Extracted {len(sources)} dev files from {js_url}[/bold magenta]")
                     for filename, content in zip(sources, contents):
                         if not content:
                             continue

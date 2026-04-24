@@ -1,4 +1,5 @@
 import joblib
+from modules.blacksmith import WasmExtractor
 from core.filters import is_whitelisted
 import asyncio
 import aiohttp

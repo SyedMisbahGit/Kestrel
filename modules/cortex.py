@@ -219,8 +219,7 @@ def run_cortex(session, config):
         return
 
     console.print(
-        f"INFO     Deploying Neural Extraction & Entropy Math against {
-        len(js_targets)} bundles...")
+        f"INFO     Deploying Neural Extraction & Entropy Math against {len(js_targets)} bundles...")
     asyncio.run(deploy_cortex(session, js_targets))
     console.print(
         "  + AST Compilation Complete. Shadow APIs and Proprietary Tokens injected into state graph.")

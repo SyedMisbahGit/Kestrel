@@ -22,6 +22,7 @@ from modules.permutations import run_permutations
 from modules.probing import run_probing
 from modules.spider import run_spider
 from modules.cortex import run_cortex
+from modules.graphx import GraphQLSniper
 from modules.nuclei_scan import run_nuclei
 from modules.fuzzer import run_fuzzer
 from modules.oast import run_oast

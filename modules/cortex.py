@@ -234,7 +234,7 @@ def sanitize_database(db_path):
     import os
 
 
-   if not os.path.exists(db_path):
+    if not os.path.exists(db_path):
         return
     try:
         conn = sqlite3.connect(db_path)

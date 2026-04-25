@@ -13,6 +13,12 @@ from core.intelligence import run_intelligence
 from core.mesh import mesh
 from modules.uncloak import OriginSniper
 from modules.cerberus import AuthEngine
+
+class SessionState:
+    def __init__(self):
+        self.auth_headers = {}
+        self.auth_cookies = {}
+
 from core.parser import parse_target
 
 # Modules
@@ -60,13 +66,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
                       > ENGAGE PASSIVELY. STRIKE DETERMINISTICALLY.
     [/bold white]"""
     console.print(KESTREL_LOGO)
-    console.print("\n[bold]
-class SessionState:
-    def __init__(self):
-        self.auth_headers = {}
-        self.auth_cookies = {}
-
-SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
+    console.print("\n[bold]SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
     config = load_config()
     session = TargetSession(target, mode)
 
@@ -141,6 +141,16 @@ SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
 
         # --- THE DIRECTED ACYCLIC GRAPH (DAG) ---
         if not resume:
+            # --- PHASE 0: PROJECT CERBERUS (AUTHENTICATED BREACH) ---
+            console.print('\n[bold red]━━ PROJECT CERBERUS: BREACHING AUTHENTICATED PERIMETER ━━[/bold red]')
+            try:
+                auth_data = AuthEngine(target).breach_perimeter()
+                if auth_data:
+                    session.auth_headers.update(auth_data.get("headers", {}))
+                    session.auth_cookies.update(auth_data.get("cookies", {}))
+            except Exception as e:
+                console.print(f'  [!] Cerberus Bypass Failed: {e}')
+
             # Stage 1: Recon & Expansion
             safe_run("OSINT", run_osint)           # Phase 1: Native SSL + API Circuit Breaker
             safe_run("HORIZONTAL", run_horizontal) # Phase 1.1: Origin / CDN Shield

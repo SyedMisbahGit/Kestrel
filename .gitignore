@@ -29,3 +29,5 @@ __pycache__/
 .idea/
 .DS_Store
 config/*.yaml
+data/sessions/*.db
+data/training_ledger.csv

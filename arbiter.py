@@ -189,3 +189,7 @@ if __name__ == "__main__":
 
 import subprocess
 subprocess.run(['python3', 'modules/reporter.py'])
+
+# --- PHASE 9: DATA LAKE SYNC ---
+import subprocess
+subprocess.run(['python3', 'modules/lake.py'])

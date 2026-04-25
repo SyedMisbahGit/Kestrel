@@ -9,3 +9,4 @@ ijson
 scikit-learn
 pandas
 joblib
+boto3

@@ -79,3 +79,10 @@ jobs:
         run: |
           echo "Triggering Neural Network Training..."
           curl -X POST "https://bytesyed-kestrel-brain.hf.space/train" || true
+      - name: Commit and push results
+        run: |
+          git config --local user.email "kestrel-bot@github.com"
+          git config --local user.name "Kestrel Grid"
+          git add --update || true
+          git commit -m "chore: Kestrel automated execution complete" || echo "No changes to commit"
+          git push

@@ -26,3 +26,6 @@ class ProxyMesh:
         if not proxy.startswith('http'):
             proxy = f"http://{proxy}"
         return proxy
+
+# Global instance for arbiter.py backwards compatibility
+mesh = ProxyMesh()

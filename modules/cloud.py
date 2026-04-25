@@ -19,71 +19,46 @@ PROVIDERS = {
 }
 
 async def check_bucket(client, sem, provider_name, url, session_state, candidate):
-
     async with sem:
-
         try:
-
-            async with client.get(url, timeout=5, ssl=False) as r:
-
+            async with client.get(url, timeout=5, ssl=False, allow_redirects=False) as r:
                 status = r.status
-
                 text = await r.text()
+                headers_str = str(r.headers).lower()
 
-                
-
-                if "NoSuchBucket" in text or status == 404:
-
+                if "nosuchbucket" in text.lower() or status == 404:
                     return
 
+                # OWNERSHIP VALIDATION: Does the target domain appear in the bucket's headers, redirects, or body?
+                # Or does the bucket name perfectly match the apex domain (e.g., target.com.s3.amazonaws.com)?
+                target_domain = session_state.domain.lower()
+                is_owned = False
                 
+                if target_domain in headers_str or target_domain in text.lower() or target_domain in candidate:
+                    is_owned = True
+                
+                if not is_owned:
+                    return # Drop the bucket to prevent tracking squatted infrastructure
 
                 if status == 200:
-
-                    console.print(f"[bold red]  ! [CRITICAL] Open {provider_name} Bucket Discovered: {url}[/bold red]")
-
-                    import sqlite3
-
-
-
-
-
-
+                    console.print(f"[bold red]  ! [CRITICAL] Open {provider_name} Bucket Discovered (Verified): {url}[/bold red]")
                     session_state.cloud_buckets.add(url)
-
                     
-
                     cmd = f"aws s3 ls s3://{candidate} --no-sign-request" if "s3.amazonaws" in url else f"curl -s {url} | xmlstarlet format"
-
                     print_briefing(
-
                         title="Unauthenticated Cloud Storage",
-
-                        happening=f"Kestrel mathematically generated the bucket name '{candidate}' and received a 200 OK from {provider_name}, indicating total exposure.",
-
+                        happening=f"Kestrel mathematically generated the bucket name '{candidate}', verified ownership, and received a 200 OK from {provider_name}.",
                         action="Immediately verify if the bucket contains Terraform states, PII, or internal source code.",
-
                         command=cmd,
-
                         style="red"
-
                     )
-
                     session_state.vulnerabilities.append({
-
                         "type": "VULN", "name": f"Open {provider_name} Bucket", "matched-at": url, "info": {"severity": "CRITICAL"}
-
                     })
-
-                elif status == 403 or "AccessDenied" in text:
-
-                    console.print(f"[yellow]  * [INFO] Protected {provider_name} Bucket Found: {url}[/yellow]")
-
+                elif status in [403, 301, 302, 307] or "accessdenied" in text.lower():
+                    console.print(f"[yellow]  * [INFO] Protected {provider_name} Bucket Found (Verified): {url}[/yellow]")
                     session_state.add_subdomain(url)
-
         except Exception:
-
-            pass
             pass
 
 async def deploy_cloud_sniper(session_state, base_name):

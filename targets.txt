@@ -8,3 +8,4 @@ class.com
 chatgpt.com
 vercel.com
 zerodha.com
+bugcrowd.com

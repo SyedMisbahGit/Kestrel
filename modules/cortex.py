@@ -58,54 +58,55 @@ class TaintTracker:
         self.endpoints = set()
         self.entropy_secrets = set()
 
-    def walk(self, node):
+    def walk(self, node, current_context="unknown"):
         if not node or not hasattr(node, "type"):
             return
-        if node.type == "VariableDeclarator" and node.id.type == "Identifier" and node.init and node.init.type == "Literal" and isinstance(
-            node.init.value, str):
-            self.variables[node.id.name] = node.init.value
+
+        # AST CONTEXT EXTRACTION: Grab the variable/property name
+        next_context = current_context
+        if node.type == "VariableDeclarator" and hasattr(node, "id"):
+            next_context = getattr(node.id, "name", current_context)
+        elif node.type == "Property" and hasattr(node, "key"):
+            next_context = getattr(node.key, "name", getattr(node.key, "value", current_context))
+        elif node.type == "AssignmentExpression" and hasattr(node, "left"):
+            next_context = getattr(node.left, "name", current_context)
+
+        # Basic endpoint concatenation tracking
         if node.type == "BinaryExpression" and node.operator == "+":
-            left, right = self._resolve_node(
-                node.left), self._resolve_node(
-        node.right)
-            if left and right and isinstance(left, str) and isinstance(
-                right, str) and "/" in (left + right) and len(left + right) > 4:
+            left, right = self._resolve_node(node.left), self._resolve_node(node.right)
+            if left and right and isinstance(left, str) and isinstance(right, str) and "/" in (left + right) and len(left + right) > 4:
                 self.endpoints.add(left + right)
+
+        # Literal String Evaluation
         if node.type == "Literal" and isinstance(node.value, str):
             val = node.value
             if val.startswith(('/', 'http', 'api/')) and len(val) > 4:
                 self.endpoints.add(val)
-            if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(
-                ('/', 'http')):
+                
+            if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(('/', 'http')):
                 if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
-                    if 16 < len(val) < 80:
-                        if not is_whitelisted(val) and not is_webpack_noise(val):
+                    if 16 < len(val) < 64:
+                        if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
                             entropy = calculate_shannon_entropy(val)
-                            
-                            # AST Context Engine
-                            var_name = node.id.name.lower() if hasattr(node, 'id') and hasattr(node.id, 'name') else ""
-                            context_keywords = ['key', 'secret', 'token', 'auth', 'pwd', 'password', 'bearer', 'api', 'cred']
-                            
-                            # Dynamic Thresholding
-                            has_context = any(k in var_name for k in context_keywords)
-                            threshold = 4.3 if has_context else 5.0
-                            
-                            if entropy >= threshold:
-                                print(f"  [*] CORTEX: Context Match [{var_name}] -> Triggered Dynamic Entropy ({threshold})") if has_context else None
-                                masked = val[:4] + "********" + \
-                                    val[-4:] if len(val) > 8 else "****"
-                                self.entropy_secrets.add(
-                                    (masked, round(entropy, 2)))
+                            if entropy > 4.85:
+                                if not any(js_noise in val for js_noise in [" ", "()", "=>", "return", "function", "var ", "let ", "const "]):
+                                    # Attach the extracted AST context to the finding
+                                    self.entropy_secrets.add((val, round(entropy, 2), str(next_context)))
+
+        # Traverse deeper into the AST
         for key, val in vars(node).items():
             if isinstance(val, list):
                 for item in val:
-                    self.walk(item)
+                    self.walk(item, next_context)
             elif hasattr(val, "type"):
-                self.walk(val)
+                self.walk(val, next_context)
 
     def _resolve_node(self, node):
-        if not node or not hasattr(node, "type"):
-            return ""
+        if not node or not hasattr(node, "type"): return ""
+        if node.type == "Literal": return node.value
+        if node.type == "Identifier": return self.variables.get(node.name, "")
+        return ""
+
         if node.type == "Literal":
             return node.value
         if node.type == "Identifier":
@@ -190,7 +191,7 @@ async def extract_target(client, js_url, session_state, proxy=None):
                             "/" if not endpoint.startswith('/') else "") + endpoint
                     session_state.add_crawled_url(endpoint)
 
-                for secret, entropy in tracker.entropy_secrets:
+                for val, entropy, context in tracker.entropy_secrets:
                     console.print(
                         f"[bold red]  ! [HIGH] Proprietary Token Detected [H: {entropy}]: {secret[:10]}...[/bold red]")
                     vulnerabilities.append({"type": "VULN",

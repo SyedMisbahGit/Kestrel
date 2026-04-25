@@ -11,6 +11,7 @@ from rich.console import Console
 from core.state import TargetSession
 from core.intelligence import run_intelligence
 from core.mesh import mesh
+from modules.uncloak import OriginSniper
 from core.parser import parse_target
 
 # Modules

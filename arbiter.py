@@ -12,6 +12,7 @@ from core.state import TargetSession
 from core.intelligence import run_intelligence
 from core.mesh import mesh
 from modules.uncloak import OriginSniper
+from modules.cerberus import AuthEngine
 from core.parser import parse_target
 
 # Modules
@@ -59,7 +60,13 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
                       > ENGAGE PASSIVELY. STRIKE DETERMINISTICALLY.
     [/bold white]"""
     console.print(KESTREL_LOGO)
-    console.print("\n[bold]SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
+    console.print("\n[bold]
+class SessionState:
+    def __init__(self):
+        self.auth_headers = {}
+        self.auth_cookies = {}
+
+SYSTEM INTEGRITY EVALUATOR // v2.2[/bold]\n")
     config = load_config()
     session = TargetSession(target, mode)
 

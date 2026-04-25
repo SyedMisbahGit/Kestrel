@@ -54,27 +54,6 @@ jobs:
         run: |
           echo "Executing Random Forest Pre-processor..."
           shopt -s nullglob
-          for db in data/sessions/*.db; do
-            if [ -f "$db" ]; then
-              python modules/brain.py "$db"
-            fi
-          done
-
-      - name: Commit State and Rotated Queue
-        run: |
-          git config --local user.email "kestrel-bot@github.com"
-          git config --local user.name "Kestrel Intelligence Bot"
-          git add --update
-          shopt -s nullglob
-          for db in data/sessions/*.db; do git add --update
-          if [ -f data/training_ledger.csv ]; then git add --update
-          git commit -m "Queue Rotate: Finished ${{ env.TARGET }} [Automated Data Synthesized]" || echo "No changes"
-          git stash
-          git config pull.rebase true
-          git pull -s recursive -X ours origin main
-          git push origin main
-          git stash drop || true
-
       - name: Trigger Neural Network Training
         run: |
           echo "Triggering Neural Network Training..."

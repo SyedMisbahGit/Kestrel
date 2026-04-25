@@ -1,0 +1,4 @@
+# KESTREL EXIT NODES
+# Format: ip:port OR user:pass@ip:port
+# Example: 198.51.100.1:8080
+# Example: kestrel_usr:pass123@proxy.mesh.network:3128

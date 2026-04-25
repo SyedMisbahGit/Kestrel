@@ -1,4 +1,4 @@
-import joblib
+from modules.oracle import ask_brain
 from modules.blacksmith import WasmExtractor
 from modules.chimera import JWTSniper
 from core.filters import is_whitelisted

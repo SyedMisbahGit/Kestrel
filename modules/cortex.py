@@ -2,6 +2,7 @@ from modules.oracle import ask_brain
 from modules.blacksmith import WasmExtractor
 from modules.chimera import JWTSniper
 from core.filters import is_whitelisted
+from core.mesh import ProxyMesh
 import asyncio
 import aiohttp
 import logging
@@ -112,7 +113,7 @@ class TaintTracker:
         return ""
 
 
-async def extract_target(client, js_url, session_state):
+async def extract_target(client, js_url, session_state, proxy=None):
     vulnerabilities = []
 
     # 1. HARD PERIMETER: Do not scan binary extensions, images, or third-party
@@ -137,7 +138,7 @@ async def extract_target(client, js_url, session_state):
         return vulnerabilities
 
     try:
-        async with client.get(f"{js_url}.map", timeout=8, ssl=False) as response:
+        async with client.get(f"{js_url}.map", timeout=8, ssl=False, proxy=proxy) as response:
             if response.status == 200:
                 # ZERO-RAM STREAMING: Parse 50MB files without loading them
                 # into memory
@@ -168,7 +169,7 @@ async def extract_target(client, js_url, session_state):
         pass
 
     try:
-        async with client.get(js_url, timeout=8, ssl=False) as response:
+        async with client.get(js_url, timeout=8, ssl=False, proxy=proxy) as response:
             if response.status == 200:
                 # 2. CONTENT TYPE SHIELD: Abort if the server returns a binary
                 # stream instead of text
@@ -210,9 +211,15 @@ async def deploy_cortex(session_state, js_targets):
     connector = aiohttp.TCPConnector(limit=20, ssl=False)
     headers = getattr(session_state, 'auth_headers', {})
     cookies = getattr(session_state, 'auth_cookies', {})
+    mesh = ProxyMesh()
 
     async with aiohttp.ClientSession(connector=connector, headers=headers, cookies=cookies) as client:
-        results = await asyncio.gather(*[extract_target(client, url, session_state) for url in js_targets])
+        # Wrap extract_target to inject a random proxy per request
+        async def _routed_extract(url):
+            proxy = mesh.get_random_node()
+            return await extract_target(client, url, session_state, proxy=proxy)
+            
+        results = await asyncio.gather(*[_routed_extract(url) for url in js_targets])
         for vuln_list in results:
             if vuln_list:
                 session_state.vulnerabilities.extend(vuln_list)

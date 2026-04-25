@@ -39,6 +39,18 @@ def calculate_shannon_entropy(data):
     return entropy
 
 
+
+def is_webpack_noise(val):
+    noise_signatures = [
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+        "use strict", "object", "undefined", "function", "boolean",
+        "symbol", "webpackChunk", "sourceMappingURL", "data:image",
+        "application/x-www-form-urlencoded"
+    ]
+    if len(val) > 100 and "{" in val and "}" in val: return True # Inline JSON/CSS
+    if val.startswith(('npm.', 'chunk-', 'webpack-', 'core-js')): return True
+    return any(noise in val for noise in noise_signatures)
+
 class TaintTracker:
     def __init__(self):
         self.variables = {}
@@ -65,13 +77,20 @@ class TaintTracker:
             if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(
                 ('/', 'http')):
                 if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
-                    if 16 < len(
-                            val) < 64:  # STRICT BOUNDARY: Only math on token-sized strings
-                        if not is_whitelisted(val) and not any(
-                            noise in val.lower() for noise in [
-        'data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
+                    if 16 < len(val) < 80:
+                        if not is_whitelisted(val) and not is_webpack_noise(val):
                             entropy = calculate_shannon_entropy(val)
-                            if entropy > 4.5:
+                            
+                            # AST Context Engine
+                            var_name = node.id.name.lower() if hasattr(node, 'id') and hasattr(node.id, 'name') else ""
+                            context_keywords = ['key', 'secret', 'token', 'auth', 'pwd', 'password', 'bearer', 'api', 'cred']
+                            
+                            # Dynamic Thresholding
+                            has_context = any(k in var_name for k in context_keywords)
+                            threshold = 4.3 if has_context else 5.0
+                            
+                            if entropy >= threshold:
+                                print(f"  [*] CORTEX: Context Match [{var_name}] -> Triggered Dynamic Entropy ({threshold})") if has_context else None
                                 masked = val[:4] + "********" + \
                                     val[-4:] if len(val) > 8 else "****"
                                 self.entropy_secrets.add(
@@ -263,7 +282,14 @@ def sanitize_database(db_path):
     '%jquery%',
     '%bootstrap%',
     '%tailwind%',
-     '%.css%' ]
+     '%.css%', 
+    '%function(%', 
+    '%Object.defineProperty%', 
+    '%return null%', 
+    '%prototype%', 
+    '%strict%', 
+    '%__esModule%',
+    '%Symbol(%' ]
 
         for pattern in noise_patterns:
             cursor.execute(

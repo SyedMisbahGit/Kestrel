@@ -4,7 +4,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 
 def sync_to_s3():
-    bucket_name = os.environ.get('KESTREL_S3_BUCKET')
+    bucket_name = os.environ.get('AWS_S3_BUCKET')
     
     if not bucket_name:
         print("[!] S3 Sync Aborted: 'KESTREL_S3_BUCKET' environment variable not set.")

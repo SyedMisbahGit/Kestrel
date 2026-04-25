@@ -17,6 +17,12 @@ class ProxyMesh:
         else:
             console.print("[yellow]  [*] PROJECT PHANTOM: No proxies loaded. Operating in Direct/Transparent mode.[/yellow]")
 
+
+    def arm_mesh(self, proxy_file=None):
+        # Backwards compatibility: Satisfies legacy calls from arbiter.py. 
+        # Proxies are already safely loaded during __init__.
+        pass
+
     def get_random_node(self):
         """Returns a formatted proxy string, or None if mesh is offline."""
         if not self.proxies:

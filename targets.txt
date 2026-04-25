@@ -1,4 +1,3 @@
-chatgpt.com
 vercel.com
 zerodha.com
 comolho.com
@@ -8,3 +7,4 @@ amazon.com
 apple.com
 microsoft.com
 class.com
+chatgpt.com

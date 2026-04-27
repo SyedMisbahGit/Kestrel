@@ -23,6 +23,7 @@ jobs:
           pip install -r requirements.txt
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml pandas
           playwright install chromium
+          sudo apt-get update && sudo apt-get install -y xvfb
           python -m playwright install-deps chromium
           wget -q https://github.com/projectdiscovery/interactsh/releases/download/v1.1.8/interactsh-client_1.1.8_linux_amd64.zip
           unzip -o -q interactsh-client_1.1.8_linux_amd64.zip
@@ -48,7 +49,7 @@ jobs:
             exit 0
           fi
           echo "Engaging target: $TARGET"
-          python arbiter.py $TARGET --mode standard
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python arbiter.py $TARGET --mode standard
 
       - name: Synthesize Training Data (ML Brain)
         run: |

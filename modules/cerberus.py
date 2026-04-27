@@ -9,6 +9,7 @@ class AuthEngine:
     def __init__(self, target):
         self.target = target
         self.config_path = "config/auth.yaml"
+        self.profile_dir = "config/chrome_profile"
         self.session_state = {"headers": {}, "cookies": {}}
 
     def load_credentials(self):
@@ -28,40 +29,53 @@ class AuthEngine:
         console.print(f"INFO     Target Lock: {creds['login_url']}")
         
         try:
+            os.makedirs(self.profile_dir, exist_ok=True)
             with sync_playwright() as p:
-                # Launch stealthy Chromium
-                browser = p.chromium.launch(headless=True, args=["--disable-blink-features=AutomationControlled"])
-                context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                page = context.new_page()
-
-                # Navigate and wait for network idle to ensure JS loads
-                page.goto(creds['login_url'], wait_until="networkidle", timeout=15000)
+                # Launch PERSISTENT Chromium to cache cf_clearance cookies
+                context = p.chromium.launch_persistent_context(
+                    user_data_dir=self.profile_dir,
+                    headless=False, # Keep headed to bypass Canvas anomalies
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                    viewport={"width": 1920, "height": 1080},
+                    args=["--disable-blink-features=AutomationControlled", "--disable-infobars"]
+                )
                 
-                # Heuristic Form Filling (Looks for common login field names)
-                console.print("INFO     Injecting Cryptographic Identity (Credentials)...")
+                # INJECT NATIVE V8 STEALTH ENGINE
+                context.add_init_script("""
+                    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                    window.chrome = { runtime: {} };
+                """)
+
+                page = context.pages[0] if context.pages else context.new_page()
+
+                page.goto(creds['login_url'], wait_until="domcontentloaded", timeout=45000)
+                
+                console.print("[yellow]INFO     WAF Check: If Cloudflare challenges you, solve it manually in the browser window now. (60s timeout)[/yellow]")
+                
+                # Wait for the login form to appear, allowing you time to pass Turnstile
+                page.wait_for_selector("input[type='email'], input[name*='user'], input[name*='email']", timeout=60000)
+                
+                console.print("INFO     WAF Cleared. Injecting Cryptographic Identity (Credentials)...")
                 page.fill("input[type='email'], input[name*='user'], input[name*='email']", creds['username'])
                 page.fill("input[type='password'], input[name*='pass']", creds['password'])
                 
-                # Smash the login button
                 page.click("button[type='submit'], input[type='submit'], button:has-text('Log In'), button:has-text('Sign In')")
                 
-                # Wait for the navigation/redirect post-login
-                page.wait_for_load_state("networkidle", timeout=10000)
+                page.wait_for_timeout(8000) # Wait for post-login WAFs and redirects
 
-                # Extract the Loot (Cookies and LocalStorage JWTs)
+                # Extract the Loot
                 cookies = context.cookies()
                 for cookie in cookies:
                     self.session_state["cookies"][cookie["name"]] = cookie["value"]
-                    if "session" in cookie["name"].lower() or "token" in cookie["name"].lower():
+                    if "session" in cookie["name"].lower() or "token" in cookie["name"].lower() or "cf_bm" in cookie["name"].lower():
                         console.print(f"  [+] SESSION HIJACKED: {cookie['name']} = {cookie['value'][:15]}...********")
 
-                # Extract LocalStorage (often contains Bearer tokens for SPAs)
                 local_storage = page.evaluate("() => JSON.stringify(window.localStorage)")
                 if "token" in local_storage.lower() or "jwt" in local_storage.lower():
                     console.print("  [+] BEARER TOKEN LOCATED in LocalStorage.")
                     self.session_state["headers"]["Authorization"] = "Bearer [EXTRACTED_FROM_DOM]"
 
-                browser.close()
+                context.close()
                 console.print("[green]INFO     Authenticated State Locked. Passing to Cortex & Fuzzer.[/green]")
                 return self.session_state
 

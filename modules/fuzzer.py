@@ -45,10 +45,23 @@ async def fuzz_endpoint(client, url, session_state):
     except:
         oast_domain = f"{url_hash}.oast.fun"
         
-    oast_headers = {"User-Agent": f"Mozilla/5.0 ({oast_domain})", "X-Forwarded-For": oast_domain, "Referer": f"http://{oast_domain}"}
+    oast_headers = {
+        "User-Agent": f"Mozilla/5.0 ({oast_domain})", 
+        "X-Forwarded-For": oast_domain, 
+        "Referer": f"http://{oast_domain}",
+        "Origin": f"https://{oast_domain}"
+    }
 
     try:
-        async with client.get(url, headers=oast_headers, timeout=5, ssl=False) as r: pass
+        async with client.get(url, headers=oast_headers, timeout=5, ssl=False) as r: 
+            # --- CORS MISCONFIGURATION DETECTION ---
+            if r.headers.get("Access-Control-Allow-Origin") == f"https://{oast_domain}":
+                if r.headers.get("Access-Control-Allow-Credentials") == "true":
+                    console.print(f"[red]  ! [CRITICAL] Authenticated CORS Misconfig (Reflects Origin) on {url}[/red]")
+                    vulnerabilities.append({"type": "VULN", "name": "Auth CORS Misconfig", "matched-at": url, "info": {"severity": "CRITICAL"}})
+                else:
+                    console.print(f"[red]  ! [HIGH] CORS Misconfig (Reflects Origin) on {url}[/red]")
+                    vulnerabilities.append({"type": "VULN", "name": "CORS Misconfig", "matched-at": url, "info": {"severity": "HIGH"}})
     except Exception: pass
 
     baseline = await measure_baseline(client, url)

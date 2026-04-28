@@ -9,6 +9,11 @@ from rich.console import Console
 console = Console()
 log = logging.getLogger("rich")
 
+try:
+    from pyjarm.api import scan as jarm_scan
+except ImportError:
+    jarm_scan = None
+
 async def fetch_and_hash_favicon(client, domain):
     """Downloads the target's favicon and computes the Shodan-compatible MurmurHash3."""
     url = f"https://{domain}/favicon.ico"
@@ -16,35 +21,53 @@ async def fetch_and_hash_favicon(client, domain):
         async with client.get(url, timeout=8, ssl=False) as r:
             if r.status == 200:
                 body = await r.read()
-                # Shodan specific Favicon hashing algorithm
                 favicon_base64 = codecs.encode(body, "base64")
                 return mmh3.hash(favicon_base64)
     except Exception:
         pass
     return None
 
-async def query_shodan_origin(client, fav_hash, api_key):
-    """Queries Shodan across the entire IPv4 space for the Favicon hash, ignoring CDNs."""
-    # We explicitly exclude Cloudflare, Fastly, and Akamai ASNs to find the true origin
-    query = f"http.favicon.hash:{fav_hash} -org:Cloudflare -org:Fastly -org:Akamai"
-    url = f"https://api.shodan.io/shodan/host/search?key={api_key}&query={query}"
-    
-    origins = set()
+async def fetch_jarm_hash(domain):
+    """Executes the JARM active TLS fingerprinting protocol."""
+    if not jarm_scan: return None
     try:
-        async with client.get(url, timeout=10) as r:
-            if r.status == 200:
-                data = await r.json()
-                for match in data.get('matches', []):
-                    ip = match.get('ip_str')
-                    if is_cdn_ip(ip): continue
-                    org = match.get('org', 'Unknown ASN')
-                    origins.add((ip, org))
+        # pyjarm is synchronous, so we run it in a thread executor
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(None, jarm_scan, domain, 443)
+        return result[0] if result else None
     except Exception:
-        pass
+        return None
+
+async def query_shodan_advanced(client, domain, fav_hash, jarm_hash, api_key):
+    """Queries Shodan across the IPv4 space utilizing both visual and cryptographic signatures."""
+    origins = set()
+    domain_keyword = domain.split('.')[0]
+    
+    queries = []
+    if fav_hash:
+        queries.append(f"http.favicon.hash:{fav_hash} -org:Cloudflare -org:Fastly -org:Akamai")
+    
+    if jarm_hash:
+        # JARM paired with the HTML keyword prevents returning millions of shared CDN edge nodes
+        queries.append(f"ssl.jarm:{jarm_hash} http.html:\"{domain_keyword}\" -org:Cloudflare -org:Fastly -org:Akamai")
+
+    for query in queries:
+        url = f"https://api.shodan.io/shodan/host/search?key={api_key}&query={query}"
+        try:
+            async with client.get(url, timeout=10) as r:
+                if r.status == 200:
+                    data = await r.json()
+                    for match in data.get('matches', []):
+                        ip = match.get('ip_str')
+                        if is_cdn_ip(ip): continue
+                        org = match.get('org', 'Unknown ASN')
+                        origins.add((ip, org))
+        except Exception:
+            pass
     return origins
 
 def run_unmask(session, config):
-    console.print("\n[bold blue]━━ PHASE 1.6: ORIGIN UNMASKING (FAVICON PIVOT) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 1.6: ORIGIN UNMASKING (JARM & FAVICON PIVOT) ━━[/bold blue]")
     
     api_key = config.get("keys", {}).get("shodan", "")
     if not api_key:
@@ -58,15 +81,28 @@ def run_unmask(session, config):
         async with aiohttp.ClientSession(connector=connector) as client:
             console.print("INFO     Extracting and hashing primary visual asset (Favicon)...")
             fav_hash = await fetch_and_hash_favicon(client, domain)
-            
-            if not fav_hash:
-                console.print("[dim]  ! Favicon unreadable or non-existent. Cannot calculate origin signature.[/dim]")
+            if fav_hash:
+                console.print(f"[green]  + Asset Signature Generated (MurmurHash3): {fav_hash}[/green]")
+            else:
+                console.print("[dim]  ! Favicon unreadable or non-existent.[/dim]")
+
+            console.print("INFO     Executing Active JARM TLS Fingerprinting...")
+            if jarm_scan:
+                jarm_hash = await fetch_jarm_hash(domain)
+                if jarm_hash:
+                    console.print(f"[green]  + Cryptographic Soul Extracted (JARM): {jarm_hash}[/green]")
+                else:
+                    console.print("[dim]  ! JARM fingerprinting failed.[/dim]")
+            else:
+                jarm_hash = None
+                console.print("[dim]  ! pyjarm library not installed. Skipping TLS fingerprinting.[/dim]")
+
+            if not fav_hash and not jarm_hash:
+                console.print("[yellow]WARNING  Both unmasking signatures failed. Bypassing phase.[/yellow]")
                 return set()
-                
-            console.print(f"[green]  + Asset Signature Generated (MurmurHash3): {fav_hash}[/green]")
-            console.print("INFO     Pivoting visual signature across global IPv4 space (Bypassing CDNs)...")
-            
-            return await query_shodan_origin(client, fav_hash, api_key)
+
+            console.print("INFO     Pivoting cryptographic signatures across global IPv4 space (Bypassing CDNs)...")
+            return await query_shodan_advanced(client, domain, fav_hash, jarm_hash, api_key)
 
     origins = asyncio.run(deploy())
     
@@ -74,7 +110,7 @@ def run_unmask(session, config):
         console.print(f"[bold red]  ! [CRITICAL] CDN SHIELD BYPASSED. TRUE ORIGINS EXPOSED:[/bold red]")
         for ip, org in origins:
             console.print(f"      └ IP: {ip} | Host: {org}")
-            # Inject the naked IP back into the state graph so the Port Scanner / Fuzzer can hit it directly
+            # Inject the naked IP back into the state graph so Port Scanners & Fuzzers can hit it directly
             session.add_subdomain(ip)
     else:
-        console.print("  + Perimeter secure. No origin IP leakage detected via visual assets.")
+        console.print("  + Perimeter secure. No origin IP leakage detected via TLS or visual assets.")

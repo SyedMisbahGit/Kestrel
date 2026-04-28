@@ -84,14 +84,32 @@ class TaintTracker:
                 self.endpoints.add(val)
                 
             if 16 <= len(val) <= 128 and " " not in val and "," not in val and not val.startswith(('/', 'http')):
+                # 1. THE STRUCTURAL FAST-PATH (Regex Signatures)
+                matched_sig = None
+                for sec_name, regex in SECRETS_REGEX.items():
+                    if regex.search(val):
+                        matched_sig = sec_name
+                        break
+                
+                if matched_sig:
+                    self.entropy_secrets.add((val, 9.99, str(next_context), matched_sig))
+                    return
+
+                # 2. THE NEURAL CONTEXT EVALUATOR
                 if not UUID_REGEX.match(val) and not HEX_HASH_REGEX.match(val):
                     if 16 < len(val) < 64:
                         if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
                             entropy = calculate_shannon_entropy(val)
-                            if entropy > 4.85:
+                            if entropy > 4.5:
                                 if not any(js_noise in val for js_noise in [" ", "()", "=>", "return", "function", "var ", "let ", "const "]):
-                                    # Attach the extracted AST context to the finding
-                                    self.entropy_secrets.add((val, round(entropy, 2), str(next_context)))
+                                    ctx = str(next_context).lower()
+                                    secret_keywords = ['key', 'secret', 'token', 'auth', 'pass', 'api', 'cred', 'jwt', 'bearer', 'client', 'session']
+                                    noise_keywords = ['chunk', 'webpack', 'id', 'hash', 'version', 'color', 'font', 'unknown']
+                                    
+                                    if any(k in ctx for k in secret_keywords):
+                                        self.entropy_secrets.add((val, round(entropy, 2), str(next_context), f"Context Verified ({next_context})"))
+                                    elif entropy > 5.5 and not any(n in ctx for n in noise_keywords):
+                                        self.entropy_secrets.add((val, round(entropy, 2), str(next_context), "High Entropy Anomaly"))
 
         # Traverse deeper into the AST
         for key, val in vars(node).items():
@@ -191,17 +209,22 @@ async def extract_target(client, js_url, session_state, proxy=None):
                             "/" if not endpoint.startswith('/') else "") + endpoint
                     session_state.add_crawled_url(endpoint)
 
-                for val, entropy, context in tracker.entropy_secrets:
-                    console.print(
-                        f"[bold red]  ! [HIGH] Proprietary Token Detected [H: {entropy}]: {secret[:10]}...[/bold red]")
-                    vulnerabilities.append({"type": "VULN",
-                                            "name": f"High Entropy Anomaly (H={entropy})",
-                        "matched-at": js_url,
-                        "info": {"severity": "HIGH"}})
-                if secret.startswith('eyJh') and len(secret) > 40:
-                    jwt_vulns = self.chimera.analyze_token(js_url, secret)
-                    if jwt_vulns:
-                        vulnerabilities.extend(jwt_vulns)
+                for val, entropy, context, sig in tracker.entropy_secrets:
+                    sev = "CRITICAL" if "Verified" in sig or entropy == 9.99 else "HIGH"
+                    title = sig if entropy == 9.99 else f"{sig} (H={entropy})"
+                    console.print(f"[bold red]  ! [{sev}] {title} detected in context '{context}': {val[:15]}...[/bold red]")
+                    vulnerabilities.append({
+                        "type": "VULN",
+                        "name": title,
+                        "matched-at": f"{js_url} (Context: {context})",
+                        "info": {"severity": sev}
+                    })
+                    # Properly scoped JWT analysis utilizing the correct variable
+                    if val.startswith('eyJh') and len(val) > 40:
+                        try:
+                            jwt_vulns = JWTSniper().analyze_token(js_url, val)
+                            if jwt_vulns: vulnerabilities.extend(jwt_vulns)
+                        except: pass
 
     except Exception:
         pass

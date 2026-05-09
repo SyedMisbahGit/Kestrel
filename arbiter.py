@@ -38,6 +38,7 @@ from modules.notifier import run_notifier
 from modules.cloud import run_cloud
 from modules.umbrella import run_umbrella
 from modules.unmask import run_unmask
+from modules.hydra_strike import run_hydra
 
 app = typer.Typer()
 console = Console()
@@ -158,7 +159,8 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             safe_run("VERTICAL", run_vertical)     # Phase 1.3: Async DNS Bruteforce
             safe_run("CLOUD", run_cloud)           # Phase 1.4: Cloud Storage Sniper
             safe_run("PORTS", run_ports)           # Phase 1.5: Shielded Port Scan
-            safe_run("UNMASK", run_unmask)         # Phase 1.6: Origin Unmasking via Shodan
+            safe_run("UNMASK", run_unmask)         # Phase 1.6: Origin Unmasking via JARM/Shodan
+            safe_run("HYDRA", run_hydra)           # Phase 1.7: Network Protocol Bruteforcing
             safe_run("PERMUTATIONS", run_permutations) # Phase 1.8: Subdomain Mutations
             # Stage 2: Application Mapping
             safe_run("PROBING", run_probing)       # Phase 2: Favicon/Tech Profiling

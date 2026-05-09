@@ -23,7 +23,7 @@ jobs:
           pip install -r requirements.txt
           pip install playwright esprima mmh3 aiohttp aiodns rich typer pyyaml pandas
           playwright install chromium
-          sudo apt-get update && sudo apt-get install -y xvfb
+          sudo apt-get update && sudo apt-get install -y xvfb hydra
           python -m playwright install-deps chromium
           wget -q https://github.com/projectdiscovery/interactsh/releases/download/v1.1.8/interactsh-client_1.1.8_linux_amd64.zip
           unzip -o -q interactsh-client_1.1.8_linux_amd64.zip

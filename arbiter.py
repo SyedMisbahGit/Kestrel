@@ -32,6 +32,7 @@ from modules.spider import run_spider
 from modules.cortex import run_cortex
 from modules.graphx import GraphQLSniper
 from modules.nuclei_scan import run_nuclei
+from modules.cve_sniper import run_cve_sniper
 from modules.fuzzer import run_fuzzer
 from modules.oast import run_oast
 from modules.notifier import run_notifier
@@ -175,6 +176,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
 
         # Stage 3: Exploitation (Always runs, even on --resume)
         safe_run("NUCLEI", run_nuclei)             # Phase 4: Tech-Stack Targeted CVEs
+        safe_run("CVE_SNIPER", run_cve_sniper)     # Phase 4.5: Surgical OAST Injection
         safe_run("FUZZER", run_fuzzer)             # Phase 5: Semantic Parameter Routing
         safe_run("OAST", run_oast)                 # Phase 8: Blind Poller (MUST BE AFTER FUZZER)
 

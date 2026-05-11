@@ -104,8 +104,7 @@ class TaintTracker:
                                 # Strict Hex/Lower-case Chunk Filter
                                 if len(val) <= 32 and not any(c.isupper() for c in val):
                                     pass
-                                elif 
-                                if not any(js_noise in val for js_noise in [" ", "()", "=>", "return", "function", "var ", "let ", "const "]):
+                                elif not any(js_noise in val for js_noise in [" ", "()", "=>", "return", "function", "var ", "let ", "const "]):
                                     ctx = str(next_context).lower()
                                     secret_keywords = ['key', 'secret', 'token', 'auth', 'pass', 'api', 'cred', 'jwt', 'bearer', 'client', 'session']
                                     noise_keywords = ['chunk', 'webpack', 'id', 'hash', 'version', 'color', 'font', 'unknown', 'js', 'css', 'build', 'bundle', 'static', 'map']

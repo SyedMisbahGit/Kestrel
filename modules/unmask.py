@@ -10,9 +10,9 @@ console = Console()
 log = logging.getLogger("rich")
 
 try:
-    from pyjarm.api import scan as jarm_scan
+    from jarm.scanner.scanner import Scanner
 except ImportError:
-    jarm_scan = None
+    Scanner = None
 
 async def fetch_and_hash_favicon(client, domain):
     """Downloads the target's favicon and computes the Shodan-compatible MurmurHash3."""
@@ -29,11 +29,9 @@ async def fetch_and_hash_favicon(client, domain):
 
 async def fetch_jarm_hash(domain):
     """Executes the JARM active TLS fingerprinting protocol."""
-    if not jarm_scan: return None
+    if not Scanner: return None
     try:
-        # pyjarm is synchronous, so we run it in a thread executor
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, jarm_scan, domain, 443)
+        result = await Scanner.scan_async(domain, 443)
         return result[0] if result else None
     except Exception:
         return None
@@ -87,7 +85,7 @@ def run_unmask(session, config):
                 console.print("[dim]  ! Favicon unreadable or non-existent.[/dim]")
 
             console.print("INFO     Executing Active JARM TLS Fingerprinting...")
-            if jarm_scan:
+            if Scanner:
                 jarm_hash = await fetch_jarm_hash(domain)
                 if jarm_hash:
                     console.print(f"[green]  + Cryptographic Soul Extracted (JARM): {jarm_hash}[/green]")

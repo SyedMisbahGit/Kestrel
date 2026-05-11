@@ -34,6 +34,15 @@ TECH_SIGS = {
 
 TITLE_REGEX = re.compile(r'<title[^>]*>([^<]+)</title>', re.IGNORECASE | re.DOTALL)
 
+# --- DEEP DOM & BEHAVIORAL SIGNATURES ---
+DEEP_SIGS = {
+    "Spring Boot": {"body": ["Whitelabel Error Page", "spring-boot"], "cookies": []},
+    "Java": {"cookies": ["JSESSIONID"]},
+    "Confluence": {"body": ["confluence-request-time", "ajs.confluence"], "cookies": ["atlassian.xsrf.token"]},
+    "Jira": {"body": ["jira-software", "ajs.context"], "cookies": ["atlassian.xsrf.token"]},
+    "Apache Struts": {"body": ["struts2", ".action"], "cookies": []}
+}
+
 def get_favicon_hash(data):
     """Calculates the MurmurHash3 value of a favicon exactly as Shodan does."""
     b64 = base64.encodebytes(data).decode()
@@ -42,13 +51,18 @@ def get_favicon_hash(data):
 async def fetch_url_and_tech(client, url, headers):
     status, text, server, resp_headers = None, None, "Unknown", {}
     detected_tech = set()
+    resp_cookies = {}
     
     # 1. Fetch Main Page
-    async with client.get(url, headers=headers, timeout=8, ssl=False, allow_redirects=True) as response:
-        status = response.status
-        text = await response.text()
-        server = response.headers.get("Server", "Unknown")
-        resp_headers = response.headers
+    try:
+        async with client.get(url, headers=headers, timeout=8, ssl=False, allow_redirects=True) as response:
+            status = response.status
+            text = await response.text()
+            server = response.headers.get("Server", "Unknown")
+            resp_headers = response.headers
+            resp_cookies = response.cookies
+    except Exception as e:
+        raise e
 
     # 2. Fetch and Hash Favicon (Bypass WAF Stripping)
     favicon_url = f"{url.rstrip('/')}/favicon.ico"
@@ -69,6 +83,29 @@ async def fetch_url_and_tech(client, url, headers):
             if h_val.lower() in resp_headers.get(h_key, "").lower(): detected_tech.add(tech)
         for b_val in sig.get("body", []):
             if b_val in text: detected_tech.add(tech)
+            
+    # 4. Deep DOM & Cookie Leakage
+    for tech, sig in DEEP_SIGS.items():
+        for c_key in sig.get("cookies", []):
+            if c_key in resp_cookies or any(c_key in cookie_name for cookie_name in resp_cookies.keys()):
+                detected_tech.add(tech)
+        for b_val in sig.get("body", []):
+            if b_val.lower() in text.lower():
+                detected_tech.add(tech)
+                
+    # 5. Behavioral Error Profiling (The Whitelabel Trigger)
+    if not any(t in detected_tech for t in ["Spring Boot", "Java", "Confluence", "Jira"]):
+        import random
+        error_url = f"{url.rstrip('/')}/kestrel_probe_{random.randint(1000,9999)}"
+        try:
+            async with client.get(error_url, headers=headers, timeout=5, ssl=False) as err_resp:
+                err_text = await err_resp.text()
+                if "Whitelabel Error Page" in err_text:
+                    detected_tech.add("Spring Boot")
+                elif "Apache Tomcat" in err_text:
+                    detected_tech.add("Java")
+        except Exception:
+            pass
 
     return status, text, server, detected_tech
 

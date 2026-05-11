@@ -70,6 +70,21 @@ def run_intelligence(session, config):
         sev = info.get('severity', 'LOW').upper()
         name = info.get('name') or v.get('name') or 'Unknown Vulnerability'
         
+        # --- THE PROTOCOL AWARENESS FILTER ---
+        if "Exposed Port" in name:
+            try:
+                port = int(target_url.split(':')[-1])
+                if port in [80, 443, 8080, 8443]:
+                    continue  # Expected web surface, completely drop from Blast Radius
+                elif port in [21, 22, 3306, 5432, 6379, 27017, 9000, 27018]:
+                    sev = "HIGH"
+                    name = f"Dangerous Infrastructure Exposed (Port {port})"
+                else:
+                    sev = "MEDIUM"
+                    name = f"Unexpected Management Service (Port {port})"
+            except ValueError:
+                pass
+        
         context = "Isolated Node"
         new_sev = sev
         

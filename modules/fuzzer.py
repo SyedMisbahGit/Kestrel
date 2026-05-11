@@ -85,8 +85,8 @@ async def fuzz_endpoint(client, url, session_state):
                 try:
                     async with client.get(target_url, timeout=5, ssl=False) as r:
                         if DETECTIONS[vuln_type].search(await r.text()):
-                            console.print(f"[red]  ! [HIGH] {vuln_type} matched on ?{param}=...[/red]")
-                            vulnerabilities.append({"type": "VULN", "name": f"GET {vuln_type}", "matched-at": target_url, "info": {"severity": "HIGH"}})
+                            console.print(f"[yellow]  ! [MEDIUM] Potential Reflected {vuln_type} on ?{param}= (Heuristic)[/yellow]")
+                            vulnerabilities.append({"type": "VULN", "name": f"Potential {vuln_type} (Heuristic)", "matched-at": target_url, "info": {"severity": "MEDIUM", "description": "Reflection detected. Requires manual validation to confirm execution context."}})
                             break
                 except Exception: pass
 
@@ -120,8 +120,8 @@ async def fuzz_endpoint(client, url, session_state):
                     except Exception: pass
 
                     if control_delay < 3.0:
-                        console.print(f"[red]  ! [CRITICAL] {vuln_type} (Double-Blind Verified) on ?{param}=...[/red]")
-                        vulnerabilities.append({"type": "VULN", "name": f"Chronos {vuln_type}", "matched-at": active_url, "info": {"severity": "CRITICAL"}})
+                        console.print(f"[red]  ! [HIGH] Probable {vuln_type} (Heuristic Timing Match) on ?{param}=...[/red]")
+                        vulnerabilities.append({"type": "VULN", "name": f"Probable {vuln_type} (Timing Heuristic)", "matched-at": active_url, "info": {"severity": "HIGH", "description": "Time delay detected against control. Lacks statistical jitter validation."}})
 
     return vulnerabilities
 

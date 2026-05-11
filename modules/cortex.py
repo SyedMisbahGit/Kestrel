@@ -100,11 +100,15 @@ class TaintTracker:
                     if 16 < len(val) < 64:
                         if not is_whitelisted(val) and not any(noise in val.lower() for noise in ['data:', 'url(', 'position:', 'application/', 'text/', 'display:']):
                             entropy = calculate_shannon_entropy(val)
-                            if entropy > 4.5:
+                            if entropy > 4.85:
+                                # Strict Hex/Lower-case Chunk Filter
+                                if len(val) <= 32 and not any(c.isupper() for c in val):
+                                    pass
+                                elif 
                                 if not any(js_noise in val for js_noise in [" ", "()", "=>", "return", "function", "var ", "let ", "const "]):
                                     ctx = str(next_context).lower()
                                     secret_keywords = ['key', 'secret', 'token', 'auth', 'pass', 'api', 'cred', 'jwt', 'bearer', 'client', 'session']
-                                    noise_keywords = ['chunk', 'webpack', 'id', 'hash', 'version', 'color', 'font', 'unknown']
+                                    noise_keywords = ['chunk', 'webpack', 'id', 'hash', 'version', 'color', 'font', 'unknown', 'js', 'css', 'build', 'bundle', 'static', 'map']
                                     
                                     if any(k in ctx for k in secret_keywords):
                                         self.entropy_secrets.add((val, round(entropy, 2), str(next_context), f"Context Verified ({next_context})"))

@@ -14,11 +14,13 @@ async def verify_l7_service(host, port, sem):
             reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=4.0)
             
             # 2. Coax the Application Banner (Layer 7)
-            # Some services (SSH, FTP) send a banner immediately. Others (HTTP, Redis) wait for the client to speak.
             if port in [6379]:
                 writer.write(b"PING\r\n")
             elif port in [80, 443, 8080, 8443, 3000, 5000, 8000, 9000]:
                 writer.write(f"GET / HTTP/1.1\r\nHost: {host}\r\n\r\n".encode())
+            elif port in [3306, 5432, 27017]:
+                # Send a dummy byte sequence to coax an error out of an HTTP reverse proxy
+                writer.write(b"\x00\x00\x00\x01\x00")
             
             await writer.drain()
             
@@ -32,7 +34,7 @@ async def verify_l7_service(host, port, sem):
                 
             banner_lower = banner.lower()
             
-            # 4. Behavioral Protocol Validation (The Trap Filter)
+            # 4. Behavioral Protocol Validation
             if port == 22 and b"ssh-" not in banner_lower: 
                 return None
             if port == 21 and b"220" not in banner_lower: 
@@ -40,9 +42,9 @@ async def verify_l7_service(host, port, sem):
             if port == 6379 and b"+pong" not in banner_lower and b"-noauth" not in banner_lower and b"-err" not in banner_lower: 
                 return None
             
-            # THE ANYCAST TRAP FILTER: If a database port responds with an HTTP header, it's a Vercel/GCP edge node hallucination.
+            # 5. THE ANYCAST TRAP FILTER: If a database port responds with HTTP/HTML, it is an edge node hallucination.
             if port in [3306, 5432, 27017]:
-                if b"http/" in banner_lower or b"html" in banner_lower:
+                if b"http/" in banner_lower or b"<html" in banner_lower or b"bad request" in banner_lower:
                     return None
             
             return port

@@ -66,7 +66,13 @@ async def fuzz_endpoint(client, url, session_state):
 
     baseline = await measure_baseline(client, url)
 
+    # --- FRAMEWORK STATE PARAMETER BLACKLIST ---
+    FRAMEWORK_NOISE = ['_rsc', '_next', '__next_data__', '__n_ssp', '__n_gssp', 'amp', 'v', 'ver']
+
     for param, values in query_params.items():
+        if param.lower() in FRAMEWORK_NOISE:
+            continue  # Silently drop framework state parameters to prevent heuristic hallucinations
+            
         target_vulns = classify_param(param)
 
         if "SSRF" in target_vulns:

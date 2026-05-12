@@ -1,3 +1,5 @@
+import ssl
+import socket
 from core.cdn import is_cdn_ip
 import asyncio
 import aiohttp
@@ -36,6 +38,27 @@ async def fetch_jarm_hash(domain):
     except Exception:
         return None
 
+
+def verify_origin_cert(ip, domain):
+    """Validates that a Shodan IP actually hosts the target's SSL certificate."""
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    
+    try:
+        # Initiate a raw TLS handshake using the target domain as the SNI
+        with socket.create_connection((ip, 443), timeout=3) as sock:
+            with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                der_cert = ssock.getpeercert(binary_form=True)
+                
+                # Check if the base domain exists anywhere in the raw DER certificate
+                base_domain = domain.split('.')[-2] if len(domain.split('.')) > 1 else domain
+                if base_domain.encode('utf-8') in der_cert:
+                    return True
+        return False
+    except Exception:
+        return False
+
 async def query_shodan_advanced(client, domain, fav_hash, jarm_hash, api_key):
     """Queries Shodan across the IPv4 space utilizing both visual and cryptographic signatures."""
     origins = set()
@@ -58,8 +81,13 @@ async def query_shodan_advanced(client, domain, fav_hash, jarm_hash, api_key):
                     for match in data.get('matches', []):
                         ip = match.get('ip_str')
                         if is_cdn_ip(ip): continue
-                        org = match.get('org', 'Unknown ASN')
-                        origins.add((ip, org))
+                        
+                        # --- TLS ORIGIN VALIDATION ---
+                        if verify_origin_cert(ip, domain):
+                            org = match.get('org', 'Unknown ASN')
+                            origins.add((ip, org))
+                        else:
+                            pass # IP shares the JARM hash but is NOT our target. Drop it.
         except Exception:
             pass
     return origins

@@ -27,7 +27,7 @@ from modules.horizontal import run_horizontal
 from modules.vertical import run_vertical
 from modules.ports import run_ports
 from modules.permutations import run_permutations
-from modules.scope_guard import run_scope_guard
+from modules.scope_guard import run_scope_guard, sanitize_state_graph
 from modules.probing import run_probing
 from modules.spider import run_spider
 from modules.cortex import run_cortex

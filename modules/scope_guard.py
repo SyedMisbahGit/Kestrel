@@ -12,7 +12,7 @@ SAAS_BLACKLIST = [
     "tally.so", "zendesk.com", "hubspot.net", "wpengine.com", "webflow.io",
     "force.com", "salesforce.com", "atlassian.net", "intercom.io", "shopify.com",
     "squarespace.com", "readme.io", "statuspage.io", "ghost.io", "netlify.app",
-    "freshdesk.com", "helpscout.com", "breezy.hr", "greenhouse.io", "workable.com"
+    "freshdesk.com", "helpscout.com", "breezy.hr", "greenhouse.io", "workable.com", "vanta.com", "github.io", "github.com"
 ]
 
 def resolve_cname(domain):
@@ -64,3 +64,49 @@ def run_scope_guard(session, config):
         console.print("  + All targets verified as native infrastructure. No SaaS collisions detected.")
     
     console.print(f"INFO     Authorized Attack Surface reduced to {len(safe_targets)} targets.")
+
+from urllib.parse import urlparse
+
+def sanitize_state_graph(session, config):
+    console.print("\n[bold blue]━━ PHASE 2.5: THE SCOPE FIREWALL (GLOBAL STATE SANITIZATION) ━━[/bold blue]")
+    
+    live_hosts = session.get_live_hosts()
+    if not live_hosts: return
+    
+    console.print(f"INFO     Auditing {len(live_hosts)} harvested endpoints against SaaS Blacklist and CNAME restrictions...")
+    
+    safe_hosts = []
+    purged_count = 0
+    domain_cache = {}
+    
+    for host in live_hosts:
+        url = host.get('url', '')
+        if not url: continue
+        
+        domain = urlparse(url).netloc.split(':')[0]
+        
+        # Cache resolutions so we don't spam DNS for 1,500 spidered endpoints
+        if domain not in domain_cache:
+            cname = resolve_cname(domain)
+            is_safe = True
+            
+            if any(saas in domain for saas in SAAS_BLACKLIST):
+                is_safe = False
+            elif cname and any(saas in cname for saas in SAAS_BLACKLIST):
+                is_safe = False
+                
+            domain_cache[domain] = is_safe
+            
+        if domain_cache[domain]:
+            safe_hosts.append(host)
+        else:
+            purged_count += 1
+            console.print(f"  [dim]- Purged unauthorized SaaS URL from state graph: {url}[/dim]")
+            
+    # Overwrite the in-memory execution queue
+    session.live_hosts = safe_hosts
+    
+    if purged_count > 0:
+        console.print(f"[bold yellow]WARNING  Purged {purged_count} out-of-scope URLs harvested by the Spider.[/bold yellow]")
+    else:
+        console.print("  + State Graph is clean. No unauthorized URLs detected.")

@@ -27,6 +27,7 @@ from modules.horizontal import run_horizontal
 from modules.vertical import run_vertical
 from modules.ports import run_ports
 from modules.permutations import run_permutations
+from modules.scope_guard import run_scope_guard
 from modules.probing import run_probing
 from modules.spider import run_spider
 from modules.cortex import run_cortex
@@ -163,6 +164,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             safe_run("UNMASK", run_unmask)         # Phase 1.6: Origin Unmasking via JARM/Shodan
             safe_run("HYDRA", run_hydra)           # Phase 1.7: Network Protocol Bruteforcing
             safe_run("PERMUTATIONS", run_permutations) # Phase 1.8: Subdomain Mutations
+            safe_run("SCOPE_GUARD", run_scope_guard)   # Phase 1.9: SaaS CNAME Bounding Filter
             # Stage 2: Application Mapping
             safe_run("PROBING", run_probing)       # Phase 2: Favicon/Tech Profiling
             safe_run("SPIDER", run_spider)         # Phase 2.2: Skeleton Hash Spider

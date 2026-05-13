@@ -18,8 +18,8 @@ async def verify_l7_service(host, port, sem):
                 writer.write(b"PING\r\n")
             elif port in [80, 443, 8080, 8443, 3000, 5000, 8000, 9000]:
                 writer.write(f"GET / HTTP/1.1\r\nHost: {host}\r\n\r\n".encode())
-            elif port in [3306, 5432, 27017]:
-                # Send dummy bytes to coax an error out of a synthetic HTTP proxy
+            else:
+                # 3306, 5432, 27017, 21, 22
                 writer.write(b"\x00\x00\x00\x01\x00")
             
             await writer.drain()
@@ -34,18 +34,26 @@ async def verify_l7_service(host, port, sem):
                 
             banner_lower = banner.lower()
             
-            # 4. Behavioral Protocol Validation
+            # 4. THE SYNTHETIC CLOUD EDGE FILTER
+            # If we see HTTP signatures or cloud headers on ANY port, we evaluate context.
+            cloud_signatures = [b"server: vercel", b"server: cloudflare", b"x-amz-request-id", b"http/1.", b"bad request", b"308 permanent redirect"]
+            is_http_response = any(sig in banner_lower for sig in cloud_signatures)
+            
+            if is_http_response:
+                # If this is supposed to be a DB/SSH/FTP port, but we got an HTTP response, it's a cloud hallucination.
+                if port not in [80, 443, 8080, 8443, 3000, 5000, 8000, 9000]:
+                    return None
+                return port # It's a valid web port
+            
+            # 5. Strict Protocol Validation for Non-Web Services
             if port == 22 and b"ssh-" not in banner_lower: 
                 return None
             if port == 21 and b"220" not in banner_lower: 
                 return None
             if port == 6379 and b"+pong" not in banner_lower and b"-noauth" not in banner_lower and b"-err" not in banner_lower: 
                 return None
-            
-            # 5. THE ANYCAST TRAP FILTER: If a database port replies with HTTP/HTML, it is an edge node hallucination.
-            if port in [3306, 5432, 27017]:
-                if b"http/" in banner_lower or b"<html" in banner_lower or b"bad request" in banner_lower:
-                    return None
+            if port == 3306 and b"mysql" not in banner_lower and b"\x00" not in banner_lower:
+                return None
             
             return port
             
@@ -69,7 +77,7 @@ async def deploy_scanner(session, targets):
     await asyncio.gather(*tasks)
 
 def run_ports(session, config):
-    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (LAYER-7 BANNER GRABBING) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (STRICT L7 PROTOCOL BOUNDING) ━━[/bold blue]")
     
     origins = session.get_subdomains()
     active_targets = [ip for ip in origins if not session.is_cdn_edge(ip)]
@@ -80,4 +88,4 @@ def run_ports(session, config):
         
     console.print(f"INFO     Executing Deep L7 Application Profiling on {len(active_targets)} Origin IPs...")
     asyncio.run(deploy_scanner(session, active_targets))
-    console.print("  + Application Port Profiling Complete. CDN Anycast Traps successfully bypassed.")
+    console.print("  + Application Port Profiling Complete. Synthetic Cloud Edges successfully bypassed.")

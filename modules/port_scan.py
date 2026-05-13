@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from rich.console import Console
-from modules.scope_guard import SAAS_BLACKLIST
 
 console = Console()
 log = logging.getLogger("rich")
@@ -11,8 +10,10 @@ TARGET_PORTS = [21, 22, 80, 443, 3000, 3306, 5000, 5432, 6379, 8000, 8080, 8443,
 async def verify_l7_service(host, port, sem):
     async with sem:
         try:
+            # 1. Establish the TCP Connection
             reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=4.0)
             
+            # 2. Coax the Application Banner
             if port in [6379]:
                 writer.write(b"PING\r\n")
             elif port in [80, 443, 8080, 8443, 3000, 5000, 8000, 9000]:
@@ -25,21 +26,29 @@ async def verify_l7_service(host, port, sem):
             writer.close()
             await writer.wait_closed()
             
+            # Silence is immediately dropped
             if not banner: return None
             banner_lower = banner.lower()
             
+            # 3. THE SYNTHETIC CLOUD EDGE FILTER (Negative Filter)
             cloud_signatures = [b"server: vercel", b"server: cloudflare", b"x-amz-request-id", b"http/1.", b"bad request", b"308 permanent redirect"]
             if any(sig in banner_lower for sig in cloud_signatures):
                 if port not in [80, 443, 8080, 8443, 3000, 5000, 8000, 9000]:
-                    return None 
+                    return None
                 return port
             
+            # 4. ZERO-TRUST POSITIVE VALIDATION (The Final Mandate)
             if port == 22 and b"ssh-" not in banner_lower: return None
             if port == 21 and b"220" not in banner_lower: return None
             if port == 6379 and b"+pong" not in banner_lower and b"-noauth" not in banner_lower and b"-err" not in banner_lower: return None
-            if port == 3306 and b"mysql" not in banner_lower and b"\x00" not in banner_lower: return None
+            
+            # Strict Database Signatures
+            if port == 3306 and not any(sig in banner_lower for sig in [b"mysql", b"mariadb", b"caching_sha2_password", b"mysql_native_password", b"\x00\x00\x00\n"]): return None
+            if port == 5432 and not any(sig in banner_lower for sig in [b"fatal", b"postgres", b"\x00"]): return None
+            if port == 27017 and not any(sig in banner_lower for sig in [b"mongodb", b"mongo", b"\x00"]): return None
             
             return port
+            
         except Exception:
             return None
 
@@ -50,7 +59,7 @@ async def scan_origin(host, session, sem):
     
     if valid_ports:
         for p in valid_ports:
-            console.print(f"  + [OPEN] {host}:{p} [green](L7 Verified)[/green]")
+            console.print(f"  + [OPEN] {host}:{p} [green](Zero-Trust L7 Verified)[/green]")
         session.add_live_host(ip=host, ports=valid_ports, url=f"http://{host}")
 
 async def deploy_scanner(session, targets):
@@ -59,12 +68,9 @@ async def deploy_scanner(session, targets):
     await asyncio.gather(*tasks)
 
 def run_ports(session, config):
-    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (STRICT L7 PROTOCOL BOUNDING) ━━[/bold blue]")
+    console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (ZERO-TRUST BANNER VALIDATION) ━━[/bold blue]")
     origins = session.get_subdomains()
-    
-    # Secondary Redundancy Filter: Mathematically guarantee no SaaS targets enter the scanner
-    safe_origins = [ip for ip in origins if not any(saas in ip for saas in SAAS_BLACKLIST)]
-    active_targets = [ip for ip in safe_origins if not session.is_cdn_edge(ip)]
+    active_targets = [ip for ip in origins if not session.is_cdn_edge(ip)]
     
     if not active_targets:
         console.print("WARNING  No bare origin IPs available for scanning. All targets shielded.")
@@ -72,4 +78,4 @@ def run_ports(session, config):
         
     console.print(f"INFO     Executing Deep L7 Application Profiling on {len(active_targets)} Origin IPs...")
     asyncio.run(deploy_scanner(session, active_targets))
-    console.print("  + Application Port Profiling Complete. Synthetic Cloud Edges successfully bypassed.")
+    console.print("  + Application Port Profiling Complete. Synthetic endpoints eliminated.")

@@ -160,11 +160,11 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             safe_run("UMBRELLA", run_umbrella)     # Phase 1.2: Corporate SSL Pivot
             safe_run("VERTICAL", run_vertical)     # Phase 1.3: Async DNS Bruteforce
             safe_run("CLOUD", run_cloud)           # Phase 1.4: Cloud Storage Sniper
-            safe_run("PORTS", run_ports)           # Phase 1.5: Shielded Port Scan
-            safe_run("UNMASK", run_unmask)         # Phase 1.6: Origin Unmasking via JARM/Shodan
-            safe_run("HYDRA", run_hydra)           # Phase 1.7: Network Protocol Bruteforcing
-            safe_run("PERMUTATIONS", run_permutations) # Phase 1.8: Subdomain Mutations
-            safe_run("SCOPE_GUARD", run_scope_guard)   # Phase 1.9: SaaS CNAME Bounding Filter
+            safe_run("PERMUTATIONS", run_permutations) # Phase 1.4: Subdomain Mutations
+            safe_run("SCOPE_GUARD", run_scope_guard)   # Phase 1.5: SaaS CNAME Bounding Filter
+            safe_run("PORTS", run_ports)               # Phase 1.6: Layer-7 Banner Grabbing
+            safe_run("UNMASK", run_unmask)             # Phase 1.7: Origin Unmasking via JARM/Shodan
+            safe_run("HYDRA", run_hydra)               # Phase 1.8: Network Protocol Bruteforcing
             # Stage 2: Application Mapping
             safe_run("PROBING", run_probing)       # Phase 2: Favicon/Tech Profiling
             safe_run("SPIDER", run_spider)         # Phase 2.2: Skeleton Hash Spider

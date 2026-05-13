@@ -19,7 +19,7 @@ async def verify_l7_service(host, port, sem):
             elif port in [80, 443, 8080, 8443, 3000, 5000, 8000, 9000]:
                 writer.write(f"GET / HTTP/1.1\r\nHost: {host}\r\n\r\n".encode())
             elif port in [3306, 5432, 27017]:
-                # Send a dummy byte sequence to coax an error out of an HTTP reverse proxy
+                # Send dummy bytes to coax an error out of a synthetic HTTP proxy
                 writer.write(b"\x00\x00\x00\x01\x00")
             
             await writer.drain()
@@ -30,7 +30,7 @@ async def verify_l7_service(host, port, sem):
             await writer.wait_closed()
             
             if not banner:
-                return None  # Connection accepted but immediately dropped (Tarpit / Edge Firewall)
+                return None  # Dropped connection (Tarpit)
                 
             banner_lower = banner.lower()
             
@@ -42,7 +42,7 @@ async def verify_l7_service(host, port, sem):
             if port == 6379 and b"+pong" not in banner_lower and b"-noauth" not in banner_lower and b"-err" not in banner_lower: 
                 return None
             
-            # 5. THE ANYCAST TRAP FILTER: If a database port responds with HTTP/HTML, it is an edge node hallucination.
+            # 5. THE ANYCAST TRAP FILTER: If a database port replies with HTTP/HTML, it is an edge node hallucination.
             if port in [3306, 5432, 27017]:
                 if b"http/" in banner_lower or b"<html" in banner_lower or b"bad request" in banner_lower:
                     return None
@@ -61,22 +61,17 @@ async def scan_origin(host, session, sem):
     if valid_ports:
         for p in valid_ports:
             console.print(f"  + [OPEN] {host}:{p} [green](L7 Verified)[/green]")
-        
-        # Inject the verified L7 ports back into Kestrel's state graph
         session.add_live_host(ip=host, ports=valid_ports, url=f"http://{host}")
 
 async def deploy_scanner(session, targets):
-    sem = asyncio.Semaphore(100) # Throttle concurrent socket connections
+    sem = asyncio.Semaphore(100)
     tasks = [scan_origin(target, session, sem) for target in targets]
     await asyncio.gather(*tasks)
 
 def run_ports(session, config):
     console.print("\n[bold blue]━━ PHASE 1.5: PORT SCANNING (LAYER-7 BANNER GRABBING) ━━[/bold blue]")
     
-    # Fetch origin IPs unmasked in previous phases
     origins = session.get_subdomains()
-    
-    # Filter out known edge nodes dynamically
     active_targets = [ip for ip in origins if not session.is_cdn_edge(ip)]
     
     if not active_targets:

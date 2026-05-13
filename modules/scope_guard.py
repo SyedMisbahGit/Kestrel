@@ -55,6 +55,17 @@ def run_scope_guard(session, config):
 
     # Overwrite the session state with ONLY the legally authorized targets
     session.subdomains = safe_targets
+    
+    # Purge from the persistent SQLite state database so downstream modules can't resurrect them
+    if out_of_scope:
+        try:
+            cursor = session.conn.cursor()
+            for domain, cname, saas in out_of_scope:
+                # Use a wildcard to ensure subdomains are wiped across all tables
+                cursor.execute("DELETE FROM subdomains WHERE name = ?", (domain,))
+            session.conn.commit()
+        except Exception:
+            pass
 
     if out_of_scope:
         console.print(f"[bold yellow]WARNING  {len(out_of_scope)} Subdomains identified as Third-Party SaaS. Removing from Attack Surface:[/bold yellow]")

@@ -73,21 +73,18 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
     config = load_config()
     session = TargetSession(target, mode)
 
-    # IPv6 & URL Sanitization Matrix
     sanitized = parse_target(target)
     if not sanitized:
         console.print("[bold red]⚠️ FATAL: Invalid Target Format. Halting.[/bold red]")
         sys.exit(1)
 
-    target = sanitized["host"] # Safely strip to core host
+    target = sanitized["host"]
 
-    # Auth-Injection Matrix
     session.auth_cookies = dict(item.split("=", 1) for item in cookie.split("; ") if "=" in item) if cookie else {}
     session.auth_headers = {header.split(":", 1)[0].strip(): header.split(":", 1)[1].strip()} if header and ":" in header else {}
     if session.auth_cookies or session.auth_headers:
         console.print("[bold magenta]  [*] STATEFUL AUTHENTICATION MATRIX ARMED.[/bold magenta]")
 
-    # --- ARM THE PROXY MESH ---
     console.print("INFO     Initializing Tactical Routing Protocol...")
     mesh.arm_mesh("config/proxies.txt")
 
@@ -98,12 +95,10 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             log.error(f"{name} failed: {e}")
 
     try:
-        # --- LOCAL OAST DAEMON INITIALIZATION ---
         console.print("INFO     Initializing Local Interactsh Daemon...")
         if os.path.exists(".oast_logs.json"): os.remove(".oast_logs.json")
         if os.path.exists(".oast_payload.txt"): os.remove(".oast_payload.txt")
 
-        # Spawn Daemon (FIX: Merge stderr into stdout to catch Go's startup logs)
         daemon = subprocess.Popen(
             [(os.path.expanduser("~/go/bin/interactsh-client") if os.path.exists(os.path.expanduser("~/go/bin/interactsh-client")) else "interactsh-client"), "-json", "-o", ".oast_logs.json"], 
             stdout=subprocess.PIPE, 
@@ -111,11 +106,8 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             text=True
         )
 
-        # Non-blocking read with a strict 15-second timeout
         payload = None
         start_time = time.time()
-
-        # We must use readline loop to avoid freezing
         import os as _os
         _os.set_blocking(daemon.stdout.fileno(), False)
         
@@ -123,7 +115,6 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             line = daemon.stdout.readline()
             if line:
                 if "interact.sh" in line or "oast." in line:
-                    # Extract the domain from the log (e.g., "[INF] Payload: xxxxx.oast.fun")
                     words = line.strip().split()
                     for word in words:
                         if "interact.sh" in word or "oast." in word:
@@ -142,9 +133,10 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             with open(".oast_payload.txt", "w") as f:
                 f.write("fallback.requestrepo.com")
 
-        # --- THE DIRECTED ACYCLIC GRAPH (DAG) ---
+        # ====================================================================
+        # THE DIRECTED ACYCLIC GRAPH (STRICT EXECUTION ORDER ENFORCED)
+        # ====================================================================
         if not resume:
-            # --- PHASE 0: PROJECT CERBERUS (AUTHENTICATED BREACH) ---
             console.print('\n[bold red]━━ PROJECT CERBERUS: BREACHING AUTHENTICATED PERIMETER ━━[/bold red]')
             try:
                 auth_data = AuthEngine(target).breach_perimeter()
@@ -154,54 +146,75 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
             except Exception as e:
                 console.print(f'  [!] Cerberus Bypass Failed: {e}')
 
-            # Stage 1: Recon & Expansion
-            safe_run("OSINT", run_osint)           # Phase 1: Native SSL + API Circuit Breaker
-            safe_run("HORIZONTAL", run_horizontal) # Phase 1.1: Origin / CDN Shield
-            safe_run("UMBRELLA", run_umbrella)     # Phase 1.2: Corporate SSL Pivot
-            safe_run("VERTICAL", run_vertical)     # Phase 1.3: Async DNS Bruteforce
-            safe_run("CLOUD", run_cloud)           # Phase 1.4: Cloud Storage Sniper
-            safe_run("PERMUTATIONS", run_permutations) # Phase 1.4: Subdomain Mutations
-            safe_run("SCOPE_GUARD", run_scope_guard)   # Phase 1.5: SaaS CNAME Bounding Filter
-            safe_run("PORTS", run_ports)               # Phase 1.6: Layer-7 Banner Grabbing
-            safe_run("UNMASK", run_unmask)             # Phase 1.7: Origin Unmasking via JARM/Shodan
-            safe_run("HYDRA", run_hydra)               # Phase 1.8: Network Protocol Bruteforcing
-            # Stage 2: Application Mapping
-            safe_run("PROBING", run_probing)       # Phase 2: Favicon/Tech Profiling
-            safe_run("SPIDER", run_spider)         # Phase 2.2: Skeleton Hash Spider
-            safe_run("CORTEX", run_cortex)         # Phase 3: Project Ghost & AST
+            # --- STAGE 1: INTELLIGENCE GATHERING ---
+            safe_run("OSINT", run_osint)               # Phase 1.0: Native SSL + API
+            safe_run("HORIZONTAL", run_horizontal)     # Phase 1.1: BGP ASN
+            safe_run("UMBRELLA", run_umbrella)         # Phase 1.2: Corporate SSL Pivot
+            safe_run("VERTICAL", run_vertical)         # Phase 1.3: Async DNS Bruteforce
+            safe_run("CLOUD", run_cloud)               # Phase 1.4: Cloud Storage Sniper
+            safe_run("PERMUTATIONS", run_permutations) # Phase 1.8: Subdomain Mutations
             
-            # Clean state database of binary/external noise
+            # --- CRITICAL FIREWALL 1: SAAS BOUNDARY ENFORCEMENT ---
+            safe_run("SCOPE_GUARD", run_scope_guard)   # Phase 1.9: MUST run before port scanning
+
+            # --- STAGE 2: INFRASTRUCTURE MAPPING ---
+            safe_run("PORTS", run_ports)               # Phase 1.5: Layer-7 Port Scanning
+            safe_run("UNMASK", run_unmask)             # Phase 1.6: Origin Unmasking via JARM
+            safe_run("HYDRA", run_hydra)               # Phase 1.7: Network Protocol Bruteforcing
+            
+            # --- STAGE 3: APPLICATION PROFILING ---
+            safe_run("PROBING", run_probing)           # Phase 2.0: Active HTTP Profiling
+            
+            # THE WAF CIRCUIT BREAKER
+            if not session.get_live_hosts():
+                console.print("\n[bold red]FATAL  Phase 2 failed to profile any live hosts.[/bold red]")
+                console.print("[yellow]REASON Target is likely behind an aggressive WAF dropping automated probes.[/yellow]")
+                console.print("[dim]ACTION Aborting execution pipeline to preserve stealth. Rerun with --mode authenticated.[/dim]\n")
+                sys.exit(0)
+
+            safe_run("SPIDER", run_spider)             # Phase 2.2: Phantom DOM
+
+            # --- CRITICAL FIREWALL 2: SPIDER QUEUE SANITIZATION ---
+            safe_run("SCOPE_FIREWALL", sanitize_state_graph) # Phase 2.5: Purge SaaS URLs before Exploitation
+
+            safe_run("CORTEX", run_cortex)             # Phase 3.0: AST Extraction
+            
             try:
                 from modules.cortex import sanitize_database
                 sanitize_database(f"data/sessions/{target.replace('.', '_')}.db")
             except: pass
 
-        # Stage 3: Exploitation (Always runs, even on --resume)
-        safe_run("NUCLEI", run_nuclei)             # Phase 4: Tech-Stack Targeted CVEs
+        # --- STAGE 4: EXPLOITATION (Always runs, even on --resume) ---
+        safe_run("NUCLEI", run_nuclei)             # Phase 4.0: Tech-Stack Targeted CVEs
         safe_run("CVE_SNIPER", run_cve_sniper)     # Phase 4.5: Surgical OAST Injection
-        safe_run("FUZZER", run_fuzzer)             # Phase 5: Semantic Parameter Routing
-        safe_run("OAST", run_oast)                 # Phase 8: Blind Poller (MUST BE AFTER FUZZER)
+        safe_run("FUZZER", run_fuzzer)             # Phase 5.0: Semantic Parameter Routing
+        safe_run("OAST", run_oast)                 # Phase 8.0: Blind Poller (MUST BE AFTER FUZZER)
 
-        # Stage 4: Intelligence & Delivery
-        safe_run("INTELLIGENCE", run_intelligence) # Phase 7: Blast Radius Graph
+        # --- STAGE 5: REPORTING ---
+        safe_run("INTELLIGENCE", run_intelligence) # Phase 7.0: Blast Radius Graph
+        
         def phase6_notifier(sess, conf):
             db_path = f"data/sessions/{target.replace('.', '_')}.db"
-            # Enforce 85% Oracle Confidence Threshold
             os.environ["KESTREL_CONFIDENCE_THRESHOLD"] = "85.0"
             run_notifier(target, db_path)
         safe_run("NOTIFIER", phase6_notifier)
 
     except KeyboardInterrupt:
-        # THE GRACEFUL SHUTDOWN TRAP
         console.print("\n[bold red]⚠️ SIGINT RECEIVED: INITIATING GRACEFUL SHUTDOWN...[/bold red]")
         console.print("INFO     Flushing Write-Ahead Logs and securing State Graph...")
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            for task in asyncio.all_tasks(loop):
+                task.cancel()
+            loop.stop()
+        except: pass
         if hasattr(session, 'close'):
             session.close()
         console.print("[green]  + State Graph secured. Terminating pipeline.[/green]")
         sys.exit(130) 
         
     finally:
-        # Ensure database closes and background daemon is killed
         if hasattr(session, 'close'):
             session.close()
         if 'daemon' in locals() and daemon.poll() is None:
@@ -213,7 +226,4 @@ if __name__ == "__main__":
 
 import subprocess
 subprocess.run(['python3', 'modules/reporter.py'])
-
-# --- PHASE 9: DATA LAKE SYNC ---
-import subprocess
 subprocess.run(['python3', 'modules/lake.py'])

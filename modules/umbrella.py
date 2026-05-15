@@ -83,7 +83,12 @@ def extract_root_domains(sans, base_domain):
 def run_umbrella(session, config):
     console.print("\n[bold blue]━━ PHASE 1.2: CORPORATE UMBRELLA (CRYPTOGRAPHIC PIVOTING) ━━[/bold blue]")
     
-    base_domain = session.target
+    subs = session.get_subdomains()
+    if not subs: 
+        return
+    import tldextract
+    ext = tldextract.extract(subs[0])
+    base_domain = f"{ext.domain}.{ext.suffix}" 
     console.print(f"INFO     Extracting X.509 Cryptographic Identity for {base_domain}...")
     
     # 1. Live Certificate Analysis

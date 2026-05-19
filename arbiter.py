@@ -28,6 +28,7 @@ from modules.vertical import run_vertical
 from modules.ports import run_ports
 from modules.permutations import run_permutations
 from modules.scope_guard import run_scope_guard, sanitize_state_graph
+from modules.api_discovery import run_api_discovery
 from modules.probing import run_probing
 from modules.spider import run_spider
 from modules.cortex import run_cortex
@@ -172,6 +173,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
                 console.print("[dim]ACTION Aborting execution pipeline to preserve stealth. Rerun with --mode authenticated.[/dim]\n")
                 sys.exit(0)
 
+            safe_run("API_DISCOVERY", run_api_discovery) # Phase 2.1: Schema Spec Parsing
             safe_run("SPIDER", run_spider)             # Phase 2.2: Phantom DOM
 
             # --- CRITICAL FIREWALL 2: SPIDER QUEUE SANITIZATION ---

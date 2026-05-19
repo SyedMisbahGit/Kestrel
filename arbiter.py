@@ -149,7 +149,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
                 console.print(f'  [!] Cerberus Bypass Failed: {e}')
                 
             # Spawn Background Keep-Alive Daemon
-            auth_daemon = KeepAliveDaemon(session)
+            auth_daemon = KeepAliveDaemon(session, target)
             auth_daemon.start()
 
             # --- STAGE 1: INTELLIGENCE GATHERING ---

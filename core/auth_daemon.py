@@ -13,12 +13,13 @@ console = Console()
 log = logging.getLogger("rich")
 
 class KeepAliveDaemon(threading.Thread):
-    def __init__(self, session, refresh_interval=300):
+    def __init__(self, session, target, refresh_interval=300):
         super().__init__(daemon=True)
         self.session = session
+        self.target = target
         self.refresh_interval = refresh_interval
         self.running = True
-        self.target_url = f"https://{self.session.target}"
+        self.target_url = f"https://{self.target}"
         self.is_authenticated = bool(self.session.auth_cookies or self.session.auth_headers)
 
     def run(self):
@@ -48,7 +49,7 @@ class KeepAliveDaemon(threading.Thread):
                 if r.status_code in [401, 403, 302]:
                     console.print("\n[bold yellow]⚠️ AUTH DAEMON: Session degradation detected. Initiating auto-refresh...[/bold yellow]")
                     
-                    auth_data = AuthEngine(self.session.target).breach_perimeter()
+                    auth_data = AuthEngine(self.target).breach_perimeter()
                     
                     if auth_data and (auth_data.get("headers") or auth_data.get("cookies")):
                         self.session.auth_headers.update(auth_data.get("headers", {}))

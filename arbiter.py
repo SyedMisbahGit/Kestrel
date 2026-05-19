@@ -13,6 +13,7 @@ from core.intelligence import run_intelligence
 from core.mesh import mesh
 from modules.uncloak import OriginSniper
 from modules.cerberus import AuthEngine
+from core.auth_daemon import KeepAliveDaemon
 
 class SessionState:
     def __init__(self):
@@ -146,6 +147,10 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
                     session.auth_cookies.update(auth_data.get("cookies", {}))
             except Exception as e:
                 console.print(f'  [!] Cerberus Bypass Failed: {e}')
+                
+            # Spawn Background Keep-Alive Daemon
+            auth_daemon = KeepAliveDaemon(session)
+            auth_daemon.start()
 
             # --- STAGE 1: INTELLIGENCE GATHERING ---
             safe_run("OSINT", run_osint)               # Phase 1.0: Native SSL + API
@@ -211,12 +216,14 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
                 task.cancel()
             loop.stop()
         except: pass
+        if 'auth_daemon' in locals(): auth_daemon.stop()
         if hasattr(session, 'close'):
             session.close()
         console.print("[green]  + State Graph secured. Terminating pipeline.[/green]")
         sys.exit(130) 
         
     finally:
+        if 'auth_daemon' in locals(): auth_daemon.stop()
         if hasattr(session, 'close'):
             session.close()
         if 'daemon' in locals() and daemon.poll() is None:

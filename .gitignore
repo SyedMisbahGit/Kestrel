@@ -35,3 +35,6 @@ data/training_ledger.csv
 # 6. Exploitation & Browser Artifacts
 .hydra_*.txt
 config/chrome_profile/
+
+# 7. Cloud Brain Repository
+kestrel-brain/

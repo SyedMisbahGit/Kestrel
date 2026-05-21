@@ -128,6 +128,24 @@ class TargetSession:
             
     def get_live_hosts(self): return list(self.live_hosts)
 
+    def get_tech_stacks(self):
+        """Extract unique tech stacks from profiled live hosts."""
+        import json
+        techs = set()
+        for host_data in self.live_hosts:
+            try:
+                if isinstance(host_data, str):
+                    host_data = json.loads(host_data)
+                if isinstance(host_data, dict):
+                    tech_str = host_data.get('tech', '')
+                    for t in tech_str.split(','):
+                        t = t.strip().lower()
+                        if t and t != 'undetected':
+                            techs.add(t)
+            except (json.JSONDecodeError, AttributeError):
+                continue
+        return sorted(list(techs))
+
     def add_crawled_url(self, url=None, **kwargs):
         if url:
             if isinstance(url, (list, set)): self.crawled_urls.extend(list(url))

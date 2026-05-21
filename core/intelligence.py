@@ -1,5 +1,6 @@
 import logging
 import json
+import requests
 from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
@@ -87,6 +88,24 @@ def run_intelligence(session, config):
         
         context = "Isolated Node"
         new_sev = sev
+        
+        # --- THE AI BRAIN 3.0 INFERENCE GATE ---
+        try:
+            payload = {
+                "url_length": len(target_url),
+                "cluster_density": density_map.get(name, 1),
+                "vulnerability": name,
+                "severity": sev,
+                "context_key": target_url.split('?')[0].split('/')[-1] if '/' in target_url else "unknown"
+            }
+            r = requests.post("https://bytesyed-kestrel-brain.hf.space/predict", json=payload, timeout=2.5)
+            if r.status_code == 200:
+                ai_res = r.json()
+                if ai_res.get("recommendation") == "DROP":
+                    console.print(f"[dim]  - AI DROPPED FP: {name} on {root} (Confidence: {ai_res.get('confidence')}%, Reason: {ai_res.get('reason')})[/dim]")
+                    continue # Skip adding this to the final matrix
+        except Exception:
+            pass # Fail open, don't let a downed HF Space stop the report
         
         # Rule 1: Direct HVT Compromise
         if target_url in graph.get(root, {}).get('hvts', []):

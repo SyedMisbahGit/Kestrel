@@ -31,3 +31,7 @@ __pycache__/
 config/*.yaml
 data/sessions/*.db
 data/training_ledger.csv
+
+# 6. Exploitation & Browser Artifacts
+.hydra_*.txt
+config/chrome_profile/

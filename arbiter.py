@@ -196,7 +196,6 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
         safe_run("NUCLEI", run_nuclei)             # Phase 4.0: Tech-Stack Targeted CVEs
         safe_run("CVE_SNIPER", run_cve_sniper)     # Phase 4.5: Surgical OAST Injection
         safe_run("FUZZER", run_fuzzer)             # Phase 5.0: Semantic Parameter Routing
-                safe_run("FUZZER", run_fuzzer)             # Phase 5.0: Semantic Parameter Routing
         safe_run("EXPLOIT", run_exploit_engine)         # Phase 6.0: Tactical Exploitation Engine
         safe_run("OAST", run_oast)                 # Phase 8.0: Blind Poller (MUST BE AFTER EXPLOIT)
 

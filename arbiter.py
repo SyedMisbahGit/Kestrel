@@ -38,6 +38,7 @@ from modules.nuclei_scan import run_nuclei
 from modules.cve_sniper import run_cve_sniper
 from modules.fuzzer import run_fuzzer
 from modules.oast import run_oast
+from modules.exploit_engine import run_exploit_engine
 from modules.notifier import run_notifier
 from modules.cloud import run_cloud
 from modules.umbrella import run_umbrella
@@ -195,7 +196,9 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
         safe_run("NUCLEI", run_nuclei)             # Phase 4.0: Tech-Stack Targeted CVEs
         safe_run("CVE_SNIPER", run_cve_sniper)     # Phase 4.5: Surgical OAST Injection
         safe_run("FUZZER", run_fuzzer)             # Phase 5.0: Semantic Parameter Routing
-        safe_run("OAST", run_oast)                 # Phase 8.0: Blind Poller (MUST BE AFTER FUZZER)
+                safe_run("FUZZER", run_fuzzer)             # Phase 5.0: Semantic Parameter Routing
+        safe_run("EXPLOIT", run_exploit_engine)         # Phase 6.0: Tactical Exploitation Engine
+        safe_run("OAST", run_oast)                 # Phase 8.0: Blind Poller (MUST BE AFTER EXPLOIT)
 
         # --- STAGE 5: REPORTING ---
         safe_run("INTELLIGENCE", run_intelligence) # Phase 7.0: Blast Radius Graph

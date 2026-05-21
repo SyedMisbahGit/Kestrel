@@ -1,0 +1,21 @@
+{
+  "vulnerability": "Open Redirect",
+  "category": "open_redirect",
+  "dialects": {
+    "basic": [
+      {"name": "External HTTP", "type": "redirect", "payload": "https://evil.com", "oast": false},
+      {"name": "External HTTPS", "type": "redirect", "payload": "//evil.com", "oast": false},
+      {"name": "Backslash Bypass", "type": "redirect", "payload": "\\\\evil.com", "oast": false},
+      {"name": "Protocol Relative", "type": "redirect", "payload": "//evil.com/%2F..", "oast": false}
+    ],
+    "oast": [
+      {"name": "OAST HTTP", "type": "oast", "payload": "http://{oast_id}.oast.fun/redirect", "oast": true},
+      {"name": "OAST HTTPS", "type": "oast", "payload": "https://{oast_id}.oast.fun/redirect", "oast": true}
+    ],
+    "xss_chaining": [
+      {"name": "javascript: Protocol", "type": "xss", "payload": "javascript:alert(1)", "oast": false},
+      {"name": "data: HTML", "type": "xss", "payload": "data:text/html,<script>alert(1)</script>", "oast": false},
+      {"name": "data: Base64", "type": "xss", "payload": "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==", "oast": false}
+    ]
+  }
+}

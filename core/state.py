@@ -60,6 +60,28 @@ class DBList:
             log.error(f"DB Extend Error in {self.table}: {e}")
 
     def __iter__(self):
+        """Iterate over stored items, yielding parsed Python objects."""
+        c = self.conn.cursor()
+        try:
+            for row in c.execute(f"SELECT data FROM {self.table}"):
+                try:
+                    yield json.loads(row[0])
+                except (json.JSONDecodeError, TypeError):
+                    yield row[0]
+        except Exception:
+            return
+
+    def __len__(self):
+        c = self.conn.cursor()
+        try:
+            return c.execute(f"SELECT COUNT(*) FROM {self.table}").fetchone()[0]
+        except Exception:
+            return 0
+
+    def __bool__(self):
+        return self.__len__() > 0
+
+    def __iter__(self):
         c = self.conn.cursor()
         c.execute(f"SELECT data, first_run_id FROM {self.table}")
         for row in c.fetchall():

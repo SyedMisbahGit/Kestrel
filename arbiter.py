@@ -32,6 +32,7 @@ from modules.scope_guard import run_scope_guard, sanitize_state_graph
 from modules.api_discovery import run_api_discovery
 from modules.probing import run_probing
 from modules.spider import run_spider
+from modules.sensitive_files import run_sensitive_files
 from modules.cortex import run_cortex
 from modules.graphx import GraphQLSniper
 from modules.nuclei_scan import run_nuclei
@@ -181,6 +182,7 @@ def scan(target: str, mode: str = "standard", resume: bool = typer.Option(False,
 
             safe_run("API_DISCOVERY", run_api_discovery) # Phase 2.1: Schema Spec Parsing
             safe_run("SPIDER", run_spider)             # Phase 2.2: Phantom DOM
+            safe_run("SENSITIVE_FILES", run_sensitive_files)  # Phase 2.3: Sensitive File Discovery
 
             # --- CRITICAL FIREWALL 2: SPIDER QUEUE SANITIZATION ---
             safe_run("SCOPE_FIREWALL", sanitize_state_graph) # Phase 2.5: Purge SaaS URLs before Exploitation

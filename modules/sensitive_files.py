@@ -118,8 +118,38 @@ async def probe_host(client, host_url):
     tasks = [probe_with_limit(f) for f in SENSITIVE_FILES]
     responses = await asyncio.gather(*tasks)
     
+    # --- CATCH-ALL ROUTE DETECTION ---
+    # Group responses by size to detect SPA catch-all routes
+    size_groups = {}
+    for r in responses:
+        if r and r['size'] > 100:  # Only compare substantial responses
+            size = r['size']
+            if size not in size_groups:
+                size_groups[size] = []
+            size_groups[size].append(r)
+    
+    # If 5+ files return similar sizes (±2% variance), it's a catch-all route
+    catch_all_sizes = set()
+    checked_sizes = set()
+    for size in sorted(size_groups.keys()):
+        if size in checked_sizes:
+            continue
+        # Find all sizes within 2% of this one
+        similar = {s for s in size_groups if abs(s - size) / max(s, 1) <= 0.02}
+        total_items = sum(len(size_groups[s]) for s in similar)
+        if total_items >= 5:
+            catch_all_sizes.update(similar)
+        checked_sizes.update(similar)
+    
     for r in responses:
         if r:
+            if r['size'] in catch_all_sizes and r['severity'] == 'INFO':
+                # Suppress INFO findings that match catch-all sizes
+                continue
+            if r['size'] in catch_all_sizes and r['severity'] in ['HIGH', 'CRITICAL']:
+                # Downgrade to INFO — pattern matched but likely false positive
+                r['severity'] = 'INFO'
+                r['patterns'] = [f"Possible false positive: {len(size_groups[r['size']])} files share same size ({r['size']} bytes) - likely SPA catch-all route"]
             results.append(r)
     
     return results
